@@ -1,38 +1,28 @@
-/* force.js
-* A graph object implementing a force-directed graph using d3.js.
+/* fornai.js
+* A container for display RNA secondary structure.
 *
 * Author: Peter Kerpedjiev <pkerp@tbi.univie.ac.at>
-* Version: 0.1
-* Date: 2014-10-15
+* Version: 0.2
+* Date: 2015-03-15
 */
 
-serverURL = "";
+console.log('hi there');
 
-// custom ajax call
-ajax = function(uri, method, data) {
-  var request = {
-    url: uri,
-    type: method,
-    contentType: "application/json",
-    accepts: "application/json",
-    cache: false,
-    dataType: 'json',
-    data: data,
-    error: function(jqXHR) {
-        console.log("ajax error " + jqXHR.status + jqXHR.responseText);
-    }
-  };
-  return $.ajax(request);
-};
-
-function Graph(element) {
+function FornaForce(element, dimensions) {
     var self = this;
 
-    var fill = d3.scale.category20();
+    self.options = {
+        "svgW": 600,
+        "svgH": 600,
+        "displayAllLinks": false
+    }
 
-    self.svgW = 800;
-    self.svgH = 600;
-    self.displayAllLinks = false;
+    if (arguments.length > 1) {
+        self.options.svgW = dimensions[0];
+        self.options.svgH = dimensions[0];
+    }
+
+    var fill = d3.scale.category20();
 
     // mouse event vars
     var mousedown_link = null,
@@ -40,9 +30,9 @@ function Graph(element) {
         mouseup_node = null;
 
     var xScale = d3.scale.linear()
-    .domain([0,self.svgW]).range([0,self.svgW]);
+    .domain([0,self.options.svgW]).range([0,self.options.svgW]);
     var yScale = d3.scale.linear()
-    .domain([0,self.svgH]).range([0, self.svgH]);
+    .domain([0,self.options.svgH]).range([0, self.options.svgH]);
 
     var graph = self.graph = {
         "nodes":[],
@@ -87,7 +77,7 @@ function Graph(element) {
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
 
-    self.addRNA = function(rnaGraph, avoidOthers) {
+    self.addRNAJSON = function(rnaGraph, avoidOthers) {
         // Add an RNAGraph, which contains nodes and links as part of the
         // structure
         // Each RNA will have uid to identify it
@@ -292,8 +282,8 @@ function Graph(element) {
         var svgW = $(element).width();
         var svgH = $(element).height();
 
-        self.svgW = svgW;
-        self.svgH = svgH;
+        self.options.svgW = svgW;
+        self.options.svgH = svgH;
 
         //Set the output range of the scales
         xScale.range([0, svgW]).domain([0, svgW]);
@@ -453,11 +443,11 @@ function Graph(element) {
     .on("keyup.brush", keyup)
     .each(function() { this.focus(); })
     .append("svg:svg")
-    .attr("width", self.svgW)
-    .attr("height", self.svgH)
+    .attr("width", self.options.svgW)
+    .attr("height", self.options.svgH)
     .attr("id", 'plotting-area');
 
-    self.svg = svg;
+    self.options.svg = svg;
 
     var svg_graph = svg.append('svg:g')
     .call(zoomer)
@@ -466,8 +456,8 @@ function Graph(element) {
     .on('mouseup', mouseup);
 
     var rect = svg_graph.append('svg:rect')
-    .attr('width', self.svgW)
-    .attr('height', self.svgH)
+    .attr('width', self.options.svgW)
+    .attr('height', self.options.svgH)
     .attr('fill', 'white')
     .attr('stroke', 'transparent')
     .attr('stroke-width', 1)
@@ -546,8 +536,8 @@ function Graph(element) {
         mol_height = max_y - min_y;
 
         // how much larger the drawing area is than the width and the height
-        width_ratio = self.svgW / mol_width;
-        height_ratio = self.svgH / mol_height;
+        width_ratio = self.options.svgW / mol_width;
+        height_ratio = self.options.svgH / mol_height;
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most
@@ -558,8 +548,8 @@ function Graph(element) {
         new_mol_height = mol_height * min_ratio;
 
         // translate so that it's in the center of the window
-        x_trans = -(min_x) * min_ratio + (self.svgW - new_mol_width) / 2;
-        y_trans = -(min_y) * min_ratio + (self.svgH - new_mol_height) / 2;
+        x_trans = -(min_x) * min_ratio + (self.options.svgW - new_mol_width) / 2;
+        y_trans = -(min_y) * min_ratio + (self.options.svgH - new_mol_height) / 2;
 
 
         // do the actual moving
@@ -591,7 +581,7 @@ function Graph(element) {
     .nodes(self.graph.nodes)
     .links(self.graph.links)
     .chargeDistance(110)
-    .size([self.svgW, self.svgH]);
+    .size([self.options.svgW, self.options.svgH]);
 
     // line displayed when dragging new nodes
     var drag_line = vis.append("line")
@@ -642,7 +632,6 @@ function Graph(element) {
         //d3.event.sourceEvent.stopPropagation();
         //d3.select(self).classed("dragging", true);
         //
-        rnaView.animation(true);
     }
 
     function dragged(d) {
@@ -718,12 +707,6 @@ function Graph(element) {
             case 67: //c
                 self.center_view();
                 break;
-            case 32:
-                if (self.animation) {
-                  rnaView.animation(false);
-                } else {
-                  rnaView.animation(true);
-                }
         }
 
         if (shift_keydown || ctrl_keydown) {
@@ -850,7 +833,6 @@ function Graph(element) {
         // to recalculate the structure and change the colors
         // appropriately
         //
-        // send ajax request to forna
         if (new_link.source.rna == new_link.target.rna) {
             r = new_link.source.rna;
 
@@ -1137,7 +1119,7 @@ function Graph(element) {
 
             /* We don't need to update the positions of the stabilizing links */
             fake_links = vis_links.selectAll("[link_type=fake]");
-            if (self.displayAllLinks) {
+            if (self.options.displayAllLinks) {
                 fake_links.style('stroke-width', 1);
             } else {
                 fake_links.style('stroke-width', 0);
@@ -1326,6 +1308,5 @@ function Graph(element) {
         self.displayProteinBindingHighlighting(true);
     };
     
-    setPlottingArea();
     setSize();
 }

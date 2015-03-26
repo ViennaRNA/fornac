@@ -1,19 +1,24 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
+<!DOCTYPE html>
+<meta charset="utf-8">
 
-</head>
-<body>
 <div id='rna_ss_1y26' />
-<script type='text/javascript' src='fornai.js'>
-<script type='text/javascript'>
-    var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',
-                   'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',
-                   'id': '1y26',
-                   'width': 600,
-                   'height': 600};
+    <script type='text/javascript' src='jquery.js'></script> 
+    <script type='text/javascript' src='d3.js'></script>                                                                
+    <script type='text/javascript' src='rnautils.js'></script>                                                          
+    <script type='text/javascript' src='rnagraph.js'></script>                                                          
+    <script type='text/javascript' src='fornaf.js'></script>                                                            
+    <script type='text/javascript' src='fornac.js'></script>                                                            
 
-    var container = FornaiContainer(options);
-</script>
-</body>
-</html>
-    
+    <script type='text/javascript'>                                                                                         
+var container = new FornaContainer("#rna_ss_1y26", [600,600]);                                                       
+console.log('container');
+
+var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',              
+    'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',               
+    'name': '1y26',                                                                                      
+    'positions': []                                                                                      
+};                                                                                                                  
+
+container.addRNA(options);                                                                                          
+    </script>
+
