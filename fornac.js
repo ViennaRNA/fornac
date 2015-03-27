@@ -5,22 +5,25 @@ function FornaContainer(element, dimensions) {
         console.warn('Not enough arguments passed to FornaContainer');
     }
 
-    self.fornaForce = new FornaForce(element, dimensions)
+    self.forceOptions = { 
+        "applyForce": false
+    }
+    self.fornaForce = new FornaForce(element, dimensions, self.forceOptions)
     
-    self.addRNA = function(structure, rnaOptions) {
+    self.addRNA = function(structure, options) {
         var options = { 
                         'seq': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',
                         'struct': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',
                         'name': '1y26',
                         'positions': [],
-                        'labelInterval': 10
-    
+                        'labelInterval': 10,
+                        'applyForce': true
                       };
 
         if (arguments.length == 2) {
-            for (var property in rnaOptions) {
+            for (var option in options) {
                 if (options.hasOwnProperty(option))
-                    options[option] = rnaOptions[option];
+                    options[option] = options[option];
             }
         }
 
@@ -28,12 +31,19 @@ function FornaContainer(element, dimensions) {
         rg = new RNAGraph(options.seq, options.struct, options.name);
 
         rnaJson = rg.recalculateElements()
-        .elementsToJson()
-        .addPositions(options.positions)
+
+        if (options.positions.length === 0) {
+            // no provided positions means we need to calculate an initial layout
+            options.positions = simple_xy_coordinates(rnaJson.pairtable);
+        }
+
+        rnaJson = rnaJson.elementsToJson()
+        .addPositions("nucleotide", options.positions)
         .addLabels(options.labelInterval)
         .reinforceStems()
         .reinforceLoops()
         .connectFakeNodes()
+
 
         self.fornaForce.addRNAJSON(rnaJson);
     }

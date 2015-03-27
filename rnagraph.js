@@ -237,7 +237,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
     self.pairtable = rnaUtilities.dotbracket_to_pairtable(self.dotbracket);
     console.log('pairtable', self.pairtable);
     self.uid = generateUUID();
-    self.rna_length = self.dotbracket.length;
+    self.rnaLength = self.dotbracket.length;
 
     self.elements = {};            //store the elements and the 
                                    //nucleotides they contain
@@ -411,7 +411,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
         var linked = new Set();
 
         // initialize the nucleotides to nodes
-        for (var i = 1; i <= self.rna_length; i++) 
+        for (var i = 1; i <= self.rnaLength; i++) 
             nucs_to_nodes[i] = [];
 
         for (i = 0; i < fake_nodes.length; i++) {
@@ -517,7 +517,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
 
         if (self.circular) {
             self.links.push({'source': self.nodes[0],
-                            'target': self.nodes[self.rna_length-1],
+                            'target': self.nodes[self.rnaLength-1],
                             'link_type': 'backbone',
                             'value': 1,
                             'uid': generateUUID() });
@@ -632,10 +632,56 @@ function RNAGraph(seq, dotbracket, struct_name) {
         if (labelInterval == 0)
             return;
 
+        if (labelInterval <= 0) 
+            console.log('The label interval entered in invalid:', labelInterval);
+
         for (i = 1; i <= pt[0]; i++) {
             // add labels
-            if (i % 10 == 0) {
-                //create a node for each nucleotide
+            if (i % labelInterval == 0) {
+                //create a node for each label
+                var newX, newY;
+
+                if (self.pairtable[i] !== 0) {
+                    // if this base is paired, position the label opposite the base pair
+                    newX = self.nodes[i-1].x + (self.nodes[i-1].x - self.nodes[self.pairtable[i] - 1].x)
+                    newY = self.nodes[i-1].y + (self.nodes[i-1].y - self.nodes[self.pairtable[i] - 1].y)
+                } else {
+                    // the label is on a nucleotide in a loop
+
+                    if (self.rnaLength == 1) {
+                        // only one nucleotide so we just position the label adjacent to it
+                        newX = self.nodes[0].x + 15;
+                        newY = self.nodes[0].y + 0;
+                    } else {
+                        if (i == 0)
+                            prevNode = self.nodes[i-1];
+                        else
+                            prevNode = self.nodes[i-2]
+
+                        if (i == self.rnaLength)
+                            nextNode = self.nodes[i-1];
+                        else
+                            nextNode = self.nodes[i];
+
+                        thisNode = self.nodes[i-1];
+
+                        nextVec = [nextNode.x - thisNode.x, nextNode.y - thisNode.y]
+                        prevVec = [prevNode.x - thisNode.x, prevNode.y - thisNode.y]
+
+                        combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]]
+                        vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1])
+                        normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength]
+                        offsetVec = [-15 * normedVec[0], -15 * normedVec[1]]
+
+                        console.log(i, 'prevNode.num', prevNode.num, 'nextNode.num', nextNode.num);
+                        console.log(i, 'prevVec', prevVec , 'nextVec', nextVec, 'combinedVec', combinedVec);
+                        console.log(i, 'normedVec', normedVec, "offsetVec", offsetVec );
+
+                        newX = self.nodes[i-1].x + offsetVec[0];
+                        newY = self.nodes[i-1].y + offsetVec[1];
+                    }
+                }
+
                 new_node = {'name': i,
                                  'num': -1,
                                  'radius': 6,
@@ -643,10 +689,10 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'node_type': 'label',
                                  'struct_name': self.struct_name,
                                  'elem_type': 'l',
-                                 'x': self.nodes[i-1].x,
-                                 'y': self.nodes[i-1].y,
-                                 'px': self.nodes[i-1].px,
-                                 'py': self.nodes[i-1].py,
+                                 'x': newX,
+                                 'y': newY,
+                                 'px': newX,
+                                 'py': newY,
                                  'uid': generateUUID() };
                 new_link = {'source': self.nodes[i-1],
                             'target': new_node,
@@ -722,7 +768,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
         return self;
     };
 
-    if (self.rna_length > 0)
+    if (self.rnaLength > 0)
         self.recalculateElements();
 }
 

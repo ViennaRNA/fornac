@@ -6,6 +6,7 @@
     <script type='text/javascript' src='d3.js'></script>                                                                
     <script type='text/javascript' src='rnautils.js'></script>                                                          
     <script type='text/javascript' src='rnagraph.js'></script>                                                          
+    <script type='text/javascript' src='simplernaplot.js'></script> 
     <script type='text/javascript' src='fornaf.js'></script>                                                            
     <script type='text/javascript' src='fornac.js'></script>                                                            
 
@@ -16,9 +17,11 @@ console.log('container');
 var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',              
     'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',               
     'name': '1y26',                                                                                      
-    'positions': []                                                                                      
+    'positions': [],
+    'labelInterval': 5,
+    'applyForce': false
 };                                                                                                                  
 
-container.addRNA(options);                                                                                          
-    </script>
+container.addRNA(options.structure, options);                                                                                          
+</script>
 

@@ -101,12 +101,12 @@ simple_xy_coordinates = function(pair_table)
 
   poss = [];
 
-  poss.push({'x': x[0], 'y': y[0]});
+  poss.push([x[0], y[0]]);
   for (i = 1; i < len; i++) {
       x[i] = x[i-1]+RADIUS*Math.cos(alpha);
       y[i] = y[i-1]+RADIUS*Math.sin(alpha);
 
-      poss.push({'x': x[i], 'y': y[i]});
+      poss.push([x[i], y[i]]);
       alpha += Math.PI-angle[i+1];
   }
 

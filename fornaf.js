@@ -8,13 +8,21 @@
 
 console.log('hi there');
 
-function FornaForce(element, dimensions) {
+function FornaForce(element, dimensions, options) {
     var self = this;
 
     self.options = {
         "svgW": 600,
         "svgH": 600,
-        "displayAllLinks": false
+        "displayAllLinks": false,
+        "applyForce": true
+    }
+
+    if (arguments.length == 3) {
+        for (var option in options) {
+            if (options.hasOwnProperty(option))
+                self.options[option] = options[option];
+        }
     }
 
     if (arguments.length > 1) {
@@ -71,7 +79,7 @@ function FornaForce(element, dimensions) {
 
     self.colorScheme = 'structure';
     self.customColors = {};
-    self.animation = true;
+    self.animation = self.options.applyForce;
     // don't listen to events because a model window is open somewhere
     self.deaf = false;
     self.rnas = {};
@@ -1153,6 +1161,12 @@ function FornaForce(element, dimensions) {
             .classed('noselect', true)
             .classed('gnode', true)
              .attr('struct_name', function(d) { return d.struct_name; })
+              .attr("transform", function(d) { 
+                  if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
+                    return 'translate(' + [d.x, d.y] + ')'; 
+                else
+                    return ''
+                })
              .each( function(d) { d.selected = d.previouslySelected = false; })
 
             gnodes_enter
