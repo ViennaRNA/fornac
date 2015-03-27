@@ -11,15 +11,14 @@
     <script type='text/javascript' src='fornac.js'></script>                                                            
 
     <script type='text/javascript'>                                                                                         
-var container = new FornaContainer("#rna_ss_1y26", [600,600]);                                                       
+var container = new FornaContainer("#rna_ss_1y26", [600,600], {'applyForce': false});                                                       
 console.log('container');
 
 var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',              
     'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',               
     'name': '1y26',                                                                                      
     'positions': [],
-    'labelInterval': 5,
-    'applyForce': false
+    'labelInterval': 5
 };                                                                                                                  
 
 container.addRNA(options.structure, options);                                                                                          

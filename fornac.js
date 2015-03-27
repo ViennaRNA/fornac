@@ -1,13 +1,21 @@
-function FornaContainer(element, dimensions) {
+function FornaContainer(element, dimensions, options) {
     var self = this;
 
     if (arguments.length < 2) { 
         console.warn('Not enough arguments passed to FornaContainer');
     }
 
-    self.forceOptions = { 
-        "applyForce": false
+    self.forceOptions = {
+        'applyForce': false
     }
+
+    if (arguments.length == 3) {
+        for (var option in options) {
+            if (options.hasOwnProperty(option))
+                self.forceOptions[option] = options[option];
+        }
+    }
+
     self.fornaForce = new FornaForce(element, dimensions, self.forceOptions)
     
     self.addRNA = function(structure, options) {
@@ -17,7 +25,6 @@ function FornaContainer(element, dimensions) {
                         'name': '1y26',
                         'positions': [],
                         'labelInterval': 10,
-                        'applyForce': true
                       };
 
         if (arguments.length == 2) {
