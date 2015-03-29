@@ -15,8 +15,9 @@ function FornaForce(element, dimensions, options) {
         "svgW": 600,
         "svgH": 600,
         "displayAllLinks": false,
+        "labelInterval": 0,
         "applyForce": true
-    }
+    };
 
     if (arguments.length == 3) {
         for (var option in options) {
@@ -571,7 +572,7 @@ function FornaForce(element, dimensions, options) {
 
     };
 
-    var force = d3.layout.force()
+    self.force = d3.layout.force()
     .charge(function(d) { if (d.node_type == 'middle')  {
             return -30; 
     }
@@ -654,7 +655,7 @@ function FornaForce(element, dimensions, options) {
             d1.py += d3.event.dy;
         });
 
-        force.resume();
+        self.force.resume();
         d3.event.sourceEvent.preventDefault();
     }
 
@@ -774,16 +775,16 @@ function FornaForce(element, dimensions, options) {
 
         var uids = r.get_uids();
 
-        r.recalculate_elements()
-        .elements_to_json()
-        .add_pseudoknots()
-        .add_positions('nucleotide', nucleotide_positions)
-        .add_uids(uids)
-        .add_labels()
-        .add_positions('label', label_positions)
-        .reinforce_stems()
-        .reinforce_loops()
-        .connect_fake_nodes();
+        r.recalculateElements()
+        .elementsToJson()
+        .addPseudoknots()
+        .addPositions('nucleotide', nucleotide_positions)
+        .addUids(uids)
+        .addLabels(self.options.labelInterval)
+        .addPositions('label', label_positions)
+        .reinforceStems()
+        .reinforceLoops()
+        .connectFakeNodes();
     };
 
     remove_link = function(d) {
@@ -836,7 +837,7 @@ function FornaForce(element, dimensions, options) {
     };
 
 
-    add_link =  function(new_link) {
+    self.add_link =  function(new_link) {
         // this means we have a new json, which means we have
         // to recalculate the structure and change the colors
         // appropriately
@@ -902,7 +903,7 @@ function FornaForce(element, dimensions, options) {
             if (mouseup_node.node_type == 'middle' || mousedown_node.node_type == 'middle' || mouseup_node.node_type == 'label' || mousedown_node.node_type == 'label')
                 return;
 
-            add_link(new_link);
+            self.add_link(new_link);
 
         }
     };
@@ -938,29 +939,29 @@ function FornaForce(element, dimensions, options) {
       self.animation = true;
       vis.selectAll('g.gnode')
         .call(drag);
-      force.start();
+      self.force.start();
     };
     
     self.stopAnimation = function() {
       self.animation = false;
       vis.selectAll('g.gnode')
            .on('mousedown.drag', null);
-      force.stop();
+      self.force.stop();
     };
     
     self.setFriction = function(value) {
-      force.friction(value);
-      force.resume();
+      self.force.friction(value);
+      self.force.resume();
     };
 
     self.setCharge = function(value) {
-      force.charge(value);
-      force.resume();
+      self.force.charge(value);
+      self.force.resume();
     };
     
     self.setGravity = function(value) {
-      force.gravity(value);
-      force.resume();
+      self.force.gravity(value);
+      self.force.resume();
     };
     
     self.setPseudoknotStrength = function(value) {
@@ -1089,11 +1090,11 @@ function FornaForce(element, dimensions, options) {
     }
 
     self.update = function () {
-        force.nodes(self.graph.nodes)
+        self.force.nodes(self.graph.nodes)
         .links(self.graph.links);
         
         if (self.animation) {
-          force.start();
+          self.force.start();
         }
 
         var all_links = vis_links.selectAll("line.link")
@@ -1286,7 +1287,7 @@ function FornaForce(element, dimensions, options) {
             //fake_nodes = self.graph.nodes.filter(function(d) { return true; });
             real_nodes = self.graph.nodes.filter(function(d) { return d.node_type == 'nucleotide' || d.node_type == 'label';});
 
-            force.on("tick", function() {
+            self.force.on("tick", function() {
                 /*
                 var q = d3.geom.quadtree(fake_nodes),
                 i = 0,
@@ -1315,7 +1316,7 @@ function FornaForce(element, dimensions, options) {
         self.changeColorScheme(self.colorScheme);
 
         if (self.animation) {
-          force.start();
+          self.force.start();
         }
 
         self.updateNumbering();

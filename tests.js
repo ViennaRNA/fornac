@@ -141,6 +141,10 @@ QUnit.test('add_labels', function(assert) {
 });
 
 QUnit.test('elementsToJson', function(assert) {
+    r = new RNAGraph('', '');
+    json = r.elementsToJson();
+    assert.equal(json.nodes.length, 0);
+
     r = new RNAGraph('AAAA', '....');
     json = r.elementsToJson();
     assert.equal(json.nodes.length, 4);

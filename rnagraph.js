@@ -27,9 +27,9 @@ if(typeof(String.prototype.trim) === "undefined")
         };
     }
 
-function ColorScheme(colors_text) {
+function ColorScheme(colorsText) {
     var self = this;
-    self.colors_text = colors_text;
+    self.colorsText = colorsText;
 
     self.parseRange = function(range_text) {
         //parse a number range such as 1-10 or 3,7,9 or just 7
@@ -170,7 +170,7 @@ function ColorScheme(colors_text) {
         return self;
     };
 
-    self.parseColorText(self.colors_text);
+    self.parseColorText(self.colorsText);
 }
 
 function ProteinGraph(struct_name, size, uid) {
@@ -191,7 +191,7 @@ function ProteinGraph(struct_name, size, uid) {
     self.links = [];
     self.uid = generateUUID();
 
-    self.add_uids = function(uids) {
+    self.addUids = function(uids) {
         for (var i = 0; i < uids.length; i++)
             self.nodes[i].uid = uids[i];
 
@@ -234,21 +234,26 @@ function RNAGraph(seq, dotbracket, struct_name) {
         self.circular = true;
     }
 
-    self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
-    console.log('pairtable', self.pairtable);
     self.uid = generateUUID();
     self.rnaLength = self.dotbracket.length;
 
-    self.elements = {};            //store the elements and the 
+    self.elements = [];            //store the elements and the 
                                    //nucleotides they contain
+    self.pseudoknotPairs = [];
     self.nucs_to_nodes = {};
 
-    self.add_uids = function(uids) {
+    self.addUids = function(uids) {
         for (var i = 0; i < uids.length; i++)
             self.nodes[i].uid = uids[i];
 
         return self;
     };
+
+    self.computePairtable = function() {
+        self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
+    };
+
+    self.computePairtable();
 
     self.addPositions = function(node_type, positions) {
         label_nodes = self.nodes.filter(function(d) { return d.node_type == node_type; });
@@ -507,9 +512,9 @@ function RNAGraph(seq, dotbracket, struct_name) {
         }
 
         //add the pseudoknot links
-        for (i = 0; i < self.pseudoknot_pairs.length; i++) {
-                self.links.push({'source': self.nodes[self.pseudoknot_pairs[i][0]-1],
-                                 'target': self.nodes[self.pseudoknot_pairs[i][1]-1],
+        for (i = 0; i < self.pseudoknotPairs.length; i++) {
+                self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
+                                 'target': self.nodes[self.pseudoknotPairs[i][1]-1],
                                  'link_type': 'pseudoknot',
                                  'value': 1,
                                  'uid': generateUUID() });
@@ -629,25 +634,25 @@ function RNAGraph(seq, dotbracket, struct_name) {
     };
 
     self.addLabels = function(labelInterval) {
-        if (arguments.length  == 0)
+        if (arguments.length  === 0)
             labelInterval = 10;
 
-        if (labelInterval == 0)
-            return;
+        if (labelInterval === 0)
+            return self;
 
         if (labelInterval <= 0) 
             console.log('The label interval entered in invalid:', labelInterval);
 
         for (i = 1; i <= pt[0]; i++) {
             // add labels
-            if (i % labelInterval == 0) {
+            if (i % labelInterval === 0) {
                 //create a node for each label
                 var newX, newY;
 
                 if (self.pairtable[i] !== 0) {
                     // if this base is paired, position the label opposite the base pair
-                    newX = self.nodes[i-1].x + (self.nodes[i-1].x - self.nodes[self.pairtable[i] - 1].x)
-                    newY = self.nodes[i-1].y + (self.nodes[i-1].y - self.nodes[self.pairtable[i] - 1].y)
+                    newX = self.nodes[i-1].x + (self.nodes[i-1].x - self.nodes[self.pairtable[i] - 1].x);
+                    newY = self.nodes[i-1].y + (self.nodes[i-1].y - self.nodes[self.pairtable[i] - 1].y);
                 } else {
                     // the label is on a nucleotide in a loop
 
@@ -748,26 +753,26 @@ function RNAGraph(seq, dotbracket, struct_name) {
 
     self.removePseudoknots = function() {
         if (self.pairtable.length > 1)
-            self.pseudoknot_pairs = rnaUtilities.removePseudoknotsFromPairtable(self.pairtable);
+            self.pseudoknotPairs = rnaUtilities.removePseudoknotsFromPairtable(self.pairtable);
         else
-            self.pseudoknot_pairs = []
+            self.pseudoknotPairs = [];
 
         return self;
     };
 
-    self.add_pseudoknots = function() {
+    self.addPseudoknots = function() {
         /* Add all of the pseudoknot pairs which are stored outside
          * of the pairtable back to the pairtable
          */
         var pt = self.pairtable;
-        var pseudoknot_pairs = self.pseudoknot_pairs;
+        var pseudoknotPairs = self.pseudoknotPairs;
 
-        for (i = 0; i < pseudoknot_pairs.length; i++) {
-            pt[pseudoknot_pairs[i][0]] = pseudoknot_pairs[i][1];
-            pt[pseudoknot_pairs[i][1]] = pseudoknot_pairs[i][0];
+        for (i = 0; i < pseudoknotPairs.length; i++) {
+            pt[pseudoknotPairs[i][0]] = pseudoknotPairs[i][1];
+            pt[pseudoknotPairs[i][1]] = pseudoknotPairs[i][0];
         }
 
-        self.pseudoknot_pairs = [];
+        self.pseudoknotPairs = [];
         return self;
     };
 
@@ -802,7 +807,7 @@ molecules_to_json = function(molecules_json) {
 
         }
 
-        rg.add_uids(molecule.uids);
+        rg.addUids(molecule.uids);
 
         for (var j = 0; j < rg.nodes.length; j++) {
             nodes[rg.nodes[j].uid] = rg.nodes[j];
