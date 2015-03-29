@@ -99,7 +99,7 @@ function RNAUtilities() {
 
     };
 
-    self.dotbracket_to_pairtable = function(dotbracket) {
+    self.dotbracketToPairtable = function(dotbracket) {
         // create an array and initialize it to 0
         pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
         
@@ -167,7 +167,7 @@ function RNAUtilities() {
         return k;
     };
 
-    self.pairtable_to_dotbracket = function(pt) {
+    self.pairtableToDotbracket = function(pt) {
         // store the pairing partners for each symbol
         stack = {};
         for (i = 0; i < pt[0]; i++) {
@@ -229,7 +229,7 @@ function RNAUtilities() {
         return to_remove;
     };
 
-    self.remove_pseudoknots_from_pairtable = function(pt) {
+    self.removePseudoknotsFromPairtable = function(pt) {
         /* Remove the pseudoknots from this structure in such a fashion
          * that the least amount of base-pairs need to be broken
          *

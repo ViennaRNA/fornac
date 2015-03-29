@@ -1,43 +1,43 @@
 rnaUtilities = new RNAUtilities();
 
 QUnit.test('pseudoknots', function(assert) {
-    pt = rnaUtilities.dotbracket_to_pairtable('(())');
+    pt = rnaUtilities.dotbracketToPairtable('(())');
     console.log('first_pt:', pt);
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
+    db = rnaUtilities.pairtableToDotbracket(pt);
     assert.equal(db, '(())');
 
-    pt = rnaUtilities.dotbracket_to_pairtable('.(.())');
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
+    pt = rnaUtilities.dotbracketToPairtable('.(.())');
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
+    db = rnaUtilities.pairtableToDotbracket(pt);
     assert.equal(db, '.(.())');
     
-    pt = rnaUtilities.dotbracket_to_pairtable('(([))()]');
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
+    pt = rnaUtilities.dotbracketToPairtable('(([))()]');
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
+    db = rnaUtilities.pairtableToDotbracket(pt);
 
     assert.equal(db, '((.))().');
-    pt = rnaUtilities.dotbracket_to_pairtable('(([[[))(]]])');
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
+    pt = rnaUtilities.dotbracketToPairtable('(([[[))(]]])');
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
     console.log('removed', removed, 'pt:', pt);
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
-    console.log('----------------------')
+    db = rnaUtilities.pairtableToDotbracket(pt);
+    console.log('----------------------');
 
     assert.equal(db, '..(((...))).');
 
-    pt = rnaUtilities.dotbracket_to_pairtable('(([))(])');
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
+    pt = rnaUtilities.dotbracketToPairtable('(([))(])');
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
+    db = rnaUtilities.pairtableToDotbracket(pt);
 
     assert.equal(db, '((.))(.)');
 
-    pt = rnaUtilities.dotbracket_to_pairtable('(([((]))))');
-    removed = rnaUtilities.remove_pseudoknots_from_pairtable(pt); 
-    db = rnaUtilities.pairtable_to_dotbracket(pt);
+    pt = rnaUtilities.dotbracketToPairtable('(([((]))))');
+    removed = rnaUtilities.removePseudoknotsFromPairtable(pt); 
+    db = rnaUtilities.pairtableToDotbracket(pt);
 
     assert.equal(db, '((.((.))))');
     //assert.deepEqual(removed, [[3,9],[4,10]]);
-    console.log('ok')
+    console.log('ok');
 });
 
 QUnit.test('pt_to_elements', function(assert) {
@@ -101,99 +101,99 @@ QUnit.test('molecules_to_json', function(assert) {
 
 QUnit.test('colors', function(assert) {
     cs = new ColorScheme("");
-    assert.deepEqual(cs.parseRange('1-3'), [1,2,3])
-    assert.deepEqual(cs.parseRange('1-3,7'), [1,2,3,7])
-    assert.deepEqual(cs.parseRange('7'), [7])
+    assert.deepEqual(cs.parseRange('1-3'), [1,2,3]);
+    assert.deepEqual(cs.parseRange('1-3,7'), [1,2,3,7]);
+    assert.deepEqual(cs.parseRange('7'), [7]);
 
     cs = new ColorScheme("1:red 2-5:green 7,8,19:blue");
-    assert.equal(cs.colors_json[''][1],'red');
-    assert.equal(cs.colors_json[''][2],'green');
-    assert.equal(cs.colors_json[''][5],'green');
-    assert.equal(cs.colors_json[''][7],'blue');
-    assert.equal(cs.colors_json[''][8],'blue');
-    assert.equal(cs.colors_json[''][19],'blue');
+    assert.equal(cs.colors_json.color_values[''][1],'red');
+    assert.equal(cs.colors_json.color_values[''][2],'green');
+    assert.equal(cs.colors_json.color_values[''][5],'green');
+    assert.equal(cs.colors_json.color_values[''][7],'blue');
+    assert.equal(cs.colors_json.color_values[''][8],'blue');
+    assert.equal(cs.colors_json.color_values[''][19],'blue');
 
     cs = new ColorScheme("0.7 0.8 0.9 \n7:red \n8:blue");
     cs.normalizeColors();
 
-    assert.equal(cs.colors_json[''][1], 0);
-    assert.equal(cs.colors_json[''][2] - 0.5 < 0.001, true);
-    assert.equal(cs.colors_json[''][3], 1);
+    assert.equal(cs.colors_json.color_values[''][1], 0.7);
+    assert.equal(cs.colors_json.color_values[''][2] - 0.8 < 0.001, true);
+    assert.equal(cs.colors_json.color_values[''][3], 0.9);
 
-    assert.equal(cs.colors_json[''][7], 'red');
+    assert.equal(cs.colors_json.color_values[''][7], 'red');
 
 });
 
 QUnit.test('add_labels', function(assert) {
     r = new RNAGraph('AAAA', '....');
-    json = r.elements_to_json();
+    json = r.elementsToJson();
     assert.equal(json.nodes.length, 4);
 
-    r.add_labels();
+    r.addLabels();
     assert.equal(json.nodes.length, 4);
 
     r = new RNAGraph('aaaaaaaaaaaaa', '.(..).(.(.)).');
-    json = r.elements_to_json();
+    json = r.elementsToJson();
     //thirteen regular nodes and one number label
     assert.equal(json.nodes.length, 13);
-    r.add_labels();
+    r.addLabels();
     assert.equal(json.nodes.length, 14);
 });
 
-QUnit.test('elements_to_json', function(assert) {
+QUnit.test('elementsToJson', function(assert) {
     r = new RNAGraph('AAAA', '....');
-    json = r.elements_to_json();
+    json = r.elementsToJson();
     assert.equal(json.nodes.length, 4);
 
     r = new RNAGraph('aaaaaaaaaaaaa', '.(..).(.(.)).');
-    json = r.elements_to_json();
-    console.log('elements_to_json:', json.nodes);
+    json = r.elementsToJson();
+    console.log('elementsToJson:', json.nodes);
 
     //thirteen regular nodes and one number label
     assert.equal(json.nodes.length, 13);
 });
 
 
-QUnit.test('pairtable_to_dotbracket', function(assert) {
-    db = rnaUtilities.pairtable_to_dotbracket([2,0,0]);
+QUnit.test('pairtableToDotbracket', function(assert) {
+    db = rnaUtilities.pairtableToDotbracket([2,0,0]);
     assert.equal(db, '..');
 
-    db = rnaUtilities.pairtable_to_dotbracket([2,2,1]);
+    db = rnaUtilities.pairtableToDotbracket([2,2,1]);
     assert.equal(db, '()');
 
-    db = rnaUtilities.pairtable_to_dotbracket([4,3,4,1,2]);
+    db = rnaUtilities.pairtableToDotbracket([4,3,4,1,2]);
     assert.equal(db, '([)]');
 });
 
-QUnit.test('dotbracket_to_pairtable', function(assert) {
-    pt = rnaUtilities.dotbracket_to_pairtable('..');
+QUnit.test('dotbracketToPairtable', function(assert) {
+    pt = rnaUtilities.dotbracketToPairtable('..');
     assert.deepEqual(pt, [2,0,0]);
 
-    pt = rnaUtilities.dotbracket_to_pairtable('()');
+    pt = rnaUtilities.dotbracketToPairtable('()');
     assert.deepEqual(pt, [2,2,1]);
 
-    pt = rnaUtilities.dotbracket_to_pairtable('([)]');
+    pt = rnaUtilities.dotbracketToPairtable('([)]');
     assert.deepEqual(pt, [4,3,4,1,2]);
 
     assert.throws(function() {
-        rnaUtilities.dotbracket_to_pairtable('.(.');
+        rnaUtilities.dotbracketToPairtable('.(.');
     }, /Unmatched/ , "Unmatched base at position 2");
 });
 
 
 QUnit.test('elements_to_connections', function(assert) {
-    r = new RNAGraph('aaaaaaaaaaaa', '(.((..))..)')
+    r = new RNAGraph('aaaaaaaaaaaa', '(.((..))..)');
     // this graph should have the structure s->i->s->h
     // which implies a set of two fake_fake links (the first
     // s->i link won't exist because the stem has a length of one
-    r.elements_to_json()
-    .reinforce_stems()
-    .reinforce_loops()
-    .connect_fake_nodes()
+    r.elementsToJson()
+    .reinforceStems()
+    .reinforceLoops()
+    .connectFakeNodes();
 
-    var fake_links = r.links.filter(function(d) { return d.link_type == 'fake_fake'; });
+    var fakeLinks = r.links.filter(function(d) { return d.link_type == 'fake_fake'; });
 
-    console.log('fake_links:', fake_links);
-    assert.equal(fake_links.length, 2);
+    console.log('fakeLinks:', fakeLinks);
+    assert.equal(fakeLinks.length, 2);
     
 });

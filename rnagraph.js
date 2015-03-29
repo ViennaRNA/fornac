@@ -87,7 +87,7 @@ function ColorScheme(colors_text) {
 
             for (var j = 0; j < words.length; j++) {
                 if (isNaN(words[j])) {
-                    if (words[j].search("range") == 0) {
+                    if (words[j].search("range") === 0) {
                         //there's a color scale in this entry
                         parts = words[j].split('=');
                         parts_right = parts[1].split(':')
@@ -234,7 +234,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
         self.circular = true;
     }
 
-    self.pairtable = rnaUtilities.dotbracket_to_pairtable(self.dotbracket);
+    self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
     console.log('pairtable', self.pairtable);
     self.uid = generateUUID();
     self.rnaLength = self.dotbracket.length;
@@ -261,17 +261,17 @@ function RNAGraph(seq, dotbracket, struct_name) {
         }
 
         return self;
-    }
+    };
 
     self.get_positions = function(node_type) {
         positions = [];
-        nucleotide_nodes = self.nodes.filter(function(d) { return d.node_type == node_type; })
+        nucleotide_nodes = self.nodes.filter(function(d) { return d.node_type == node_type; });
 
         for (var i = 0; i < nucleotide_nodes.length; i++)
             positions.push([nucleotide_nodes[i].x, nucleotide_nodes[i].y]);
 
         return positions;
-    }
+    };
 
     self.get_uids = function() {
         /* Get the positions of each node so that they
@@ -629,6 +629,9 @@ function RNAGraph(seq, dotbracket, struct_name) {
     };
 
     self.addLabels = function(labelInterval) {
+        if (arguments.length  == 0)
+            labelInterval = 10;
+
         if (labelInterval == 0)
             return;
 
@@ -653,10 +656,10 @@ function RNAGraph(seq, dotbracket, struct_name) {
                         newX = self.nodes[0].x + 15;
                         newY = self.nodes[0].y + 0;
                     } else {
-                        if (i == 0)
+                        if (i === 0)
                             prevNode = self.nodes[i-1];
                         else
-                            prevNode = self.nodes[i-2]
+                            prevNode = self.nodes[i-2];
 
                         if (i == self.rnaLength)
                             nextNode = self.nodes[i-1];
@@ -665,13 +668,13 @@ function RNAGraph(seq, dotbracket, struct_name) {
 
                         thisNode = self.nodes[i-1];
 
-                        nextVec = [nextNode.x - thisNode.x, nextNode.y - thisNode.y]
-                        prevVec = [prevNode.x - thisNode.x, prevNode.y - thisNode.y]
+                        nextVec = [nextNode.x - thisNode.x, nextNode.y - thisNode.y];
+                        prevVec = [prevNode.x - thisNode.x, prevNode.y - thisNode.y];
 
-                        combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]]
-                        vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1])
-                        normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength]
-                        offsetVec = [-15 * normedVec[0], -15 * normedVec[1]]
+                        combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
+                        vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
+                        normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
+                        offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
 
                         console.log(i, 'prevNode.num', prevNode.num, 'nextNode.num', nextNode.num);
                         console.log(i, 'prevVec', prevVec , 'nextVec', nextVec, 'combinedVec', combinedVec);
@@ -706,10 +709,10 @@ function RNAGraph(seq, dotbracket, struct_name) {
         }
 
         return self;
-    }
+    };
 
     self.recalculateElements = function() {
-        self.remove_pseudoknots();
+        self.removePseudoknots();
         self.elements = self.pt_to_elements(self.pairtable, 0, 1, self.dotbracket.length);
 
         if (self.circular) {
@@ -743,9 +746,9 @@ function RNAGraph(seq, dotbracket, struct_name) {
         return self;
     };
 
-    self.remove_pseudoknots = function() {
+    self.removePseudoknots = function() {
         if (self.pairtable.length > 1)
-            self.pseudoknot_pairs = rnaUtilities.remove_pseudoknots_from_pairtable(self.pairtable);
+            self.pseudoknot_pairs = rnaUtilities.removePseudoknotsFromPairtable(self.pairtable);
         else
             self.pseudoknot_pairs = []
 
