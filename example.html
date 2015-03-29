@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<div id='rna_ss_1y26' />
+    <script type='text/javascript' src='jquery.js'></script> 
+    <script type='text/javascript' src='d3.js'></script>                                                                
+    <script type='text/javascript' src='rnautils.js'></script>                                                          
+    <script type='text/javascript' src='rnagraph.js'></script>                                                          
+    <script type='text/javascript' src='simplernaplot.js'></script> 
+    <script type='text/javascript' src='fornaf.js'></script>                                                            
+    <script type='text/javascript' src='fornac.js'></script>                                                            
+
+    <script type='text/javascript'>                                                                                         
+var container = new FornaContainer("#rna_ss_1y26", [600,600], {'applyForce': false});                                                       
+console.log('container');
+
+var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',              
+    'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',               
+    'name': '1y26',                                                                                      
+    'positions': [],
+    'labelInterval': 5
+};                                                                                                                  
+
+container.addRNA(options.structure, options);                                                                                          
+</script>
+
