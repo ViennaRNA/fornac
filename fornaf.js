@@ -6,8 +6,6 @@
 * Date: 2015-03-15
 */
 
-console.log('hi there');
-
 function FornaForce(element, dimensions, options) {
     var self = this;
 
@@ -159,8 +157,6 @@ function FornaForce(element, dimensions, options) {
                             d.link_type == 'fake');
                 });
 
-                console.log('fake_links:', fake_links);
-
                 for (var j = 0; j < fake_links.length; j++) {
                     var linkIndex = self.graph.links.indexOf(fake_links[j]); 
                     self.graph.links.splice(linkIndex, 1);
@@ -232,7 +228,6 @@ function FornaForce(element, dimensions, options) {
     
     self.toJSON = function toJSON() {
        var data = {"rnas": self.rnas, "extraLinks": self.extraLinks};
-            console.log('data:', data);
             var data_string = JSON.stringify(data, function(key, value) {
             //remove circular references
             if (key == 'rna') {
@@ -343,9 +338,10 @@ function FornaForce(element, dimensions, options) {
         fake_nodes.style('fill', 'transparent');
         */
 
-        var nodes = vis_nodes.selectAll('[node_type=nucleotide]');
-        var scale;
-        data = nodes.data();
+        var gnodes = vis_nodes.selectAll('g.gnode');
+        var circles = vis_nodes.selectAll('g.gnode').selectAll('circle');
+        console.log('circles:', circles);
+        var nodes = vis_nodes.selectAll('g.gnode').select('[node_type=nucleotide]');
         self.colorScheme = newColorScheme;
 
 
@@ -362,7 +358,9 @@ function FornaForce(element, dimensions, options) {
             .domain(['s','m','i','e','t','h','x'])
             .range(['lightgreen', '#ff9896', '#dbdb8d', 'lightsalmon',
                    'lightcyan', 'lightblue', 'transparent']);
+
                    nodes.style('fill', function(d) { 
+                       console.log('d.elem_type:', d.elem_type);
                        return scale(d.elem_type);
                    });
 
@@ -382,9 +380,6 @@ function FornaForce(element, dimensions, options) {
             .interpolate(d3.interpolateLab)
             .domain(self.customColors.domain)
             .range(self.customColors.range);
-
-            console.log('scale.domain', scale.domain())
-
 
             nodes.style('fill', function(d) {
                 if (typeof self.customColors == 'undefined') {
@@ -545,8 +540,8 @@ function FornaForce(element, dimensions, options) {
         mol_height = max_y - min_y;
 
         // how much larger the drawing area is than the width and the height
-        width_ratio = self.options.svgW / mol_width;
-        height_ratio = self.options.svgH / mol_height;
+        width_ratio = self.options.svgW / (mol_width + 1);
+        height_ratio = self.options.svgH / (mol_height + 1);
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most

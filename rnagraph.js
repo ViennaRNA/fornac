@@ -195,6 +195,9 @@ function ProteinGraph(struct_name, size, uid) {
         for (var i = 0; i < uids.length; i++)
             self.nodes[i].uid = uids[i];
 
+        for (var i = 0; i < self.links.length; i++)
+            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
+
         return self;
     };
 
@@ -215,6 +218,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
     var self = this;
 
     self.type = 'rna';
+    self.circularizeExternal = false;
 
     if (arguments.length == 0) {
         self.seq = '';
@@ -316,7 +320,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
         };
 
         for (i=0; i < self.elements.length; i++) {
-            if (self.elements[i][0] == 's' || self.elements[i][0] == 'e')
+            if (self.elements[i][0] == 's' || (!self.circularizeExternal && self.elements[i][0] == 'e'))
                 continue;
 
             var nucs = self.elements[i][2].filter(filter_nucs);
@@ -498,7 +502,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'target': self.nodes[pt[i]-1],
                                  'link_type': 'basepair',
                                  'value': 1,
-                                 'uid': generateUUID() });
+                                 'uid': self.nodes[i-1].uid + self.nodes[pt[i]-1].uid });
             }
 
             if (i > 1) {
@@ -507,7 +511,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'target': self.nodes[i-1],
                                  'link_type': 'backbone',
                                  'value': 1,
-                                 'uid': generateUUID() });
+                                 'uid': self.nodes[i-2].uid + self.nodes[i-1].uid });
             }
         }
 
@@ -517,7 +521,8 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'target': self.nodes[self.pseudoknotPairs[i][1]-1],
                                  'link_type': 'pseudoknot',
                                  'value': 1,
-                                 'uid': generateUUID() });
+                                 'uid': self.nodes[self.pseudoknotPairs[i][0]-1].uid + 
+                                        self.nodes[self.pseudoknotPairs[i][1]-1].uid });
         }
 
         if (self.circular) {
