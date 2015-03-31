@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="example.css" media="screen" />
-
+<link rel="stylesheet" type="text/css" href="fornaf.css" media="screen" />
 This is an RNA container.
 
-<div id='rna_ss' style='min-height: 300px; max-width: 400px;'> </div>
+<div id='rna_ss'> </div>
 
-    <br>
-This after the RNA container. Blah
+This after the RNA container.
 
     <script type='text/javascript' src='jquery.js'></script> 
     <script type='text/javascript' src='d3.js'></script>                                                                
@@ -15,18 +13,12 @@ This after the RNA container. Blah
     <script type='text/javascript' src='rnagraph.js'></script>                                                          
     <script type='text/javascript' src='simplernaplot.js'></script> 
     <script type='text/javascript' src='fornaf.js'></script>                                                            
-    <script type='text/javascript' src='fornac.js'></script>                                                            
 
     <script type='text/javascript'>                                                                                         
 var container = new FornaContainer("#rna_ss", {'applyForce': false}); 
-//var container = new FornaContainer("#rna_ss");
-console.log('container');
 
 var options = {'structure': '((..((....)).(((....))).))',              
-    'sequence':             'CGCUUCAUAUAAUCCUAAUGACCUAU',               
-    'name': '1y26',                                                                                      
-    'positions': [],
-    'labelInterval': 5
+    'sequence':             'CGCUUCAUAUAAUCCUAAUGACCUAU'               
 };  
 
 
