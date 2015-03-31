@@ -18,24 +18,25 @@ function FornaContainer(element, dimensions, options) {
 
     self.fornaForce = new FornaForce(element, dimensions, self.forceOptions)
     
-    self.addRNA = function(structure, options) {
+    self.addRNA = function(structure, passedOptions) {
+        // the default options
         var options = { 
-                        'seq': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',
-                        'struct': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',
-                        'name': '1y26',
+                        'sequence': '',
+                        'structure': '',
+                        'name': 'empty',
                         'positions': [],
                         'labelInterval': 10,
                       };
 
         if (arguments.length == 2) {
-            for (var option in options) {
+            for (var option in passedOptions) {
                 if (options.hasOwnProperty(option))
-                    options[option] = options[option];
+                    options[option] = passedOptions[option];
             }
         }
 
         console.log('structure:', structure);
-        rg = new RNAGraph(options.seq, options.struct, options.name);
+        rg = new RNAGraph(options.sequence, options.structure, options.name);
 
         rnaJson = rg.recalculateElements()
 

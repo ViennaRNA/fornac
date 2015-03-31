@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="example.css" media="screen" />
 
-<div id='rna_ss_1y26' />
+This is an RNA container.
+
+<div id='rna_ss'></div>
+    <br>
+
+This after the RNA container. Blah
+
     <script type='text/javascript' src='jquery.js'></script> 
     <script type='text/javascript' src='d3.js'></script>                                                                
     <script type='text/javascript' src='rnautils.js'></script>                                                          
@@ -11,15 +18,16 @@
     <script type='text/javascript' src='fornac.js'></script>                                                            
 
     <script type='text/javascript'>                                                                                         
-var container = new FornaContainer("#rna_ss_1y26", [600,600], {'applyForce': false});                                                       
+var container = new FornaContainer("#rna_ss", [200,200], {'applyForce': false});                                                       
 console.log('container');
 
-var options = {'structure': '((((((((((..((((((.........))))))......).((((((.......))))))..)))))))))',              
-    'sequence': 'CGCUUCAUAUAAUCCUAAUGAUAUGGUUUGGGAGUUUCUACCAAGAGCCUUAAACUCUUGAUUAUGAAGUG',               
+var options = {'structure': '((..((....))..((....))..))',              
+    'sequence':             'CGCUUCAUAUAAUCCUAAUGAUAUGG',               
     'name': '1y26',                                                                                      
     'positions': [],
     'labelInterval': 5
-};                                                                                                                  
+};  
+
 
 container.addRNA(options.structure, options);                                                                                          
 </script>

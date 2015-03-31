@@ -195,9 +195,6 @@ function ProteinGraph(struct_name, size, uid) {
         for (var i = 0; i < uids.length; i++)
             self.nodes[i].uid = uids[i];
 
-        for (var i = 0; i < self.links.length; i++)
-            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
-
         return self;
     };
 
@@ -304,7 +301,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
             nucs = all_nucs.slice(0, all_nucs.length / 2);
 
             for (var j = 0; j < nucs.length-1; j++) {
-                self.add_fake_node([nucs[j], nucs[j+1], pt[nucs[j+1]], pt[nucs[j]]]);
+                self.addFakeNode([nucs[j], nucs[j+1], pt[nucs[j+1]], pt[nucs[j]]]);
             }
         }
 
@@ -325,17 +322,30 @@ function RNAGraph(seq, dotbracket, struct_name) {
 
             var nucs = self.elements[i][2].filter(filter_nucs);
 
-            self.add_fake_node(nucs);
+            self.addFakeNode(nucs);
         }
 
         return self;
     };
 
-    self.add_fake_node = function(nucs) {
+    self.updateLinkUids = function() {
+        for (var i = 0; i < self.links.length; i++) {
+            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
+        }
+
+        return self;
+    }
+
+    self.addFakeNode = function(nucs) {
         var linkLength = 18; //make sure this is consistent with the value in force.js
         var nodeWidth = 6;
         var angle = (3.1415 * 2) / (2 * nucs.length);
         var radius =  linkLength / (2 * Math.tan(angle));
+
+        var fakeNodeUid = ""
+
+        for (var i = 0; i < nucs.length; i++)
+            fakeNodeUid += self.nodes[nucs[i]-1].uid;
 
         new_node = {'name': '',
                          'num': -1,
@@ -345,7 +355,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
                          'node_type': 'middle',
                          'elem_type': 'f',
                          'nucs': nucs,
-                         'uid': generateUUID() };
+                         'uid': fakeNodeUid };
         self.nodes.push(new_node);
 
         new_x = 0;
@@ -502,7 +512,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'target': self.nodes[pt[i]-1],
                                  'link_type': 'basepair',
                                  'value': 1,
-                                 'uid': self.nodes[i-1].uid + self.nodes[pt[i]-1].uid });
+                                 'uid': generateUUID() });
             }
 
             if (i > 1) {
@@ -511,18 +521,17 @@ function RNAGraph(seq, dotbracket, struct_name) {
                                  'target': self.nodes[i-1],
                                  'link_type': 'backbone',
                                  'value': 1,
-                                 'uid': self.nodes[i-2].uid + self.nodes[i-1].uid });
+                                 'uid': generateUUID() });
             }
         }
 
         //add the pseudoknot links
         for (i = 0; i < self.pseudoknotPairs.length; i++) {
-                self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
-                                 'target': self.nodes[self.pseudoknotPairs[i][1]-1],
-                                 'link_type': 'pseudoknot',
-                                 'value': 1,
-                                 'uid': self.nodes[self.pseudoknotPairs[i][0]-1].uid + 
-                                        self.nodes[self.pseudoknotPairs[i][1]-1].uid });
+            self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
+                            'target': self.nodes[self.pseudoknotPairs[i][1]-1],
+                            'link_type': 'pseudoknot',
+                            'value': 1,
+                            'uid': generateUUID()});
         }
 
         if (self.circular) {
@@ -654,46 +663,56 @@ function RNAGraph(seq, dotbracket, struct_name) {
                 //create a node for each label
                 var newX, newY;
 
-                if (self.pairtable[i] !== 0) {
-                    // if this base is paired, position the label opposite the base pair
-                    newX = self.nodes[i-1].x + (self.nodes[i-1].x - self.nodes[self.pairtable[i] - 1].x);
-                    newY = self.nodes[i-1].y + (self.nodes[i-1].y - self.nodes[self.pairtable[i] - 1].y);
+                thisNode = self.nodes[i-1]
+
+                if (self.rnaLength == 1) {
+                    nextVec = [thisNode.x - 15, thisNode.y]
+                    prevVec = [thisNode.x - 15, thisNode.y]
                 } else {
-                    // the label is on a nucleotide in a loop
+                    // if we're labelling the first node, then label it in relation to the last
+                    if (i == 1)
+                        prevNode = self.nodes[self.rnaLength - 1];
+                    else
+                        prevNode = self.nodes[i - 2];
 
-                    if (self.rnaLength == 1) {
-                        // only one nucleotide so we just position the label adjacent to it
-                        newX = self.nodes[0].x + 15;
-                        newY = self.nodes[0].y + 0;
+                    // if we're labelling the last node, then label it in relation to the first
+                    if (i == self.rnaLength)
+                        nextNode = self.nodes[0];
+                    else
+                        nextNode = self.nodes[i];
+
+                    // this nucleotide and its neighbors are paired
+                    if (self.pairtable[nextNode.num] !== 0 &&
+                        self.pairtable[prevNode.num] !== 0 &&
+                        self.pairtable[thisNode.num] !== 0) {
+                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num]-1]
+                    }
+
+                    // this node is paired but at least one of its neighbors is unpaired
+                    // place the label in the direction of the two neighbors
+                    if (self.pairtable[thisNode.num] !== 0 && (
+                        self.pairtable[nextNode.num] === 0 ||
+                        self.pairtable[prevNode.num] === 0)) {
+                        nextVec = [thisNode.x - nextNode.x, thisNode.y - nextNode.y];
+                        prevVec = [thisNode.x - prevNode.x, thisNode.y - prevNode.y];
+
                     } else {
-                        if (i === 0)
-                            prevNode = self.nodes[i-1];
-                        else
-                            prevNode = self.nodes[i-2];
-
-                        if (i == self.rnaLength)
-                            nextNode = self.nodes[i-1];
-                        else
-                            nextNode = self.nodes[i];
-
-                        thisNode = self.nodes[i-1];
-
                         nextVec = [nextNode.x - thisNode.x, nextNode.y - thisNode.y];
                         prevVec = [prevNode.x - thisNode.x, prevNode.y - thisNode.y];
-
-                        combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
-                        vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
-                        normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
-                        offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
-
-                        console.log(i, 'prevNode.num', prevNode.num, 'nextNode.num', nextNode.num);
-                        console.log(i, 'prevVec', prevVec , 'nextVec', nextVec, 'combinedVec', combinedVec);
-                        console.log(i, 'normedVec', normedVec, "offsetVec", offsetVec );
-
-                        newX = self.nodes[i-1].x + offsetVec[0];
-                        newY = self.nodes[i-1].y + offsetVec[1];
                     }
                 }
+
+                combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
+                vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
+                normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
+                offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
+
+                console.log(i, 'prevNode.num', prevNode.num, 'nextNode.num', nextNode.num);
+                console.log(i, 'prevVec', prevVec , 'nextVec', nextVec, 'combinedVec', combinedVec);
+                console.log(i, 'normedVec', normedVec, "offsetVec", offsetVec );
+
+                newX = self.nodes[i-1].x + offsetVec[0];
+                newY = self.nodes[i-1].y + offsetVec[1];
 
                 new_node = {'name': i,
                                  'num': -1,

@@ -6,7 +6,7 @@
 * Date: 2015-03-15
 */
 
-function FornaForce(element, dimensions, options) {
+function FornaForce(element, dimensions, passedOptions) {
     var self = this;
 
     self.options = {
@@ -18,9 +18,9 @@ function FornaForce(element, dimensions, options) {
     };
 
     if (arguments.length == 3) {
-        for (var option in options) {
-            if (options.hasOwnProperty(option))
-                self.options[option] = options[option];
+        for (var option in passedOptions) {
+            if (self.options.hasOwnProperty(option))
+                self.options[option] = passedOptions[option];
         }
     }
 
@@ -340,7 +340,6 @@ function FornaForce(element, dimensions, options) {
 
         var gnodes = vis_nodes.selectAll('g.gnode');
         var circles = vis_nodes.selectAll('g.gnode').selectAll('circle');
-        console.log('circles:', circles);
         var nodes = vis_nodes.selectAll('g.gnode').select('[node_type=nucleotide]');
         self.colorScheme = newColorScheme;
 
@@ -360,7 +359,6 @@ function FornaForce(element, dimensions, options) {
                    'lightcyan', 'lightblue', 'transparent']);
 
                    nodes.style('fill', function(d) { 
-                       console.log('d.elem_type:', d.elem_type);
                        return scale(d.elem_type);
                    });
 
@@ -779,7 +777,7 @@ function FornaForce(element, dimensions, options) {
         .addPositions('label', label_positions)
         .reinforceStems()
         .reinforceLoops()
-        .connectFakeNodes();
+        .updateLinkUids()
     };
 
     remove_link = function(d) {
@@ -1095,7 +1093,9 @@ function FornaForce(element, dimensions, options) {
         var all_links = vis_links.selectAll("line.link")
         .data(self.graph.links, link_key);
 
-        link_lines = all_links.enter().append("svg:line");
+        var links_enter = all_links.enter();
+
+        link_lines = links_enter.append("svg:line");
 
         link_lines.append("svg:title")
         .text(link_key);
@@ -1119,7 +1119,8 @@ function FornaForce(element, dimensions, options) {
         .attr("link_type", function(d) { return d.link_type; } )
         .attr('pointer-events', function(d) { if (d.link_type == 'fake') return 'none'; else return 'all';});
 
-            all_links.exit().each(function(d) { /*console.log('exiting', d);*/ }).remove();
+            //all_links.exit().each(function(d) { console.log('link exiting', d); }).remove();
+            all_links.exit().remove();
 
             /* We don't need to update the positions of the stabilizing links */
             fake_links = vis_links.selectAll("[link_type=fake]");
