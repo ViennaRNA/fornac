@@ -283,8 +283,11 @@ function FornaForce(element, dimensions, passedOptions) {
     };
 
     function setSize() {
+        console.log('element', $(element));
         var svgW = $(element).width();
         var svgH = $(element).height();
+
+        console.log('svgW', svgW, 'svgH', svgH);
 
         self.options.svgW = svgW;
         self.options.svgH = svgH;
@@ -306,6 +309,8 @@ function FornaForce(element, dimensions, passedOptions) {
 
         svg.attr("width", svgW)
         .attr("height", svgH);
+
+        console.log('svgW', svgW, 'svgH', svgH);
     }
 
     function change_colors(molecule_colors, d, scale) {

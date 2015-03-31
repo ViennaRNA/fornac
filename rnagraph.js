@@ -707,10 +707,6 @@ function RNAGraph(seq, dotbracket, struct_name) {
                 normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
                 offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
 
-                console.log(i, 'prevNode.num', prevNode.num, 'nextNode.num', nextNode.num);
-                console.log(i, 'prevVec', prevVec , 'nextVec', nextVec, 'combinedVec', combinedVec);
-                console.log(i, 'normedVec', normedVec, "offsetVec", offsetVec );
-
                 newX = self.nodes[i-1].x + offsetVec[0];
                 newY = self.nodes[i-1].y + offsetVec[1];
 
