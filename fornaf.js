@@ -6,28 +6,25 @@
 * Date: 2015-03-15
 */
 
-function FornaForce(element, dimensions, passedOptions) {
+function FornaContainer(element, passedOptions) {
     var self = this;
 
     self.options = {
-        "svgW": 600,
-        "svgH": 600,
         "displayAllLinks": false,
         "labelInterval": 0,
-        "applyForce": true
+        "applyForce": true,
+        "initialSize": [200,200]
     };
 
-    if (arguments.length == 3) {
+    if (arguments.length > 1) {
         for (var option in passedOptions) {
             if (self.options.hasOwnProperty(option))
                 self.options[option] = passedOptions[option];
         }
     }
 
-    if (arguments.length > 1) {
-        self.options.svgW = dimensions[0];
-        self.options.svgH = dimensions[0];
-    }
+    self.options.svgW = self.options.initialSize[0];
+    self.options.svgH = self.options.initialSize[1];
 
     var fill = d3.scale.category20();
 
@@ -83,6 +80,44 @@ function FornaForce(element, dimensions, passedOptions) {
     self.deaf = false;
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
+
+    self.addRNA = function(structure, passedOptions) {
+        // the default options
+        var options = { 
+                        'sequence': '',
+                        'structure': '',
+                        'name': 'empty',
+                        'positions': [],
+                        'labelInterval': 10,
+                      };
+
+        if (arguments.length == 2) {
+            for (var option in passedOptions) {
+                if (options.hasOwnProperty(option))
+                    options[option] = passedOptions[option];
+            }
+        }
+
+        console.log('structure:', structure);
+        rg = new RNAGraph(options.sequence, options.structure, options.name);
+
+        rnaJson = rg.recalculateElements()
+
+        if (options.positions.length === 0) {
+            // no provided positions means we need to calculate an initial layout
+            options.positions = simple_xy_coordinates(rnaJson.pairtable);
+        }
+
+        rnaJson = rnaJson.elementsToJson()
+        .addPositions("nucleotide", options.positions)
+        .addLabels(options.labelInterval)
+        .reinforceStems()
+        .reinforceLoops()
+        .connectFakeNodes()
+
+
+        self.addRNAJSON(rnaJson);
+    }
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
         // Add an RNAGraph, which contains nodes and links as part of the
@@ -271,7 +306,7 @@ function FornaForce(element, dimensions, passedOptions) {
                 r.uid = rnas[uid].uid;
             }
 
-            self.addRNA(r, false);
+            self.addRNAJSON(r, false);
         }
 
         extraLinks.forEach(function(link) {
@@ -311,6 +346,7 @@ function FornaForce(element, dimensions, passedOptions) {
         .attr("height", svgH);
 
         console.log('svgW', svgW, 'svgH', svgH);
+        self.center_view();
     }
 
     function change_colors(molecule_colors, d, scale) {
@@ -452,6 +488,7 @@ function FornaForce(element, dimensions, passedOptions) {
     .append("svg:svg")
     .attr("width", self.options.svgW)
     .attr("height", self.options.svgH)
+    .style("display", "block")
     .attr("id", 'plotting-area');
 
     self.options.svg = svg;
