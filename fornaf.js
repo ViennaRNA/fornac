@@ -528,7 +528,7 @@ function FornaContainer(element, passedOptions) {
                    var extent = d3.event.target.extent();
 
                    gnodes.classed("selected", function(d) {
-                       return d.selected = d.previouslySelected ^
+                       return d.selected = self.options.applyForce && d.previouslySelected ^
                        (extent[0][0] <= d.x && d.x < extent[1][0]
                         && extent[0][1] <= d.y && d.y < extent[1][1]);
                    });
@@ -663,10 +663,10 @@ function FornaContainer(element, passedOptions) {
       if (!d.selected && !ctrl_keydown) {
           // if this node isn't selected, then we have to unselect every other node
             var node = vis_nodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed("selected", function(p) { return p.selected =  p.previouslySelected = false; })
+            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); })
           }
 
-        d3.select(this).select('.outline_node').classed("selected", function(p) { d.previouslySelected = d.selected; return d.selected = true; });
+        d3.select(this).select('.outline_node').classed("selected", function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         var toDrag = selectedNodes(d);
         toDrag.each(function(d1) {
@@ -900,11 +900,11 @@ function FornaContainer(element, passedOptions) {
         if (!ctrl_keydown) {
             //if the shift key isn't down, unselect everything
             var node = vis_nodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed("selected", function(p) { return p.selected =  p.previouslySelected = false; })
+            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); })
         }
 
         // always select this node
-        d3.select(this).select('circle').classed("selected", d.selected = !d.previouslySelected);
+        d3.select(this).select('circle').classed("selected", d.selected = self.options.applyForce && !d.previouslySelected);
     }
 
     node_mouseup = function(d) {
@@ -951,7 +951,7 @@ function FornaContainer(element, passedOptions) {
           }
 
 
-          d3.select(this).classed("selected", function(p) { d.previouslySelected = d.selected; return d.selected = true; });
+          d3.select(this).classed("selected", function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         if (!shift_keydown) {
             return;
