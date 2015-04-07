@@ -13,7 +13,8 @@ function FornaContainer(element, passedOptions) {
         "displayAllLinks": false,
         "labelInterval": 0,
         "applyForce": true,
-        "initialSize": [200,200]
+        "initialSize": [200,200],
+        "allowPanningAndZooming": true
     };
 
     if (arguments.length > 1) {
@@ -494,10 +495,12 @@ function FornaContainer(element, passedOptions) {
     self.options.svg = svg;
 
     var svg_graph = svg.append('svg:g')
-    .call(zoomer)
     .on('mousemove', mousemove)
     .on('mousedown', mousedown)
-    .on('mouseup', mouseup);
+    .on('mouseup', mouseup)
+
+    if (self.options.allowPanningAndZooming)
+        svg_graph.call(zoomer)
 
     var rect = svg_graph.append('svg:rect')
     .attr('width', self.options.svgW)
