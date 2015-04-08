@@ -88,7 +88,7 @@ function FornaContainer(element, passedOptions) {
                         'sequence': '',
                         'name': 'empty',
                         'positions': [],
-                        'labelInterval': 10,
+                        'labelInterval': 10
                       };
 
         if (arguments.length == 2) {
