@@ -1044,7 +1044,6 @@ function FornaContainer(element, passedOptions) {
         self.displayParameters.nodeStrokeWidth=0;
       }
       svg.selectAll('circle').style('stroke-width', self.displayParameters.nodeStrokeWidth);
-      svg.selectAll('circle').style('stroke', 'gray');
 
     };
     
