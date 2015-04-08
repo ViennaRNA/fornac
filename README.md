@@ -13,29 +13,23 @@ The code for creating this web page is rather straightforward. After importing s
 ```html
 <!DOCTYPE html>
 <meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="fornaf.css" media="screen" />
+
 This is an RNA container.
- 
 <div id='rna_ss'> </div>
- 
-This is after the RNA container.
+This after the RNA container.
 
-    <script type='text/javascript' src='jquery.js'></script>
-    <script type='text/javascript' src='d3.js'></script>
-    <script type='text/javascript' src='rnautils.js'></script>
-    <script type='text/javascript' src='rnagraph.js'></script>
-    <script type='text/javascript' src='simplernaplot.js'></script>
-    <script type='text/javascript' src='fornaf.js'></script>
-
+    <script type='text/javascript' src='js/jquery.js'></script>
+    <script type='text/javascript' src='js/d3.js'></script>
+    <script type='text/javascript' src='js/fornac.js'></script>
     <script type='text/javascript'>
-var container = new FornaContainer("#rna_ss", {'applyForce': false});
+        var container = new FornaContainer("#rna_ss", {'applyForce': false});
 
-var options = {'structure': '((..((....)).(((....))).))',
-    'sequence':             'CGCUUCAUAUAAUCCUAAUGACCUAU' 
-};
+        var options = {'structure': '((..((....)).(((....))).))',
+                        'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+        };
 
-container.addRNA(options.structure, options);
-</script>
+        container.addRNA(options.structure, options);
+    </script>
 ```
 ## Options
 
@@ -48,3 +42,15 @@ Indicate whether the force-directed layout will be applied to the displayed mole
 ### allowPanningAndZooming
 
 Allow users to zoom in and pan the display. If this is enabled then pressing the 'c' key on the keyboard will center the view.
+
+### Installation
+
+You need [ANT](http://ant.apache.org/), [Java](http://java.com) and [GNU Make](https://www.gnu.org/software/make/) installed if you want to produce a release javascript file (compressed and optimized). Then just type:
+```sh
+$ make
+```
+Optionally, you can just cat all javascript files into one file:
+```sh
+$ cat src/*.js > js/fornac.js
+```
+Do not forget to run the unit tests in `test.html` to check for regressions!
