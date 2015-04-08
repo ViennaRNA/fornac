@@ -9,7 +9,7 @@ closure-compiler/build/compiler.jar:
 	cd closure-compiler; ant jar
 
 release: js/fornac.js
-	zip fornac-release.zip js/fornac.js example.html README.md
+	zip fornac-release.zip js/fornac.js css/fornac.css example.html README.md
 
 clean:
 	rm -f closure-compiler/build/compiler.jar js/fornac.js fornac-release.zip

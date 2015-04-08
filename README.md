@@ -18,6 +18,7 @@ This is an RNA container.
 <div id='rna_ss'> </div>
 This after the RNA container.
 
+    <link rel='stylesheet' type='text/css' href='css/fornac.css' />
     <script type='text/javascript' src='js/jquery.js'></script>
     <script type='text/javascript' src='js/d3.js'></script>
     <script type='text/javascript' src='js/fornac.js'></script>
