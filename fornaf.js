@@ -86,7 +86,6 @@ function FornaContainer(element, passedOptions) {
         // the default options
         var options = { 
                         'sequence': '',
-                        'structure': '',
                         'name': 'empty',
                         'positions': [],
                         'labelInterval': 10,
@@ -99,8 +98,7 @@ function FornaContainer(element, passedOptions) {
             }
         }
 
-        console.log('structure:', structure);
-        rg = new RNAGraph(options.sequence, options.structure, options.name);
+        rg = new RNAGraph(options.sequence, structure, options.name);
 
         rnaJson = rg.recalculateElements()
 
@@ -118,6 +116,7 @@ function FornaContainer(element, passedOptions) {
 
 
         self.addRNAJSON(rnaJson);
+        
     }
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
