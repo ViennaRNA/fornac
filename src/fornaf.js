@@ -82,7 +82,8 @@ function FornaContainer(element, passedOptions) {
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
 
-    self.addRNA = function(structure, passedOptions) {
+
+    self.createInitialLayout = function(structure, passedOptions) {
         // the default options
         var options = { 
                         'sequence': '',
@@ -114,9 +115,15 @@ function FornaContainer(element, passedOptions) {
         .reinforceLoops()
         .connectFakeNodes()
 
+        return rnaJson;
 
+    }
+
+    self.addRNA = function(structure, passedOptions) {
+        var rnaJson = self.createInitialLayout(structure, passedOptions);
         self.addRNAJSON(rnaJson);
-        
+
+        return rnaJson;
     }
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
@@ -148,6 +155,22 @@ function FornaContainer(element, passedOptions) {
 
         self.update();
         self.center_view();
+    };
+
+    self.transitionRNA = function(previousRNAJson, newStructure, options) {
+        //transition from an RNA which is already displayed to a new structure
+        var newRNAJson = self.createInitialLayout(newStructure, options);
+        console.log('newRNAJson:', newRNAJson);
+
+        vis_nodes.selectAll('g.gnode').each(function(d) { console.log('d before', d); });
+        var gnodes = vis_nodes.selectAll('g.gnode').data(newRNAJson);
+
+        gnodes.each(function(d) { console.log('d after', d); });
+
+        gnodes.transition().attr('transform', function(d) { 
+            console.log('d after', d);
+            return 'translate(' + [d.x, d.y] + ')'}).duration(1000);
+
     };
 
     self.recalculateGraph = function(rnaGraph) {
@@ -692,8 +715,13 @@ function FornaContainer(element, passedOptions) {
             d1.py += d3.event.dy;
         });
 
-        self.force.resume();
+        self.resumeForce();
         d3.event.sourceEvent.preventDefault();
+    }
+
+    self.resumeForce = function() {
+        if (self.animation)
+            self.force.resume();
     }
 
     function dragended(d) {
@@ -988,17 +1016,17 @@ function FornaContainer(element, passedOptions) {
     
     self.setFriction = function(value) {
       self.force.friction(value);
-      self.force.resume();
+      self.resumeForce();
     };
 
     self.setCharge = function(value) {
       self.force.charge(value);
-      self.force.resume();
+      self.resumeForce();
     };
     
     self.setGravity = function(value) {
       self.force.gravity(value);
-      self.force.resume();
+      self.resumeForce();
     };
     
     self.setPseudoknotStrength = function(value) {
