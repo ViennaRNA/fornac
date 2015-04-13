@@ -11,7 +11,7 @@ function FornaContainer(element, passedOptions) {
 
     self.options = {
         "displayAllLinks": false,
-        "labelInterval": 0,
+        "labelInterval": 10,
         "applyForce": true,
         "initialSize": [200,200],
         "allowPanningAndZooming": true
