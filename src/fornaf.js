@@ -318,7 +318,7 @@ function FornaContainer(element, passedOptions) {
                 r.struct_name = rnas[uid].struct_name;
                 r.nodes = rnas[uid].nodes;
                 r.links = rnas[uid].links;
-                r.rna_length = rnas[uid].rna_length;
+                r.rnaLength = rnas[uid].rnaLength;
                 r.elements = rnas[uid].elements;
                 r.nucs_to_nodes = rnas[uid].nucs_to_nodes;
                 r.pseudoknot_pairs = rnas[uid].pseudoknot_pairs;
@@ -431,8 +431,9 @@ function FornaContainer(element, passedOptions) {
                 scale = d3.scale.linear()
                 .range(["#98df8a", "#dbdb8d", "#ff9896"])
                 .interpolate(d3.interpolateLab)
-                .domain([1, 1 + (d.rna.rna_length - 1) / 2, d.rna.rna_length]);
+                .domain([1, 1 + (d.rna.rnaLength - 1) / 2, d.rna.rnaLength]);
 
+                console.log('color d:', d);
                 return scale(d.num);
             });
         } else if (newColorScheme == 'custom') {
@@ -866,7 +867,7 @@ function FornaContainer(element, passedOptions) {
             if (d.source.rna == d.target.rna) {
                 var r = d.source.rna;
 
-                r.add_pseudoknots();
+                r.addPseudoknots();
                 r.pairtable[d.source.num] = 0;
                 r.pairtable[d.target.num] = 0;
 
