@@ -433,7 +433,6 @@ function FornaContainer(element, passedOptions) {
                 .interpolate(d3.interpolateLab)
                 .domain([1, 1 + (d.rna.rnaLength - 1) / 2, d.rna.rnaLength]);
 
-                console.log('color d:', d);
                 return scale(d.num);
             });
         } else if (newColorScheme == 'custom') {
