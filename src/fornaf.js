@@ -99,7 +99,6 @@ function FornaContainer(element, passedOptions) {
             }
         }
 
-        console.log('structure:', structure);
         rg = new RNAGraph(options.sequence, options.structure, options.name);
 
         rnaJson = rg.recalculateElements()
@@ -319,11 +318,9 @@ function FornaContainer(element, passedOptions) {
     };
 
     function setSize() {
-        console.log('element', $(element));
         var svgW = $(element).width();
         var svgH = $(element).height();
 
-        console.log('svgW', svgW, 'svgH', svgH);
 
         self.options.svgW = svgW;
         self.options.svgH = svgH;
@@ -346,7 +343,6 @@ function FornaContainer(element, passedOptions) {
         svg.attr("width", svgW)
         .attr("height", svgH);
 
-        console.log('svgW', svgW, 'svgH', svgH);
         self.center_view();
     }
 
@@ -1163,7 +1159,6 @@ function FornaContainer(element, passedOptions) {
         .attr("link_type", function(d) { return d.link_type; } )
         .attr('pointer-events', function(d) { if (d.link_type == 'fake') return 'none'; else return 'all';});
 
-            //all_links.exit().each(function(d) { console.log('link exiting', d); }).remove();
             all_links.exit().remove();
 
             /* We don't need to update the positions of the stabilizing links */
