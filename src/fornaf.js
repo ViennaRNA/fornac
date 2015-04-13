@@ -89,7 +89,8 @@ function FornaContainer(element, passedOptions) {
                         'sequence': '',
                         'name': 'empty',
                         'positions': [],
-                        'labelInterval': 10
+                        'labelInterval': 10,
+                        'avoidOthers': true
                       };
 
         if (arguments.length == 2) {
@@ -121,7 +122,9 @@ function FornaContainer(element, passedOptions) {
 
     self.addRNA = function(structure, passedOptions) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
-        self.addRNAJSON(rnaJson);
+
+        console.log('passedOptions', passedOptions);
+        self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
 
         return rnaJson;
     }
@@ -132,7 +135,7 @@ function FornaContainer(element, passedOptions) {
         // Each RNA will have uid to identify it
         // when it is modified, it is replaced in the global list of RNAs
         //
-        var max_x;
+        var max_x, min_x;
 
         if (avoidOthers) {
             if (self.graph.nodes.length > 0)
@@ -140,9 +143,11 @@ function FornaContainer(element, passedOptions) {
             else
                 max_x = 0;
 
+            min_x = d3.min(rnaGraph.nodes.map(function(d) { return d.x; })); 
+
             rnaGraph.nodes.forEach(function(node) {
-                node.x += max_x;
-                node.px += max_x;
+                node.x += (max_x - min_x);
+                node.px += (max_x - min_x);
             });
         }
 
