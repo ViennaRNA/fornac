@@ -104,7 +104,6 @@ function FornaContainer(element, passedOptions) {
         .connectFakeNodes()
 
         return rnaJson;
-
     }
 
     self.addRNA = function(structure, passedOptions) {
@@ -306,7 +305,7 @@ function FornaContainer(element, passedOptions) {
                 r.struct_name = rnas[uid].struct_name;
                 r.nodes = rnas[uid].nodes;
                 r.links = rnas[uid].links;
-                r.rna_length = rnas[uid].rna_length;
+                r.rnaLength = rnas[uid].rnaLength;
                 r.elements = rnas[uid].elements;
                 r.nucs_to_nodes = rnas[uid].nucs_to_nodes;
                 r.pseudoknot_pairs = rnas[uid].pseudoknot_pairs;
@@ -329,11 +328,8 @@ function FornaContainer(element, passedOptions) {
     };
 
     function setSize() {
-        console.log('element', $(element));
         var svgW = $(element).width();
         var svgH = $(element).height();
-
-        console.log('svgW', svgW, 'svgH', svgH);
 
         self.options.svgW = svgW;
         self.options.svgH = svgH;
@@ -356,7 +352,6 @@ function FornaContainer(element, passedOptions) {
         svg.attr("width", svgW)
         .attr("height", svgH);
 
-        console.log('svgW', svgW, 'svgH', svgH);
         self.center_view();
     }
 
@@ -413,7 +408,7 @@ function FornaContainer(element, passedOptions) {
                 scale = d3.scale.linear()
                 .range(["#98df8a", "#dbdb8d", "#ff9896"])
                 .interpolate(d3.interpolateLab)
-                .domain([1, 1 + (d.rna.rna_length - 1) / 2, d.rna.rna_length]);
+                .domain([1, 1 + (d.rna.rnaLength - 1) / 2, d.rna.rnaLength]);
 
                 return scale(d.num);
             });
@@ -853,7 +848,7 @@ function FornaContainer(element, passedOptions) {
             if (d.source.rna == d.target.rna) {
                 var r = d.source.rna;
 
-                r.add_pseudoknots();
+                r.addPseudoknots();
                 r.pairtable[d.source.num] = 0;
                 r.pairtable[d.target.num] = 0;
 
@@ -1119,7 +1114,6 @@ function FornaContainer(element, passedOptions) {
         .attr("link_type", function(d) { return d.link_type; } )
         .attr('pointer-events', function(d) { if (d.link_type == 'fake') return 'none'; else return 'all';});
 
-            //all_links.exit().each(function(d) { console.log('link exiting', d); }).remove();
             all_links.exit().remove();
 
             /* We don't need to update the positions of the stabilizing links */
