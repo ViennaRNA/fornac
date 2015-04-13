@@ -7,16 +7,61 @@ svg {
 
 circle.node {
   stroke: #ccc;
-  stroke-width: 1.5px;
+  stroke-width: 1px;
   opacity: 1;
+  fill: white;
 }
 
 circle.node.label {
     stroke: transparent;
+    stroke-width: 0;
+    fill: white;
 }
 
+circle.outline_node {
+    stroke-width: 1px;
+    fill: red;
+}
+
+circle.protein {
+    fill: blue;
+    fill-opacity: 0.5;
+    stroke-width: 4;
+}
+
+circle.hidden_outline {
+    stroke-width: 0px;
+}
+
+
 line.link {
-  stroke-opacity: .6;
+  stroke: #999;
+  stroke-opacity: 0.8;
+  stroke-width: 2;
+}
+
+line.basepair {
+  stroke: red;
+}
+
+line.intermolecule {
+  stroke: blue;
+}
+
+line.chain_chain {
+  stroke-dasharray: 3,3;
+}
+
+line.fake {
+  stroke: green;
+}
+
+.transparent {
+    fill: transparent;
+    stroke-width: 0;
+    stroke-opacity: 0;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .drag_line {
@@ -68,7 +113,7 @@ circle.outline_node {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;
-  }
+}
 
 .noselect {
     -webkit-touch-callout: none;
@@ -77,4 +122,4 @@ circle.outline_node {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-                    }
+}
