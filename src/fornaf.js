@@ -11,7 +11,7 @@ function FornaContainer(element, passedOptions) {
 
     self.options = {
         "displayAllLinks": false,
-        "labelInterval": 0,
+        "labelInterval": 10,
         "applyForce": true,
         "initialSize": [200,200],
         "allowPanningAndZooming": true
@@ -53,25 +53,13 @@ function FornaContainer(element, passedOptions) {
     };
     
     self.displayParameters = {
-        "nodeStrokeWidth": 0.8,
-        "nodeStrokeWidthDefault": 0.8,
-        "nodeLabelFillDefault":  d3.rgb(50,50,50),
-        "nodeLabelFill":  d3.rgb(50,50,50),
-        "linkOpacityDefault": 0.8,
-        "linkOpacity": 0.8,
-        "proteinLinkOpacityDefault": 0.8,
-        "proteinLinkOpacity": 0.8,
-        "pseudoknotLinkOpacityDefault": 0.8,
-        "pseudoknotLinkOpacity": 0.8,
-        "labelLinkOpacityDefault": 0.8,
-        "labelTextFillDefault": d3.rgb(50,50,50),
-        "labelTextFill": d3.rgb(50,50,50),
-        "labelNodeFillDefault": 'white',
-        "labelNodeFill": 'white',
-        "backgroundColorDefault": "white",
-        "backgroundColor": "white",
-        "proteinBindingHighlighting": true,
-        "proteinBindingHighlightingDefault": true
+        "displayBackground": "true",
+        "displayNumbering": "true",
+        "displayNodeOutline": "true",
+        "displayNodeLabel": "true",
+        "displayLinks": "true",
+        "displayPseudoknotLinks": "true",
+        "displayProteinLinks": "true"
     };
 
     self.colorScheme = 'structure';
@@ -82,14 +70,15 @@ function FornaContainer(element, passedOptions) {
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
 
-    self.addRNA = function(structure, passedOptions) {
+
+    self.createInitialLayout = function(structure, passedOptions) {
         // the default options
         var options = { 
                         'sequence': '',
-                        'structure': '',
                         'name': 'empty',
                         'positions': [],
-                        'labelInterval': 10
+                        'labelInterval': 10,
+                        'avoidOthers': true
                       };
 
         if (arguments.length == 2) {
@@ -99,8 +88,7 @@ function FornaContainer(element, passedOptions) {
             }
         }
 
-        console.log('structure:', structure);
-        rg = new RNAGraph(options.sequence, options.structure, options.name);
+        rg = new RNAGraph(options.sequence, structure, options.name);
 
         rnaJson = rg.recalculateElements()
 
@@ -111,13 +99,26 @@ function FornaContainer(element, passedOptions) {
 
         rnaJson = rnaJson.elementsToJson()
         .addPositions("nucleotide", options.positions)
-        .addLabels(options.labelInterval)
+        .addLabels(1, options.labelInterval)
         .reinforceStems()
         .reinforceLoops()
         .connectFakeNodes()
 
+        return rnaJson;
+    }
 
-        self.addRNAJSON(rnaJson);
+    self.addRNA = function(structure, passedOptions) {
+        var rnaJson = self.createInitialLayout(structure, passedOptions);
+
+        if (arguments.length === 1)
+            passedOptions = {}
+
+        if ('avoidOthers' in passedOptions)
+            self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
+        else
+            self.addRNAJSON(rnaJson, true);
+
+        return rnaJson;
     }
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
@@ -126,7 +127,7 @@ function FornaContainer(element, passedOptions) {
         // Each RNA will have uid to identify it
         // when it is modified, it is replaced in the global list of RNAs
         //
-        var max_x;
+        var max_x, min_x;
 
         if (avoidOthers) {
             if (self.graph.nodes.length > 0)
@@ -134,9 +135,11 @@ function FornaContainer(element, passedOptions) {
             else
                 max_x = 0;
 
+            min_x = d3.min(rnaGraph.nodes.map(function(d) { return d.x; })); 
+
             rnaGraph.nodes.forEach(function(node) {
-                node.x += max_x;
-                node.px += max_x;
+                node.x += (max_x - min_x);
+                node.px += (max_x - min_x);
             });
         }
 
@@ -149,6 +152,22 @@ function FornaContainer(element, passedOptions) {
 
         self.update();
         self.center_view();
+    };
+
+    self.transitionRNA = function(previousRNAJson, newStructure, options) {
+        //transition from an RNA which is already displayed to a new structure
+        var newRNAJson = self.createInitialLayout(newStructure, options);
+        console.log('newRNAJson:', newRNAJson);
+
+        vis_nodes.selectAll('g.gnode').each(function(d) { console.log('d before', d); });
+        var gnodes = vis_nodes.selectAll('g.gnode').data(newRNAJson);
+
+        gnodes.each(function(d) { console.log('d after', d); });
+
+        gnodes.transition().attr('transform', function(d) { 
+            console.log('d after', d);
+            return 'translate(' + [d.x, d.y] + ')'}).duration(1000);
+
     };
 
     self.recalculateGraph = function(rnaGraph) {
@@ -296,7 +315,7 @@ function FornaContainer(element, passedOptions) {
                 r.struct_name = rnas[uid].struct_name;
                 r.nodes = rnas[uid].nodes;
                 r.links = rnas[uid].links;
-                r.rna_length = rnas[uid].rna_length;
+                r.rnaLength = rnas[uid].rnaLength;
                 r.elements = rnas[uid].elements;
                 r.nucs_to_nodes = rnas[uid].nucs_to_nodes;
                 r.pseudoknot_pairs = rnas[uid].pseudoknot_pairs;
@@ -319,11 +338,8 @@ function FornaContainer(element, passedOptions) {
     };
 
     function setSize() {
-        console.log('element', $(element));
         var svgW = $(element).width();
         var svgH = $(element).height();
-
-        console.log('svgW', svgW, 'svgH', svgH);
 
         self.options.svgW = svgW;
         self.options.svgH = svgH;
@@ -346,7 +362,6 @@ function FornaContainer(element, passedOptions) {
         svg.attr("width", svgW)
         .attr("height", svgH);
 
-        console.log('svgW', svgW, 'svgH', svgH);
         self.center_view();
     }
 
@@ -371,14 +386,8 @@ function FornaContainer(element, passedOptions) {
     self.changeColorScheme = function(newColorScheme) {
         var protein_nodes = vis_nodes.selectAll('[node_type=protein]');
 
-        protein_nodes.style('fill', 'grey')
-                    .style('fill-opacity', 0.5)
+        protein_nodes.classed("protein", true)
                     .attr('r', function(d) { return d.radius; });
-
-                    /*
-        var fake_nodes = vis_nodes.seletAll('[node_type=fake]');
-        fake_nodes.style('fill', 'transparent');
-        */
 
         var gnodes = vis_nodes.selectAll('g.gnode');
         var circles = vis_nodes.selectAll('g.gnode').selectAll('circle');
@@ -409,7 +418,7 @@ function FornaContainer(element, passedOptions) {
                 scale = d3.scale.linear()
                 .range(["#98df8a", "#dbdb8d", "#ff9896"])
                 .interpolate(d3.interpolateLab)
-                .domain([1, 1 + (d.rna.rna_length - 1) / 2, d.rna.rna_length]);
+                .domain([1, 1 + (d.rna.rnaLength - 1) / 2, d.rna.rnaLength]);
 
                 return scale(d.num);
             });
@@ -424,7 +433,7 @@ function FornaContainer(element, passedOptions) {
             nodes.style('fill', function(d) {
                 if (typeof self.customColors == 'undefined') {
                     return 'white';
-                } 
+                }
                 
                 if (self.customColors.color_values.hasOwnProperty(d.struct_name) &&
                     self.customColors.color_values[d.struct_name].hasOwnProperty(d.num)) {
@@ -489,9 +498,14 @@ function FornaContainer(element, passedOptions) {
     .append("svg:svg")
     .attr("width", self.options.svgW)
     .attr("height", self.options.svgH)
-    .style("display", "block")
     .attr("id", 'plotting-area');
 
+    // set css for svg
+    var style = svg.append('svg:style');
+    $.get("../css/fornac.css", function(content){
+        style.text(content.replace(/[\s\n]/g, ""));
+    });
+    
     self.options.svg = svg;
 
     var svg_graph = svg.append('svg:g')
@@ -693,8 +707,13 @@ function FornaContainer(element, passedOptions) {
             d1.py += d3.event.dy;
         });
 
-        self.force.resume();
+        self.resumeForce();
         d3.event.sourceEvent.preventDefault();
+    }
+
+    self.resumeForce = function() {
+        if (self.animation)
+            self.force.resume();
     }
 
     function dragended(d) {
@@ -818,7 +837,7 @@ function FornaContainer(element, passedOptions) {
         .addPseudoknots()
         .addPositions('nucleotide', nucleotide_positions)
         .addUids(uids)
-        .addLabels(self.options.labelInterval)
+        .addLabels(1, self.options.labelInterval)
         .addPositions('label', label_positions)
         .reinforceStems()
         .reinforceLoops()
@@ -839,7 +858,7 @@ function FornaContainer(element, passedOptions) {
             if (d.source.rna == d.target.rna) {
                 var r = d.source.rna;
 
-                r.add_pseudoknots();
+                r.addPseudoknots();
                 r.pairtable[d.source.num] = 0;
                 r.pairtable[d.target.num] = 0;
 
@@ -989,17 +1008,17 @@ function FornaContainer(element, passedOptions) {
     
     self.setFriction = function(value) {
       self.force.friction(value);
-      self.force.resume();
+      self.resumeForce();
     };
 
     self.setCharge = function(value) {
       self.force.charge(value);
-      self.force.resume();
+      self.resumeForce();
     };
     
     self.setGravity = function(value) {
       self.force.gravity(value);
-      self.force.resume();
+      self.resumeForce();
     };
     
     self.setPseudoknotStrength = function(value) {
@@ -1008,108 +1027,60 @@ function FornaContainer(element, passedOptions) {
     };
     
     self.displayBackground = function(value) {
-      if (value === true) {
-        self.displayParameters.backgroundColor=self.displayParameters.backgroundColorDefault;
-      } else {
-        self.displayParameters.backgroundColor='transparent';
-      }
-      rect.attr('fill', self.displayParameters.backgroundColor);
-      //vis_nodes.selectAll('[label_type=label]').attr('fill', self.displayParameters["backgroundColor"]);
+      self.displayParameters.displayBackground = value;
+      self.updateStyle();
     };
     
     self.displayNumbering = function(value) {
-      if (value === true) {
-        self.displayParameters.labelTextFill=self.displayParameters.labelTextFillDefault;
-        self.displayParameters.labelLinkOpacity=self.displayParameters.labelLinkOpacityDefault;
-        self.displayParameters.labelNodeFill = self.displayParameters.labelNodeFillDefault;
-      } else {
-        self.displayParameters.labelTextFill='transparent';
-        self.displayParameters.labelLinkOpacity=0;
-        self.displayParameters.labelNodeFill = 'transparent';
-      }
-
-      self.updateNumbering();
-    };
-
-    self.updateNumbering = function() {
-      vis_nodes.selectAll('[node_type=label]').style('fill', self.displayParameters.labelNodeFill);
-      vis_nodes.selectAll('[label_type=label]').style('fill', self.displayParameters.labelTextFill);
-      vis_links.selectAll('[link_type=label_link]').style('stroke-opacity', self.displayParameters.labelLinkOpacity);
+      self.displayParameters.displayNumbering = value;
+      self.updateStyle();
     };
 
     self.displayNodeOutline = function(value) {
-      if (value === true) {
-        self.displayParameters.nodeStrokeWidth=self.displayParameters.nodeStrokeWidthDefault;
-      } else {
-        self.displayParameters.nodeStrokeWidth=0;
-      }
-      svg.selectAll('circle').style('stroke-width', self.displayParameters.nodeStrokeWidth);
-      svg.selectAll('circle').style('stroke', 'gray');
-
+      self.displayParameters.displayNodeOutline = value;
+      self.updateStyle();
     };
     
     self.displayNodeLabel = function(value) {
-      if (value === true) {
-        self.displayParameters.nodeLabelFill=self.displayParameters.nodeLabelFillDefault;
-      } else {
-        self.displayParameters.nodeLabelFill='transparent';
-      }
-      vis_nodes.selectAll('[label_type=nucleotide]').attr('fill', self.displayParameters.nodeLabelFill);
+      self.displayParameters.displayNodeLabel = value;
+      self.updateStyle();
     };
     
     self.displayLinks = function(value) {
-      if (value === true) {
-        self.displayParameters.linkOpacity=self.displayParameters.linkOpacityDefault;
-      } else {
-        self.displayParameters.linkOpacity=0;
-      }
-
-      svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain]").style('stroke-opacity', self.displayParameters.linkOpacity);
+      self.displayParameters.displayLinks = value;
+      self.updateStyle();
     };
 
     self.displayPseudoknotLinks = function(value) {
-      if (value === true) {
-        self.displayParameters.pseudoknotLinkOpacity=self.displayParameters.pseudoknotLinkOpacityDefault;
-      } else {
-        self.displayParameters.pseudoknotLinkOpacity=0;
-      }
-
-      svg.selectAll("[link_type=pseudoknot]").style('stroke-opacity', self.displayParameters.pseudoknotLinkOpacity);
+      self.displayParameters.displayPseudoknotLinks = value;
+      self.updateStyle();
     };
 
     self.displayProteinLinks = function(value) {
-      if (value === true) {
-        self.displayParameters.proteinLinkOpacity=self.displayParameters.proteintLinkOpacityDefault;
-      } else {
-        self.displayParameters.proteinLinkOpacity=0;
-      }
-
-      svg.selectAll("[link_type=protein_chain]").style('stroke-opacity', self.displayParameters.proteinLinkOpacity);
+      self.displayParameters.displayProteinLinks = value;
+      self.updateStyle();
     };
-
-    self.displayProteinBindingHighlighting = function(value) {
-        if (value == true) {
-            self.displayParameters.proteinBindingHighlighting=self.displayParameters.proteinBindingHighlightingDefault;
-        } else {
-            self.displayParameters.proteinBindingHighlighting=false;
-        }
-
-        //self.displayNodeOutline(true);
-        /*
-
-        if (self.displayParameters.proteinBindingHighlighting) {
-            var protein_links = svg.selectAll('[link_type=protein_chain]');
-            protein_links.each(function(d) {
-                var boundNodes = svg.selectAll("circle")
-                var onlyThese = boundNodes.filter(function(d1) { 
-                    return d1.node_type == 'nucleotide' && (d1 == d.source || d1 == d.target );
-                });
-
-                onlyThese.style('stroke-width', 3).style('stroke', 'red')
-            })
-        }
-        */
-    }
+    
+    self.updateStyle = function() {
+        // Background
+        rect.classed("transparent", !self.displayParameters.displayBackground);
+        // Numbering
+        vis_nodes.selectAll('[node_type=label]').classed("transparent", !self.displayParameters.displayNumbering);
+        vis_nodes.selectAll('[label_type=label]').classed("transparent", !self.displayParameters.displayNumbering);
+        vis_links.selectAll('[link_type=label_link]').classed("transparent", !self.displayParameters.displayNumbering);
+        // Node Outline
+        svg.selectAll('circle').classed("hidden_outline", !self.displayParameters.displayNodeOutline);
+        // Node Labels
+        vis_nodes.selectAll('[label_type=nucleotide]').classed("transparent", !self.displayParameters.displayNodeLabel);
+        // Links
+        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain]").classed("transparent", !self.displayParameters.displayLinks);
+        // Pseudoknot Links
+        svg.selectAll("[link_type=pseudoknot]").classed("transparent", !self.displayParameters.displayPseudoknotLinks);
+        // Protein Links
+        svg.selectAll("[link_type=protein_chain]").classed("transparent", !self.displayParameters.displayProteinLinks);
+        // Fake Links
+        vis_links.selectAll("[link_type=fake]").classed("transparent", !self.options.displayAllLinks);
+    };
 
     function nudge(dx, dy) {
         node.filter(function(d) { return d.selected; })
@@ -1145,46 +1116,37 @@ function FornaContainer(element, passedOptions) {
         link_lines.append("svg:title")
         .text(link_key);
 
-        link_lines.attr("class", "link")
-        .style("stroke", "#999")
-        .style("stroke-opacity", self.displayParameters.linkOpacity)
-        .style("stroke-width", function(d) { 
-            return 2;
-        })
-        .attr('visibility', function(d) {
-            if (d.link_type == 'fake')
-                return 'hidden';
-            else
-                return 'visible';
-        })
+        link_lines
+        .classed("link", true)
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; })
         .attr("link_type", function(d) { return d.link_type; } )
+        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.link_type; })
         .attr('pointer-events', function(d) { if (d.link_type == 'fake') return 'none'; else return 'all';});
 
-            //all_links.exit().each(function(d) { console.log('link exiting', d); }).remove();
+        all_links.attr('class', '')
+        .classed('link', true)
+        .attr("link_type", function(d) { return d.link_type; } )
+        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.link_type; })
+
             all_links.exit().remove();
 
             /* We don't need to update the positions of the stabilizing links */
-            fake_links = vis_links.selectAll("[link_type=fake]");
-            if (self.options.displayAllLinks) {
-                fake_links.style('stroke-width', 1);
-            } else {
-                fake_links.style('stroke-width', 0);
-            }
-            //fake_links.style('stroke', 'blue')
-
+            /*
             basepair_links = vis_links.selectAll("[link_type=basepair]");
-            basepair_links.style('stroke', 'red');
+            basepair_links.classed("basepair", true);
+            
+            fake_links = vis_links.selectAll("[link_type=fake]")
+            fake_links.classed("fake", true);
 
             intermolecule_links = vis_links.selectAll("[link_type=intermolecule]");
-            intermolecule_links.style('stroke', 'blue');
+            intermolecule_links.classed("intermolecule", true);
 
             plink = vis_links.selectAll("[link_type=protein_chain],[link_type=chain_chain]");
-            plink.style("stroke-dasharray", ("3,3"));
-
+            plink.classed("chain_chain", true);
+            */
 
             if (self.displayFakeLinks)
                 xlink = all_links;
@@ -1222,33 +1184,6 @@ function FornaContainer(element, passedOptions) {
             .ease("elastic")
             .attr("r", 6.5);
 
-            node_fill = function(d) {
-                node_fills = {};
-
-                node_fills.nucleotide = 'white';
-                node_fills.label = 'white';
-                //node_fills.pseudo = 'transparent';
-                //node_fills.pseudo = 'transparent';
-                //node_fills.middle = 'transparent';
-                //node_fills.middle = 'transparent';
-                node_fills.middle = 'white';
-                node_fills.protein = 'grey';
-
-                return node_fills[d.node_type];
-            };
-
-            node_stroke = function(d) {
-                node_strokes = {};
-
-                node_strokes.nucleotide = 'gray';
-                node_strokes.label = 'transparent';
-                node_strokes.pseudo = 'transparent';
-                node_strokes.middle = 'transparent';
-                node_strokes.protein = 'gray';
-
-                return node_strokes[d.node_type];
-            };
-
             node_tooltip = function(d) {
                 node_tooltips = {};
 
@@ -1261,7 +1196,6 @@ function FornaContainer(element, passedOptions) {
                 return node_tooltips[d.node_type];
             };
 
-
             xlink.on('click', link_click);
 
             var circle_update = gnodes.select('circle');
@@ -1273,8 +1207,6 @@ function FornaContainer(element, passedOptions) {
             nucleotide_nodes.append("svg:circle")
             .attr('class', "outline_node")
             .attr("r", function(d) { return d.radius+1; })
-            .style('stroke_width', 1)
-            .style('fill', 'red')
 
             var node = gnodes_enter.append("svg:circle")
             .attr("class", "node")
@@ -1286,14 +1218,6 @@ function FornaContainer(element, passedOptions) {
                 }
                 })
             .attr("node_type", function(d) { return d.node_type; })
-            .style('stroke-width', function(d) {
-                if (d.node_type == 'protein') {
-                    return 10;
-                } else if (d.node_type == 'label') {
-                    return 0;
-                }})
-            .style('stroke-width', self.displayParameters.nodeStrokeWidth)
-            .style("fill", node_fill)
             
             var labels = gnodes_enter.append("text")
             .text(function(d) { return d.name; })
@@ -1301,7 +1225,6 @@ function FornaContainer(element, passedOptions) {
             .attr('font-size', 8.0)
             .attr('font-weight', 'bold')
             .attr('y', 2.5)
-            .attr('fill', self.displayParameters.nodeLabelFill)
             .attr('class', 'node-label')
             .attr("label_type", function(d) { return d.node_type; })
             .append("svg:title")
@@ -1359,9 +1282,8 @@ function FornaContainer(element, passedOptions) {
         if (self.animation) {
           self.force.start();
         }
-
-        self.updateNumbering();
-        self.displayProteinBindingHighlighting(true);
+        
+        self.updateStyle();
     };
     
     setSize();
