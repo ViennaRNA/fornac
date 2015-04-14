@@ -654,7 +654,7 @@ function RNAGraph(seq, dotbracket, struct_name) {
         }
 
         if (arguments.length === 1) 
-            startNumber = labelInterval = 10;
+            labelInterval = 10;
 
         if (labelInterval === 0)
             return self;
