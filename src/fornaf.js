@@ -110,8 +110,13 @@ function FornaContainer(element, passedOptions) {
     self.addRNA = function(structure, passedOptions) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
 
-        console.log('passedOptions', passedOptions);
-        self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
+        if (arguments.length === 1)
+            passedOptions = {}
+
+        if ('avoidOthers' in passedOptions)
+            self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
+        else
+            self.addRNAJSON(rnaJson, true);
 
         return rnaJson;
     }
