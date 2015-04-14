@@ -99,7 +99,7 @@ function FornaContainer(element, passedOptions) {
 
         rnaJson = rnaJson.elementsToJson()
         .addPositions("nucleotide", options.positions)
-        .addLabels(options.labelInterval)
+        .addLabels(1, options.labelInterval)
         .reinforceStems()
         .reinforceLoops()
         .connectFakeNodes()
@@ -837,7 +837,7 @@ function FornaContainer(element, passedOptions) {
         .addPseudoknots()
         .addPositions('nucleotide', nucleotide_positions)
         .addUids(uids)
-        .addLabels(self.options.labelInterval)
+        .addLabels(1, self.options.labelInterval)
         .addPositions('label', label_positions)
         .reinforceStems()
         .reinforceLoops()
