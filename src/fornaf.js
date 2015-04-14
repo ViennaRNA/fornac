@@ -1188,7 +1188,6 @@ function FornaContainer(element, passedOptions) {
                 return node_tooltips[d.node_type];
             };
 
-
             xlink.on('click', link_click);
 
             var circle_update = gnodes.select('circle');
