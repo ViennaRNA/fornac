@@ -1116,17 +1116,25 @@ function FornaContainer(element, passedOptions) {
         link_lines.append("svg:title")
         .text(link_key);
 
-        link_lines.attr("class", "link")
+        link_lines
+        .classed("link", true)
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; })
         .attr("link_type", function(d) { return d.link_type; } )
+        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.link_type; })
         .attr('pointer-events', function(d) { if (d.link_type == 'fake') return 'none'; else return 'all';});
+
+        all_links.attr('class', '')
+        .classed('link', true)
+        .attr("link_type", function(d) { return d.link_type; } )
+        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.link_type; })
 
             all_links.exit().remove();
 
             /* We don't need to update the positions of the stabilizing links */
+            /*
             basepair_links = vis_links.selectAll("[link_type=basepair]");
             basepair_links.classed("basepair", true);
             
@@ -1138,7 +1146,7 @@ function FornaContainer(element, passedOptions) {
 
             plink = vis_links.selectAll("[link_type=protein_chain],[link_type=chain_chain]");
             plink.classed("chain_chain", true);
-
+            */
 
             if (self.displayFakeLinks)
                 xlink = all_links;
