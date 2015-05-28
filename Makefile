@@ -3,7 +3,7 @@ all: closure-compiler/build/compiler.jar js/fornac.js
 js/fornac.js: src/*.js
 	java -jar closure-compiler/build/compiler.jar --compilation_level=SIMPLE_OPTIMIZATIONS --js_output_file=js/fornac.js src/*.js
 
-closure-compiler/build/compiler.jar: closure-compiler/*
+closure-compiler/build/compiler.jar:
 	git submodule init closure-compiler
 	git submodule update closure-compiler
 	cd closure-compiler; ant jar
