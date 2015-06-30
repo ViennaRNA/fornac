@@ -815,9 +815,7 @@ function RNAGraph(seq, dotbracket, structName) {
 
     self.removePseudoknots = function() {
         if (self.pairtable.length > 1)
-            self.pseudoknotPairs = rnaUtilities.removePseudoknotsFromPairtable(self.pairtable);
-        else
-            self.pseudoknotPairs = [];
+            self.pseudoknotPairs = self.pseudoknotPairs.concat(rnaUtilities.removePseudoknotsFromPairtable(self.pairtable));
 
         return self;
     };

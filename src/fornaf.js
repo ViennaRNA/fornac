@@ -89,7 +89,6 @@ function FornaContainer(element, passedOptions) {
         }
 
         rg = new RNAGraph(options.sequence, structure, options.name);
-
         rnaJson = rg.recalculateElements()
 
         if (options.positions.length === 0) {
