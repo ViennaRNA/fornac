@@ -6,7 +6,6 @@ simple_xy_coordinates = function(pair_table)
   var RADIUS =  15.;
 
   var x = [], y = [];
-  console.log('pair_table', pair_table);
 
   var i, len;
   var  alpha;
@@ -37,7 +36,6 @@ simple_xy_coordinates = function(pair_table)
   var    begin, v, diff;
   var  polygon;
 
-  console.log('i:', i, 'j:', j  );
   var remember = Array.apply(null, new Array((1+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
 
   i_old = i-1, j++;         /* j has now been set to the partner of the
