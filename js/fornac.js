@@ -108,7 +108,6 @@ function FornaContainer(element, passedOptions) {
 
     self.addRNA = function(structure, passedOptions) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
-        console.log('rnaJson:', rnaJson);
 
         if (arguments.length === 1)
             passedOptions = {}
@@ -1830,7 +1829,6 @@ function RNAGraph(seq, dotbracket, structName) {
             }
         }
 
-        console.log('pseudoknotPairs:', self.pseudoknotPairs);
         //add the pseudoknot links
         for (i = 0; i < self.pseudoknotPairs.length; i++) {
             self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
@@ -2036,7 +2034,7 @@ function RNAGraph(seq, dotbracket, structName) {
                 newLink = {'source': self.nodes[i-1],
                             'target': newNode,
                             'value': 1,
-                            'linkType': 'labelLink',
+                            'linkType': 'label_link',
                             'uid': generateUUID() };
 
                 self.nodes.push(newNode);
@@ -2050,7 +2048,6 @@ function RNAGraph(seq, dotbracket, structName) {
     self.recalculateElements = function() {
         self.removePseudoknots();
         self.elements = self.ptToElements(self.pairtable, 0, 1, self.dotbracket.length);
-        console.log('pseudoknotPairs:', self.pseudoknotPairs);
 
         if (self.circular) {
             //check to see if the external loop is a hairpin or a multiloop
