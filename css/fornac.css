@@ -40,6 +40,10 @@ line.link {
   stroke-width: 2;
 }
 
+line.pseudoknot {
+    stroke: red;
+}
+
 line.basepair {
   stroke: red;
 }

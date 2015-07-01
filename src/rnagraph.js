@@ -767,7 +767,7 @@ function RNAGraph(seq, dotbracket, structName) {
                 newLink = {'source': self.nodes[i-1],
                             'target': newNode,
                             'value': 1,
-                            'linkType': 'labelLink',
+                            'linkType': 'label_link',
                             'uid': generateUUID() };
 
                 self.nodes.push(newNode);
