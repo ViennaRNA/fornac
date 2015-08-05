@@ -78,7 +78,8 @@ function FornaContainer(element, passedOptions) {
                         'name': 'empty',
                         'positions': [],
                         'labelInterval': 10,
-                        'avoidOthers': true
+                        'avoidOthers': true,
+                        'circularizeExternal': true
                       };
 
         if (arguments.length == 2) {
@@ -89,6 +90,8 @@ function FornaContainer(element, passedOptions) {
         }
 
         rg = new RNAGraph(options.sequence, structure, options.name);
+        rg.circularizeExternal = options.circularizeExternal;
+
         rnaJson = rg.recalculateElements()
 
         if (options.positions.length === 0) {

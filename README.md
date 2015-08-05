@@ -40,9 +40,16 @@ The `FornaContainer` supports a number of options to allow users to customize ho
 
 Indicate whether the force-directed layout will be applied to the displayed molecule. Enabling this option allows users to change the layout of the molecule by selecting and dragging the individual nucleotide nodes
 
-### allowPanningAndZooming
+### allowPanningAndZooming [default=true]
 
 Allow users to zoom in and pan the display. If this is enabled then pressing the 'c' key on the keyboard will center the view.
+
+### circularizeExternal [default=true]
+
+This only makes sense in connection with the `applyForce` argument. If it's true, the external loops will be arranged in a nice circle. If false, they will be allowed to flop around as the force layout dictates:
+
+![uncircularized loops](https://raw.githubusercontent.com/pkerpedjiev/fornac/img/uncircularized_exterior)"An uncircularized exterior loop")
+
 
 ### Installation
 
