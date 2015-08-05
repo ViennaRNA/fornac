@@ -171,6 +171,7 @@ function ColorScheme(colorsText) {
     };
 
     self.parseColorText(self.colorsText);
+    return self;
 }
 
 function ProteinGraph(structName, size, uid) {

@@ -156,15 +156,13 @@ function FornaContainer(element, passedOptions) {
     self.transitionRNA = function(previousRNAJson, newStructure, options) {
         //transition from an RNA which is already displayed to a new structure
         var newRNAJson = self.createInitialLayout(newStructure, options);
-        console.log('newRNAJson:', newRNAJson);
 
-        visNodes.selectAll('g.gnode').each(function(d) { console.log('d before', d); });
+        //visNodes.selectAll('g.gnode').each(function(d) { console.log('d before', d); });
         var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson);
 
-        gnodes.each(function(d) { console.log('d after', d); });
+        //gnodes.each(function(d) { console.log('d after', d); });
 
         gnodes.transition().attr('transform', function(d) { 
-            console.log('d after', d);
             return 'translate(' + [d.x, d.y] + ')'}).duration(1000);
 
     };
@@ -442,7 +440,9 @@ function FornaContainer(element, passedOptions) {
                     return changeColors(moleculeColors, d, scale);
                 } else if (self.customColors.colorValues.hasOwnProperty('')) {
                     moleculeColors = self.customColors.colorValues[''];
-                    return changeColors(moleculeColors, d, scale);
+                    to_change =  changeColors(moleculeColors, d, scale);
+                    return to_change;
+
                 }
 
                 return 'white';
