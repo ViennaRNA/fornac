@@ -48,7 +48,7 @@ Allow users to zoom in and pan the display. If this is enabled then pressing the
 
 This only makes sense in connection with the `applyForce` argument. If it's true, the external loops will be arranged in a nice circle. If false, they will be allowed to flop around as the force layout dictates:
 
-<img src="https://github.com/pkerpedjiev/fornac/blob/master/doc/img/uncircularized_exterior.png" width=300 />
+<img src="https://github.com/pkerpedjiev/fornac/blob/master/doc/img/uncircularized_exterior.png" width=200 align=center />
 
 ### Installation
 
