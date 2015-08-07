@@ -14,7 +14,8 @@ function FornaContainer(element, passedOptions) {
         "labelInterval": 10,
         "applyForce": true,
         "initialSize": [200,200],
-        "allowPanningAndZooming": true
+        "allowPanningAndZooming": true,
+        "cssFileLocation": "css/fornac.css"
     };
 
     if (arguments.length > 1) {
@@ -504,7 +505,7 @@ function FornaContainer(element, passedOptions) {
 
     // set css for svg
     var style = svg.append('svg:style');
-    $.get(location.origin + window.location.pathname.replace(/[^\/]+$/g,"") + "css/fornac.css", function(content){
+    $.get(options.cssFileLocation, function(content){
         style.text(content.replace(/[\s\n]/g, ""));
     });
     
