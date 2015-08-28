@@ -50,6 +50,10 @@ This only makes sense in connection with the `applyForce` argument. If it's true
 
 <img src="https://github.com/pkerpedjiev/fornac/blob/master/doc/img/uncircularized_exterior.png" width=200 align=center />
 
+### labelInterval [default=10]
+
+Change how often nucleotide numbers are labelled with their number.
+
 ### Installation
 
 You need [ANT](http://ant.apache.org/), [Java](http://java.com) and [GNU Make](https://www.gnu.org/software/make/) installed if you want to produce a release javascript file (compressed and optimized). Then just type:

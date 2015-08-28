@@ -78,7 +78,7 @@ function FornaContainer(element, passedOptions) {
                         'sequence': '',
                         'name': 'empty',
                         'positions': [],
-                        'labelInterval': 10,
+                        'labelInterval': self.options.labelInterval,
                         'avoidOthers': true,
                         'circularizeExternal': true
                       };
