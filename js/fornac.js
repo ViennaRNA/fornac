@@ -1271,14 +1271,14 @@ function FornaContainer(element, passedOptions) {
         .on('mousedown', nodeMousedown)
         .on('mousedrag', function(d) {})
         .on('mouseup', nodeMouseup)
-        .on('click', nodeMouseclick)
-        .transition()
-        .duration(750)
-        .ease("elastic")
         .attr("r", 6.5)
         .attr('num', function(d) { return "n" + d.num; })
         .attr('rnum', function(d) { 
-            return "n" + (d.rna.rnaLength - d.num + 1); });
+            return "n" + (d.rna.rnaLength - d.num + 1); })
+        .on('click', nodeMouseclick)
+        .transition()
+        .duration(750)
+        .ease("elastic");
 
         // create nodes behind the circles which will serve to highlight them
         var nucleotideNodes = gnodesEnter.filter(function(d) { 
@@ -1301,7 +1301,7 @@ function FornaContainer(element, passedOptions) {
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
         .attr('visibility', function(d) {
-            if (+d.num == 1)
+            if (+d.num == 1 || +d.num == d.rna.rnaLength)
                 return 'hidden';
             return 'visible'
         });
@@ -1390,9 +1390,62 @@ function FornaContainer(element, passedOptions) {
             else
                 xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
 
-            var startNode = visNodes.selectAll("[num=n1]")
-            console.log('visNodes:', visNodes)
+            var position;
+            var startNode = visNodes.selectAll("[num=n1]");
+            var endNode = visNodes.selectAll("[rnum=n1]");
+            var preEndNode = visNodes.selectAll("[rnum=n2]");
+
+            var polygonNode = startNode.append('polygon')
+                                     .style('stroke', 'black')
+                                     .style('stroke-width', 1);
+
+            var endPolygonNode = endNode.append('polygon')
+                                     .style('stroke', 'black')
+                                     .style('stroke-width', 1);
+
+            function magnitude(x) {
+                return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
+            }
+
+            function positionStartNode() {
+                var lengthMult = 6.5;
+
+                //should normalize by the distance between the first two nodes
+                var u  = [(realNodes[1].x - realNodes[0].x), 
+                    (realNodes[1].y - realNodes[0].y)];
+                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
+                var v = [-u[1], u[0]];
+
+                // -0.5 * u + 0.866 * v
+                polygonNode.attr('points', (-0.5 * u[0] + 0.866 * v[0]) + "," + (-0.5 * u[1] + 0.866 * v[1]) + " " +
+                                 (-0.5 * u[0] + -0.866 * v[0]) + "," + (-0.5 * u[1] + -0.866 * v[1]) + " " +
+                                     (u[0]) + "," + (u[1]));
+            }
+
+            var endNodeData = endNode.data()[0];
+            var preEndNodeData = preEndNode.data()[0];
+            var rectangleLengthDiv = 1.5;
+
+            function positionEndNode() {
+                var lengthMult = 10;
+                var u  = [(endNodeData.x - preEndNodeData.x)/rectangleLengthDiv, 
+                    (endNodeData.y - preEndNodeData.y)/rectangleLengthDiv]; 
+                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
+                var v = [-u[1], u[0]]; 
+
+                endPolygonNode.attr('points', (u[0]/2 + v[0]/2) + "," + (u[1]/2 + v[1]/2) + " " + 
+                                        (-u[0]/2 + v[0]/2) + "," + (-u[1]/2 + v[1]/2) + " " + 
+                                        (-u[0]/2 + -v[0]/2) + "," + (-u[1]/2 + -v[1]/2) + " " + 
+                                        (u[0]/2 + -v[0]/2) + "," + (u[1]/2 + -v[1]/2));
+            }
+
+            positionStartNode();
+            positionEndNode();
+
+            console.log('visNodes:', visNodes);
+            
             console.log('startNode:', startNode);
+            console.log('endNode:', endNode);
 
             gnodes.each(function(d) {
                 //console.log('num:', d, d3.select(this), d3.select(this).attr('num'));
@@ -1420,6 +1473,9 @@ function FornaContainer(element, passedOptions) {
                 gnodes.attr("transform", function(d) { 
                     return 'translate(' + [d.x, d.y] + ')'; 
                 });
+
+                positionStartNode();
+                positionEndNode();
             });
             
         self.changeColorScheme(self.colorScheme);
