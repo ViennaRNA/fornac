@@ -193,6 +193,7 @@ function FornaContainer(element, passedOptions) {
                 return '';
         });
 
+
         if (duration === 0)
             gnodes.exit().remove();
         else
@@ -1274,7 +1275,9 @@ function FornaContainer(element, passedOptions) {
         .transition()
         .duration(750)
         .ease("elastic")
-        .attr("r", 6.5);
+        .attr("r", 6.5)
+        .attr('num', function(d) { return d.num; });
+        .attr('rnum', function(d) { return d.rna.rnaLength - d.num + 1; });
 
         // create nodes behind the circles which will serve to highlight them
         var nucleotideNodes = gnodesEnter.filter(function(d) { 
@@ -1283,7 +1286,7 @@ function FornaContainer(element, passedOptions) {
 
         nucleotideNodes.append("svg:circle")
         .attr('class', "outline_node")
-        .attr("r", function(d) { return d.radius+1; });
+        .attr("r", function(d) { return d.radius+1; })
 
         var node = gnodesEnter.append("svg:circle")
         .attr("class", "node")
@@ -1294,7 +1297,13 @@ function FornaContainer(element, passedOptions) {
                 return d.radius; 
             }
         })
-        .attr("node_type", function(d) { return d.nodeType; });
+        .attr("node_type", function(d) { return d.nodeType; })
+        .attr('node_num', function(d) { return d.num; })
+        .attr('visibility', function(d) {
+            if (+d.num == 1)
+                return 'hidden';
+            return 'visible'
+        });
 
         var labels = gnodesEnter.append("text")
         .text(function(d) { return d.name; })
@@ -1358,8 +1367,8 @@ function FornaContainer(element, passedOptions) {
         allLinks.exit().remove();
 
 
-            domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-            var colors = d3.scale.category10().domain(domain);
+        domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        var colors = d3.scale.category10().domain(domain);
 
             var gnodes = visNodes.selectAll('g.gnode')
             .data(self.graph.nodes, nodeKey);
@@ -1368,8 +1377,11 @@ function FornaContainer(element, passedOptions) {
             gnodesEnter = gnodes.enter();
 
             self.createNewNodes(gnodesEnter);
-
             gnodes.exit().remove();
+
+            var selectString = '[num=1]'
+            var startNode = visNodes.selectAll(selectString)
+            console.log('startNode:', selectString, graph, startNode);
 
             //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
