@@ -1395,6 +1395,9 @@ function FornaContainer(element, passedOptions) {
             var endNode = visNodes.selectAll("[rnum=n1]");
             var preEndNode = visNodes.selectAll("[rnum=n2]");
 
+            visNodes.selectAll('polygon')
+            .remove()
+
             var polygonNode = startNode.append('polygon')
                                      .style('stroke', 'black')
                                      .style('stroke-width', 1);
