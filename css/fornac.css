@@ -12,6 +12,13 @@ circle.node {
   fill: white;
 }
 
+polygon.node {
+  stroke: #ccc;
+  stroke-width: 1px;
+  opacity: 1;
+  fill: white;
+}
+
 circle.node.label {
     stroke: transparent;
     stroke-width: 0;

@@ -499,7 +499,7 @@ function FornaContainer(element, passedOptions) {
 
         var gnodes = visNodes.selectAll('g.gnode');
         var circles = visNodes.selectAll('g.gnode').selectAll('circle');
-        var nodes = visNodes.selectAll('g.gnode').select('[node_type=nucleotide]');
+        var nodes = visNodes.selectAll('g.gnode').selectAll('[node_type=nucleotide]');
         self.colorScheme = newColorScheme;
 
 
@@ -1398,20 +1398,20 @@ function FornaContainer(element, passedOptions) {
             visNodes.selectAll('polygon')
             .remove()
 
-            var polygonNode = startNode.append('polygon')
-                                     .style('stroke', 'black')
-                                     .style('stroke-width', 1);
+            var polygonNode = startNode.insert('polygon', 'text')
+                                     .attr('node_type', 'nucleotide')
+                                     .classed('node', true);
 
-            var endPolygonNode = endNode.append('polygon')
-                                     .style('stroke', 'black')
-                                     .style('stroke-width', 1);
+            var endPolygonNode = endNode.insert('polygon', 'text')
+                                     .attr('node_type', 'nucleotide')
+                                     .classed('node', true);
 
             function magnitude(x) {
                 return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
             }
 
             function positionStartNode() {
-                var lengthMult = 6.5;
+                var lengthMult = 7.5;
 
                 //should normalize by the distance between the first two nodes
                 var u  = [(realNodes[1].x - realNodes[0].x), 
