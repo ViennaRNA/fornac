@@ -1289,6 +1289,9 @@ function FornaContainer(element, passedOptions) {
         labelAndProteinNodes.append("svg:circle")
         .attr('class', "outline_node")
         .attr("r", function(d) { return d.radius+1; })
+        nucleotideNodes.append("svg:circle")
+        .attr('class', "outline_node")
+        .attr("r", function(d) { return d.radius+1; })
 
         labelAndProteinNodes.append("svg:circle")
         .attr("class", "node")
@@ -1376,12 +1379,6 @@ function FornaContainer(element, passedOptions) {
             var gnodes = visNodes.selectAll('g.gnode')
             .data(self.graph.nodes, nodeKey);
             //.attr('pointer-events', 'all');
-
-            // even though the uids of many nodes didn't change, the
-            // underlying data may have changed
-            // this shouldn't affect the DOM, but we use the underlying
-            // data for the nextNode and prevNode pointers so we have
-            // to update it
 
             gnodesEnter = gnodes.enter();
 
