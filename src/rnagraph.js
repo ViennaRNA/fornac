@@ -541,6 +541,19 @@ function RNAGraph(seq, dotbracket, structName) {
                              'uid': generateUUID() });
         }
 
+        for (var i = 0; i < self.nodes.length; i++) {
+            if (i == 0) 
+                self.nodes[i].prevNode = null;
+            else {
+                self.nodes[i].prevNode = self.nodes[i-1];
+            }
+
+            if (i == self.nodes.length-1) 
+                self.nodes[i].nextNode = null;
+            else {
+                self.nodes[i].nextNode = self.nodes[i+1];
+            }
+        }
 
         for (i = 1; i <= pt[0]; i++) {
 

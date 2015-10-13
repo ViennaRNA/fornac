@@ -1,8 +1,4 @@
-/* fornai.js
-* A container for display RNA secondary structure.
-*
-* Author: Peter Kerpedjiev <pkerp@tbi.univie.ac.at>
-* Version: 0.2
+/* Version: 0.2
 * Date: 2015-03-15
 */
 
@@ -271,7 +267,7 @@ function FornaContainer(element, passedOptions) {
 
     };
 
-    self.recalculateGraph = function(rnaGraph) {
+    self.recalculateGraph = function() {
         // Condense all of the individual RNAs into one
         // collection of nodes and links
         self.graph.nodes = [];
@@ -946,6 +942,7 @@ function FornaContainer(element, passedOptions) {
         return key;
     };
 
+    
     updateRnaGraph = function(r) {
         var nucleotidePositions = r.getPositions('nucleotide');
         var labelPositions = r.getPositions('label');
@@ -1380,6 +1377,12 @@ function FornaContainer(element, passedOptions) {
             .data(self.graph.nodes, nodeKey);
             //.attr('pointer-events', 'all');
 
+            // even though the uids of many nodes didn't change, the
+            // underlying data may have changed
+            // this shouldn't affect the DOM, but we use the underlying
+            // data for the nextNode and prevNode pointers so we have
+            // to update it
+
             gnodesEnter = gnodes.enter();
 
             self.createNewNodes(gnodesEnter);
@@ -1389,22 +1392,6 @@ function FornaContainer(element, passedOptions) {
             //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
             realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
-            nucleotideNodes = realNodes.filter(function(d) { return d.nodeType == 'nucleotide' });
-            for (var i = 0; i < nucleotideNodes.length; i++) {
-                if (i == 0) 
-                    nucleotideNodes[i].prevNode = null;
-                else {
-                    nucleotideNodes[i].prevNode = nucleotideNodes[i-1];
-                    console.log("prev:", nucleotideNodes[i].prevNode.num, nucleotideNodes[i].num);
-                }
-
-                if (i == nucleotideNodes.length-1) 
-                    nucleotideNodes[i].nextNode = null;
-                else {
-                    nucleotideNodes[i].nextNode = nucleotideNodes[i+1];
-                    console.log('next:', nucleotideNodes[i].num, nucleotideNodes[i].nextNode.num);
-                }
-            }
 
             if (self.displayFakeLinks)
                 xlink = allLinks;
@@ -1412,45 +1399,10 @@ function FornaContainer(element, passedOptions) {
                 xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
 
             var position;
-            var startNode = visNodes.selectAll("[num=n1]");
-            var endNode = visNodes.selectAll("[rnum=n1]");
-            var preEndNode = visNodes.selectAll("[rnum=n2]");
-
-            /*
-            visNodes.selectAll('polygon')
-            .remove()
-            */
-
-            var polygonNode = startNode.insert('polygon', 'text')
-                                     .attr('node_type', 'nucleotide')
-                                     .classed('node', true);
-
-            var endPolygonNode = endNode.insert('polygon', 'text')
-                                     .attr('node_type', 'nucleotide')
-                                     .classed('node', true);
 
             function magnitude(x) {
                 return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
             }
-
-            function positionStartNode() {
-                var lengthMult = 7.5;
-
-                //should normalize by the distance between the first two nodes
-                var u  = [(realNodes[1].x - realNodes[0].x), 
-                    (realNodes[1].y - realNodes[0].y)];
-                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
-                var v = [-u[1], u[0]];
-
-                // -0.5 * u + 0.866 * v
-                polygonNode.attr('points', (-0.5 * u[0] + 0.866 * v[0]) + "," + (-0.5 * u[1] + 0.866 * v[1]) + " " +
-                                 (-0.5 * u[0] + -0.866 * v[0]) + "," + (-0.5 * u[1] + -0.866 * v[1]) + " " +
-                                     (u[0]) + "," + (u[1]));
-            }
-
-            var endNodeData = endNode.data()[0];
-            var preEndNodeData = preEndNode.data()[0];
-            var rectangleLengthDiv = 1.5;
 
             function positionEndNode() {
                 var lengthMult = 10;
@@ -1466,27 +1418,21 @@ function FornaContainer(element, passedOptions) {
             }
 
             function positionAnyNode(d) {
-                console.log('d:', d);
                 var lengthMult = 7;
                 var polygonNode = d3.select(this);
 
-                var f = d, t = d.nextNode;
+                var f = d; 
+                var t = d.nextNode;
 
                 if (d.nextNode == null) {
                     f = d.prevNode, t=d;
                 }
-
-                console.log('f:', f, 't:', t);
 
                 //should normalize by the distance between the first two nodes
                 var u  = [(t.x - f.x), (t.y - f.y)];
                 var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
                 var v = [-u[1], u[0]];
 
-                // -0.5 * u + 0.866 * v
-                polygonNode.attr('points', (-0.5 * u[0] + 0.866 * v[0]) + "," + (-0.5 * u[1] + 0.866 * v[1]) + " " +
-                                 (-0.5 * u[0] + -0.866 * v[0]) + "," + (-0.5 * u[1] + -0.866 * v[1]) + " " +
-                                     (u[0]) + "," + (u[1]));
 
                 var df = 1.5;
                 var bf = 0.6;
@@ -1502,29 +1448,10 @@ function FornaContainer(element, passedOptions) {
                                            (ff * u[0] + v[0]/df) + "," + (ff * u[1] + v[1]/df))
             }
 
-            //positionStartNode();
-            //positionEndNode();
-
             gnodes.selectAll('polygon')
             .each(positionAnyNode);
 
-            //positionAnyNode();
-
-            console.log('visNodes:', visNodes);
-            
-            console.log('startNode:', startNode);
-            console.log('endNode:', endNode);
-
-            gnodes.each(function(d) {
-                //console.log('num:', d, d3.select(this), d3.select(this).attr('num'));
-            });
-
-            visLinks.selectAll('g').each(function(d) {
-                console.log('link', d3.select(this).attr('link_type'))
-            });
-
             xlink.on('click', linkClick);
-
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),
@@ -1543,11 +1470,9 @@ function FornaContainer(element, passedOptions) {
                     return 'translate(' + [d.x, d.y] + ')'; 
                 });
 
-                gnodes.selectAll('polygon')
+                gnodes.select('polygon')
                 .each(positionAnyNode);
 
-                //positionStartNode();
-                //positionEndNode();
             });
             
         self.changeColorScheme(self.colorScheme);
@@ -1561,3 +1486,5 @@ function FornaContainer(element, passedOptions) {
     
     self.setSize();
 }
+
+/************************* END FORNAF **********************************/
