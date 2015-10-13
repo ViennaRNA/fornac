@@ -1492,8 +1492,10 @@ function FornaContainer(element, passedOptions) {
                 var bf = 0.6;
                 var ff = 0.3;
                 var pf = 1.6;
+                var hf = 0.6;
 
                 polygonNode.attr('points', (-bf * u[0] + v[0]/df) + "," + (-bf * u[1] + v[1]/df) + " " +
+                                           (-hf * u[0]) + "," + (-hf * u[1]) + " " +
                                            (-bf * u[0] - v[0]/df) + "," + (-bf * u[1] - v[1]/df) + " " +
                                            (ff * u[0]  - v[0]/df) + "," + (ff * u[1] - v[1]/df) + " " +
                                            (pf * u[0]/df) + "," + (pf * u[1]/df) + " " +
