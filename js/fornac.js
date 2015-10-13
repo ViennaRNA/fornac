@@ -495,7 +495,7 @@ function FornaContainer(element, passedOptions) {
 
         var gnodes = visNodes.selectAll('g.gnode');
         var circles = visNodes.selectAll('g.gnode').selectAll('circle');
-        var nodes = visNodes.selectAll('g.gnode').selectAll('[node_type=nucleotide]');
+        var nodes = visNodes.selectAll('g.gnode').select('[node_type=nucleotide]');
         self.colorScheme = newColorScheme;
 
 
@@ -1279,7 +1279,7 @@ function FornaContainer(element, passedOptions) {
 
         // create nodes behind the circles which will serve to highlight them
         var labelAndProteinNodes = gnodesEnter.filter(function(d) { 
-            return d.nodeType == 'nucleotide' || d.nodeType == 'label' || d.nodeType == 'protein';
+            return d.nodeType == 'label' || d.nodeType == 'protein';
         });
 
         var nucleotideNodes = gnodesEnter.filter(function(d) { 
@@ -1290,7 +1290,7 @@ function FornaContainer(element, passedOptions) {
         .attr('class', "outline_node")
         .attr("r", function(d) { return d.radius+1; })
 
-        var node = gnodesEnter.append("svg:circle")
+        labelAndProteinNodes.append("svg:circle")
         .attr("class", "node")
         .classed("label", function(d) { return d.nodeType == 'label'; })
         .attr("r", function(d) { 
@@ -1307,6 +1307,14 @@ function FornaContainer(element, passedOptions) {
         .attr('class', 'node')
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
+        .append("svg:title")
+        .text(function(d) { 
+            if (d.nodeType == 'nucleotide') {
+                return d.structName + ":" + d.num;
+            } else {
+                return '';
+            }
+        });
 
         var labels = gnodesEnter.append("text")
         .text(function(d) { return d.name; })
@@ -1325,14 +1333,6 @@ function FornaContainer(element, passedOptions) {
             }
         });
 
-        node.append("svg:title")
-        .text(function(d) { 
-            if (d.nodeType == 'nucleotide') {
-                return d.structName + ":" + d.num;
-            } else {
-                return '';
-            }
-        });
 
         return gnodesEnter;
     };
