@@ -1388,7 +1388,6 @@ function FornaContainer(element, passedOptions) {
         })
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
-        .attr('visibility', 'hidden');
 
         nucleotideNodes.append('svg:polygon')
         .attr('class', 'node')
