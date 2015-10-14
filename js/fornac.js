@@ -47,6 +47,7 @@ function FornaContainer(element, passedOptions) {
         "proteinChain": 0.00,
         "chainChain": 0.00,
         "intermolecule": 10.00,
+        "external": 0.00,
         "other": 10.00
     };
     
@@ -162,7 +163,7 @@ function FornaContainer(element, passedOptions) {
         var newLinks = [];
 
         for (var i = 0; i < externalLinks.length; i++) {
-            var newLink = {};
+            var newLink = {linkType: 'external', value: 1};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
@@ -1273,7 +1274,7 @@ function FornaContainer(element, passedOptions) {
         // Node Labels
         visNodes.selectAll('[label_type=nucleotide]').classed("transparent", !self.displayParameters.displayNodeLabel);
         // Links
-        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain]").classed("transparent", !self.displayParameters.displayLinks);
+        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=external]").classed("transparent", !self.displayParameters.displayLinks);
         // Pseudoknot Links
         svg.selectAll("[link_type=pseudoknot]").classed("transparent", !self.displayParameters.displayPseudoknotLinks);
         // Protein Links
@@ -1471,12 +1472,12 @@ function FornaContainer(element, passedOptions) {
 
             //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
-            realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label' || d.nodeType == 'middle';});
+            realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
-                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
+                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule],[link_type=external]");
 
             var position;
 
@@ -1532,6 +1533,8 @@ function FornaContainer(element, passedOptions) {
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
+            console.log('graph.links:', graph.links);
+            console.log('realNodes:', realNodes);
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),
