@@ -47,6 +47,7 @@ function FornaContainer(element, passedOptions) {
         "proteinChain": 0.00,
         "chainChain": 0.00,
         "intermolecule": 10.00,
+        "external": 0.00,
         "other": 10.00
     };
     
@@ -67,6 +68,30 @@ function FornaContainer(element, passedOptions) {
     self.deaf = false;
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
+
+    Array.prototype.equals = function (array) {
+        // if the other array is a falsy value, return
+        if (!array)
+            return false;
+
+        // compare lengths - can save a lot of time 
+        if (this.length != array.length)
+            return false;
+
+        for (var i = 0, l=this.length; i < l; i++) {
+            // Check if we have nested arrays
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                // recurse into the nested arrays
+                if (!this[i].equals(array[i]))
+                    return false;       
+            }           
+            else if (this[i] != array[i]) { 
+                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                return false;   
+            }           
+        }       
+        return true;
+    }    
 
 
     self.createInitialLayout = function(structure, passedOptions) {
@@ -116,12 +141,74 @@ function FornaContainer(element, passedOptions) {
         if (arguments.length === 1)
             passedOptions = {};
 
+        if ('extraLinks' in passedOptions) {
+            // presumably the passed in links are within the passed molecule
+            console.log('rnaJson:', rnaJson, passedOptions.extraLinks);
+            var newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
+            
+            self.extraLinks = self.extraLinks.concat(newLinks);
+        }
+
         if ('avoidOthers' in passedOptions)
             self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
         else
             self.addRNAJSON(rnaJson, true);
 
+
         return rnaJson;
+    };
+
+    self.addExternalLinks = function(rnaJson, externalLinks) {
+        console.log('rnaJson:', rnaJson);
+        var newLinks = [];
+
+        for (var i = 0; i < externalLinks.length; i++) {
+            var newLink = {linkType: 'external', value: 1, uid: generateUUID(),
+                source: null, target: null};
+            // check if the source node is an array
+            if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if ('nucs' in rnaJson.nodes[j]) {
+                        if (rnaJson.nodes[j].nucs.equals(externalLinks[i][0])) {
+                            newLink.source = rnaJson.nodes[j]; 
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if (rnaJson.nodes[j].num == externalLinks[i][0]) {
+                        newLink.source = rnaJson.nodes[j]; 
+                    }
+                }
+            }
+
+            // check if the target node is an array
+            if (Object.prototype.toString.call(externalLinks[i][1]) === '[object Array]') {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if ('nucs' in rnaJson.nodes[j]) {
+                        if (rnaJson.nodes[j].nucs.equals(externalLinks[i][1])) {
+                            newLink.target = rnaJson.nodes[j]; 
+                        }
+                    }
+                }
+            } else {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if (rnaJson.nodes[j].num == externalLinks[i][1]) {
+                        newLink.target = rnaJson.nodes[j]; 
+                    }
+                }
+            }
+            
+            if (newLink.source == null || newLink.target == null) {
+                console.log('ERROR: source or target of new link not found:', newLink, externalLinks[i]);
+                continue;
+            }
+
+            newLinks.push(newLink);
+        }
+
+        return newLinks;
     };
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
@@ -155,6 +242,8 @@ function FornaContainer(element, passedOptions) {
 
         self.update();
         self.centerView();
+
+        return rnaGraph;
     };
 
     self.transitionRNA = function(newStructure, nextFunction) {
@@ -1190,7 +1279,7 @@ function FornaContainer(element, passedOptions) {
         // Node Labels
         visNodes.selectAll('[label_type=nucleotide]').classed("transparent", !self.displayParameters.displayNodeLabel);
         // Links
-        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain]").classed("transparent", !self.displayParameters.displayLinks);
+        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=external]").classed("transparent", !self.displayParameters.displayLinks);
         // Pseudoknot Links
         svg.selectAll("[link_type=pseudoknot]").classed("transparent", !self.displayParameters.displayPseudoknotLinks);
         // Protein Links
@@ -1304,7 +1393,6 @@ function FornaContainer(element, passedOptions) {
         })
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
-        .attr('visibility', 'hidden');
 
         nucleotideNodes.append('svg:polygon')
         .attr('class', 'node')
@@ -1393,7 +1481,7 @@ function FornaContainer(element, passedOptions) {
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
-                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
+                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule],[link_type=external]");
 
             var position;
 
@@ -1449,6 +1537,8 @@ function FornaContainer(element, passedOptions) {
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
+            console.log('graph.links:', graph.links);
+            console.log('realNodes:', realNodes);
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),
