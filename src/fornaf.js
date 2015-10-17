@@ -1,8 +1,4 @@
-/* fornai.js
-* A container for display RNA secondary structure.
-*
-* Author: Peter Kerpedjiev <pkerp@tbi.univie.ac.at>
-* Version: 0.2
+/* Version: 0.2
 * Date: 2015-03-15
 */
 
@@ -271,7 +267,7 @@ function FornaContainer(element, passedOptions) {
 
     };
 
-    self.recalculateGraph = function(rnaGraph) {
+    self.recalculateGraph = function() {
         // Condense all of the individual RNAs into one
         // collection of nodes and links
         self.graph.nodes = [];
@@ -946,6 +942,7 @@ function FornaContainer(element, passedOptions) {
         return key;
     };
 
+    
     updateRnaGraph = function(r) {
         var nucleotidePositions = r.getPositions('nucleotide');
         var labelPositions = r.getPositions('label');
@@ -1271,24 +1268,32 @@ function FornaContainer(element, passedOptions) {
         .on('mousedown', nodeMousedown)
         .on('mousedrag', function(d) {})
         .on('mouseup', nodeMouseup)
+        .attr("r", 6.5)
+        .attr('num', function(d) { return "n" + d.num; })
+        .attr('rnum', function(d) { 
+            return "n" + (d.rna.rnaLength - d.num + 1); })
         .on('click', nodeMouseclick)
         .transition()
         .duration(750)
-        .ease("elastic")
-        .attr("r", 6.5)
-        .attr('num', function(d) { return d.num; });
-        .attr('rnum', function(d) { return d.rna.rnaLength - d.num + 1; });
+        .ease("elastic");
 
         // create nodes behind the circles which will serve to highlight them
-        var nucleotideNodes = gnodesEnter.filter(function(d) { 
-            return d.nodeType == 'nucleotide' || d.nodeType == 'label' || d.nodeType == 'protein';
+        var labelAndProteinNodes = gnodesEnter.filter(function(d) { 
+            return d.nodeType == 'label' || d.nodeType == 'protein';
         });
 
+        var nucleotideNodes = gnodesEnter.filter(function(d) { 
+            return d.nodeType == 'nucleotide';
+        });
+
+        labelAndProteinNodes.append("svg:circle")
+        .attr('class', "outline_node")
+        .attr("r", function(d) { return d.radius+1; })
         nucleotideNodes.append("svg:circle")
         .attr('class', "outline_node")
         .attr("r", function(d) { return d.radius+1; })
 
-        var node = gnodesEnter.append("svg:circle")
+        labelAndProteinNodes.append("svg:circle")
         .attr("class", "node")
         .classed("label", function(d) { return d.nodeType == 'label'; })
         .attr("r", function(d) { 
@@ -1299,10 +1304,19 @@ function FornaContainer(element, passedOptions) {
         })
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
-        .attr('visibility', function(d) {
-            if (+d.num == 1)
-                return 'hidden';
-            return 'visible'
+        .attr('visibility', 'hidden');
+
+        nucleotideNodes.append('svg:polygon')
+        .attr('class', 'node')
+        .attr("node_type", function(d) { return d.nodeType; })
+        .attr('node_num', function(d) { return d.num; })
+        .append("svg:title")
+        .text(function(d) { 
+            if (d.nodeType == 'nucleotide') {
+                return d.structName + ":" + d.num;
+            } else {
+                return '';
+            }
         });
 
         var labels = gnodesEnter.append("text")
@@ -1322,14 +1336,6 @@ function FornaContainer(element, passedOptions) {
             }
         });
 
-        node.append("svg:title")
-        .text(function(d) { 
-            if (d.nodeType == 'nucleotide') {
-                return d.structName + ":" + d.num;
-            } else {
-                return '';
-            }
-        });
 
         return gnodesEnter;
     };
@@ -1379,9 +1385,6 @@ function FornaContainer(element, passedOptions) {
             self.createNewNodes(gnodesEnter);
             gnodes.exit().remove();
 
-            var selectString = '[num=1]'
-            var startNode = visNodes.selectAll(selectString)
-            console.log('startNode:', selectString, graph, startNode);
 
             //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
@@ -1391,6 +1394,59 @@ function FornaContainer(element, passedOptions) {
                 xlink = allLinks;
             else
                 xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
+
+            var position;
+
+            function magnitude(x) {
+                return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
+            }
+
+            function positionEndNode() {
+                var lengthMult = 10;
+                var u  = [(endNodeData.x - preEndNodeData.x)/rectangleLengthDiv, 
+                    (endNodeData.y - preEndNodeData.y)/rectangleLengthDiv]; 
+                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
+                var v = [-u[1], u[0]]; 
+
+                endPolygonNode.attr('points', (u[0]/2 + v[0]/2) + "," + (u[1]/2 + v[1]/2) + " " + 
+                                        (-u[0]/2 + v[0]/2) + "," + (-u[1]/2 + v[1]/2) + " " + 
+                                        (-u[0]/2 + -v[0]/2) + "," + (-u[1]/2 + -v[1]/2) + " " + 
+                                        (u[0]/2 + -v[0]/2) + "," + (u[1]/2 + -v[1]/2));
+            }
+
+            function positionAnyNode(d) {
+                var lengthMult = 7;
+                var polygonNode = d3.select(this);
+
+                var f = d; 
+                var t = d.nextNode;
+
+                if (d.nextNode == null) {
+                    f = d.prevNode, t=d;
+                }
+
+                //should normalize by the distance between the first two nodes
+                var u  = [(t.x - f.x), (t.y - f.y)];
+                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
+                var v = [-u[1], u[0]];
+
+
+                var df = 1.5;
+                var bf = 0.6;
+                var ff = 0.3;
+                var pf = 1.6;
+                var hf = 0.6;
+
+                polygonNode.attr('points', (-bf * u[0] + v[0]/df) + "," + (-bf * u[1] + v[1]/df) + " " +
+                                           (-hf * u[0]) + "," + (-hf * u[1]) + " " +
+                                           (-bf * u[0] - v[0]/df) + "," + (-bf * u[1] - v[1]/df) + " " +
+                                           (ff * u[0]  - v[0]/df) + "," + (ff * u[1] - v[1]/df) + " " +
+                                           (pf * u[0]/df) + "," + (pf * u[1]/df) + " " +
+                                           (ff * u[0] + v[0]/df) + "," + (ff * u[1] + v[1]/df))
+            }
+
+            gnodes.selectAll('polygon')
+            .each(positionAnyNode);
 
             xlink.on('click', linkClick);
 
@@ -1410,6 +1466,10 @@ function FornaContainer(element, passedOptions) {
                 gnodes.attr("transform", function(d) { 
                     return 'translate(' + [d.x, d.y] + ')'; 
                 });
+
+                gnodes.select('polygon')
+                .each(positionAnyNode);
+
             });
             
         self.changeColorScheme(self.colorScheme);
@@ -1423,3 +1483,5 @@ function FornaContainer(element, passedOptions) {
     
     self.setSize();
 }
+
+/************************* END FORNAF **********************************/

@@ -12,16 +12,16 @@ This after the RNA container.
 
     <script type='text/javascript'>
         var container = new FornaContainer("#rna_ss",
-            {'applyForce': true, 'allowPanningAndZooming': true});
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[200,300]});
 
-        var options = {'structure': '((..((...[)).(((..].))).))',
-                        'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+        var options = {'structure': '..((..((...[)).(((..].))).))..',
+                        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
         };
 /*
-        var options = {'structure': '...',
-            'sequence': 'CCC'}
+        var options = {'structure': '((...)).',
+            'sequence':             'CCCCCCCC'
         };
-        */
+*/
 
         container.addRNA(options.structure, options);
     </script>
