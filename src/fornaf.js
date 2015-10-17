@@ -2,6 +2,153 @@
 * Date: 2015-03-15
 */
 
+function ColorScheme(colorsText) {
+    var self = this;
+    self.colorsText = colorsText;
+
+    self.parseRange = function(rangeText) {
+        //parse a number range such as 1-10 or 3,7,9 or just 7
+        var parts = rangeText.split(',')
+        var nums = [];
+
+        for (var i = 0; i < parts.length; i++) {
+            //could be 1 or 10-11  or something like that
+            var parts1 = parts[i].split('-');
+
+            if (parts1.length == 1)
+                nums.push(parseInt(parts1[0]));
+            else if (parts1.length == 2) {
+                var from = parseInt(parts1[0]);
+                var to = parseInt(parts1[1]);
+
+                // add each number in this range
+                for (var j = from; j <= to; j++) 
+                    nums.push(j)
+            } else {
+                console.log('Malformed range (too many dashes):', rangeText);
+            }
+        }
+
+        return nums;
+    }
+
+    self.parseColorText = function(colorText) {
+        /* Parse the text of an RNA color string. Instructions and description
+         * of the format are given below.
+         *
+         * The return is a json double dictionary indexed first by the 
+         * molecule name, then by the nucleotide. This is then applied
+         * by force.js to the RNAs it is displaying. When no molecule
+         * name is specified, the color is applied to all molecules*/
+        var lines = colorText.split('\n');
+        var currMolecule = '';
+        var counter = 1;
+        var colorsJson = {colorValues: {'':{}}, range:['white', 'steelblue']};
+        var domainValues = [];
+
+
+        for (var i = 0; i < lines.length; i++) {
+
+            if (lines[i][0] == '>') {
+                // new molecule
+                currMolecule = lines[i].trim().slice(1);
+                counter = 1;
+
+                colorsJson.colorValues[currMolecule] = {};
+                continue;
+            }
+
+            words = lines[i].trim().split(/[\s]+/);
+
+            for (var j = 0; j < words.length; j++) {
+                if (isNaN(words[j])) {
+                    if (words[j].search("range") === 0) {
+                        //there's a color scale in this entry
+                        parts = words[j].split('=');
+                        partsRight = parts[1].split(':')
+                        colorsJson.range = [partsRight[0], partsRight[1]];
+                        continue;
+                    }
+
+                    if (words[j].search("domain") == 0) {
+                        //there's a color scale in this entry
+                        parts = words[j].split('=');
+                        partsRight = parts[1].split(':')
+                        colorsJson.domain = [partsRight[0], partsRight[1]];
+                        continue;
+                    }
+
+                    // it's not a number, should be a combination 
+                    // of a number (nucleotide #) and a color
+                    parts = words[j].split(':');
+                    nums = self.parseRange(parts[0]);
+                    color = parts[1]
+
+                    for (var k = 0; k < nums.length; k++) {
+                        if (isNaN(color)) {
+                            colorsJson.colorValues[currMolecule][nums[k]] = color;
+                        } else {
+                            colorsJson.colorValues[currMolecule][nums[k]] = +color;
+                            domainValues.push(Number(color));
+                        }
+                    }
+                } else {
+                    //it's a number, so we add it to the list of values
+                    //seen for this molecule
+                    colorsJson.colorValues[currMolecule][counter] = Number(words[j]);
+                    counter += 1;
+
+                    domainValues.push(Number(words[j]));
+                }
+            }
+        }
+
+        if (!('domain' in colorsJson))
+            colorsJson.domain = [Math.min.apply(null, domainValues), Math.max.apply(null, domainValues)];
+
+        self.colorsJson = colorsJson;
+
+        return self;
+    };
+
+    self.normalizeColors = function() {
+        /* 
+         * Normalize the passed in values so that they range from
+         * 0 to 1
+         */
+        var value;
+
+        for (var moleculeName in self.colorsJson) {
+            var minNum = Number.MAX_VALUE;
+            var maxNum = Number.MIN_VALUE;
+
+            // iterate once to find the min and max values;
+            for (var resnum in self.colorsJson.colorValues[moleculeName]) {
+                value = self.colorsJson.colorValues[moleculeName][resnum];
+                if (typeof value == 'number') {
+                    if (value < minNum)
+                        minNum = value;
+                    if (value > maxNum)
+                        maxNum = value;
+                }
+            }
+
+            // iterate again to normalize
+            for (resnum in self.colorsJson.colorValues[moleculeName]) {
+                value = self.colorsJson.colorValues[moleculeName][resnum];
+                if (typeof value == 'number') {
+                    self.colorsJson.colorValues[moleculeName][resnum] = (value - minNum ) / (maxNum - minNum);
+                }
+            }
+        }
+
+        return self;
+    };
+
+    self.parseColorText(self.colorsText);
+    return self;
+}
+
 function FornaContainer(element, passedOptions) {
     var self = this;
 
@@ -47,6 +194,7 @@ function FornaContainer(element, passedOptions) {
         "proteinChain": 0.00,
         "chainChain": 0.00,
         "intermolecule": 10.00,
+        "external": 0.00,
         "other": 10.00
     };
     
@@ -67,6 +215,30 @@ function FornaContainer(element, passedOptions) {
     self.deaf = false;
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
+
+    Array.prototype.equals = function (array) {
+        // if the other array is a falsy value, return
+        if (!array)
+            return false;
+
+        // compare lengths - can save a lot of time 
+        if (this.length != array.length)
+            return false;
+
+        for (var i = 0, l=this.length; i < l; i++) {
+            // Check if we have nested arrays
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                // recurse into the nested arrays
+                if (!this[i].equals(array[i]))
+                    return false;       
+            }           
+            else if (this[i] != array[i]) { 
+                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                return false;   
+            }           
+        }       
+        return true;
+    }    
 
 
     self.createInitialLayout = function(structure, passedOptions) {
@@ -116,12 +288,74 @@ function FornaContainer(element, passedOptions) {
         if (arguments.length === 1)
             passedOptions = {};
 
+        if ('extraLinks' in passedOptions) {
+            // presumably the passed in links are within the passed molecule
+            console.log('rnaJson:', rnaJson, passedOptions.extraLinks);
+            var newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
+            
+            self.extraLinks = self.extraLinks.concat(newLinks);
+        }
+
         if ('avoidOthers' in passedOptions)
             self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
         else
             self.addRNAJSON(rnaJson, true);
 
+
         return rnaJson;
+    };
+
+    self.addExternalLinks = function(rnaJson, externalLinks) {
+        console.log('rnaJson:', rnaJson);
+        var newLinks = [];
+
+        for (var i = 0; i < externalLinks.length; i++) {
+            var newLink = {linkType: 'external', value: 1, uid: generateUUID(),
+                source: null, target: null};
+            // check if the source node is an array
+            if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if ('nucs' in rnaJson.nodes[j]) {
+                        if (rnaJson.nodes[j].nucs.equals(externalLinks[i][0])) {
+                            newLink.source = rnaJson.nodes[j]; 
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if (rnaJson.nodes[j].num == externalLinks[i][0]) {
+                        newLink.source = rnaJson.nodes[j]; 
+                    }
+                }
+            }
+
+            // check if the target node is an array
+            if (Object.prototype.toString.call(externalLinks[i][1]) === '[object Array]') {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if ('nucs' in rnaJson.nodes[j]) {
+                        if (rnaJson.nodes[j].nucs.equals(externalLinks[i][1])) {
+                            newLink.target = rnaJson.nodes[j]; 
+                        }
+                    }
+                }
+            } else {
+                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                    if (rnaJson.nodes[j].num == externalLinks[i][1]) {
+                        newLink.target = rnaJson.nodes[j]; 
+                    }
+                }
+            }
+            
+            if (newLink.source == null || newLink.target == null) {
+                console.log('ERROR: source or target of new link not found:', newLink, externalLinks[i]);
+                continue;
+            }
+
+            newLinks.push(newLink);
+        }
+
+        return newLinks;
     };
 
     self.addRNAJSON = function(rnaGraph, avoidOthers) {
@@ -155,6 +389,8 @@ function FornaContainer(element, passedOptions) {
 
         self.update();
         self.centerView();
+
+        return rnaGraph;
     };
 
     self.transitionRNA = function(newStructure, nextFunction) {
@@ -1190,7 +1426,7 @@ function FornaContainer(element, passedOptions) {
         // Node Labels
         visNodes.selectAll('[label_type=nucleotide]').classed("transparent", !self.displayParameters.displayNodeLabel);
         // Links
-        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain]").classed("transparent", !self.displayParameters.displayLinks);
+        svg.selectAll("[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=external]").classed("transparent", !self.displayParameters.displayLinks);
         // Pseudoknot Links
         svg.selectAll("[link_type=pseudoknot]").classed("transparent", !self.displayParameters.displayPseudoknotLinks);
         // Protein Links
@@ -1304,7 +1540,6 @@ function FornaContainer(element, passedOptions) {
         })
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
-        .attr('visibility', 'hidden');
 
         nucleotideNodes.append('svg:polygon')
         .attr('class', 'node')
@@ -1393,7 +1628,7 @@ function FornaContainer(element, passedOptions) {
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
-                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
+                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule],[link_type=external]");
 
             var position;
 
@@ -1449,6 +1684,8 @@ function FornaContainer(element, passedOptions) {
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
+            console.log('graph.links:', graph.links);
+            console.log('realNodes:', realNodes);
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),

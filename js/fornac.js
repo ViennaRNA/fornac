@@ -163,7 +163,8 @@ function FornaContainer(element, passedOptions) {
         var newLinks = [];
 
         for (var i = 0; i < externalLinks.length; i++) {
-            var newLink = {linkType: 'external', value: 1};
+            var newLink = {linkType: 'external', value: 1, uid: generateUUID(),
+                source: null, target: null};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
@@ -198,11 +199,15 @@ function FornaContainer(element, passedOptions) {
                     }
                 }
             }
+            
+            if (newLink.source == null || newLink.target == null) {
+                console.log('ERROR: source or target of new link not found:', newLink, externalLinks[i]);
+                continue;
+            }
 
             newLinks.push(newLink);
         }
 
-        console.log('newLinks:', newLinks);
         return newLinks;
     };
 
