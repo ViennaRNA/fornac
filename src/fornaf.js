@@ -1625,6 +1625,7 @@ function FornaContainer(element, passedOptions) {
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
             realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
+            var xlink;
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
