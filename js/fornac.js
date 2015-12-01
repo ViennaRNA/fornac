@@ -2,6 +2,153 @@
 * Date: 2015-03-15
 */
 
+function ColorScheme(colorsText) {
+    var self = this;
+    self.colorsText = colorsText;
+
+    self.parseRange = function(rangeText) {
+        //parse a number range such as 1-10 or 3,7,9 or just 7
+        var parts = rangeText.split(',')
+        var nums = [];
+
+        for (var i = 0; i < parts.length; i++) {
+            //could be 1 or 10-11  or something like that
+            var parts1 = parts[i].split('-');
+
+            if (parts1.length == 1)
+                nums.push(parseInt(parts1[0]));
+            else if (parts1.length == 2) {
+                var from = parseInt(parts1[0]);
+                var to = parseInt(parts1[1]);
+
+                // add each number in this range
+                for (var j = from; j <= to; j++) 
+                    nums.push(j)
+            } else {
+                console.log('Malformed range (too many dashes):', rangeText);
+            }
+        }
+
+        return nums;
+    }
+
+    self.parseColorText = function(colorText) {
+        /* Parse the text of an RNA color string. Instructions and description
+         * of the format are given below.
+         *
+         * The return is a json double dictionary indexed first by the 
+         * molecule name, then by the nucleotide. This is then applied
+         * by force.js to the RNAs it is displaying. When no molecule
+         * name is specified, the color is applied to all molecules*/
+        var lines = colorText.split('\n');
+        var currMolecule = '';
+        var counter = 1;
+        var colorsJson = {colorValues: {'':{}}, range:['white', 'steelblue']};
+        var domainValues = [];
+
+
+        for (var i = 0; i < lines.length; i++) {
+
+            if (lines[i][0] == '>') {
+                // new molecule
+                currMolecule = lines[i].trim().slice(1);
+                counter = 1;
+
+                colorsJson.colorValues[currMolecule] = {};
+                continue;
+            }
+
+            words = lines[i].trim().split(/[\s]+/);
+
+            for (var j = 0; j < words.length; j++) {
+                if (isNaN(words[j])) {
+                    if (words[j].search("range") === 0) {
+                        //there's a color scale in this entry
+                        parts = words[j].split('=');
+                        partsRight = parts[1].split(':')
+                        colorsJson.range = [partsRight[0], partsRight[1]];
+                        continue;
+                    }
+
+                    if (words[j].search("domain") == 0) {
+                        //there's a color scale in this entry
+                        parts = words[j].split('=');
+                        partsRight = parts[1].split(':')
+                        colorsJson.domain = [partsRight[0], partsRight[1]];
+                        continue;
+                    }
+
+                    // it's not a number, should be a combination 
+                    // of a number (nucleotide #) and a color
+                    parts = words[j].split(':');
+                    nums = self.parseRange(parts[0]);
+                    color = parts[1]
+
+                    for (var k = 0; k < nums.length; k++) {
+                        if (isNaN(color)) {
+                            colorsJson.colorValues[currMolecule][nums[k]] = color;
+                        } else {
+                            colorsJson.colorValues[currMolecule][nums[k]] = +color;
+                            domainValues.push(Number(color));
+                        }
+                    }
+                } else {
+                    //it's a number, so we add it to the list of values
+                    //seen for this molecule
+                    colorsJson.colorValues[currMolecule][counter] = Number(words[j]);
+                    counter += 1;
+
+                    domainValues.push(Number(words[j]));
+                }
+            }
+        }
+
+        if (!('domain' in colorsJson))
+            colorsJson.domain = [Math.min.apply(null, domainValues), Math.max.apply(null, domainValues)];
+
+        self.colorsJson = colorsJson;
+
+        return self;
+    };
+
+    self.normalizeColors = function() {
+        /* 
+         * Normalize the passed in values so that they range from
+         * 0 to 1
+         */
+        var value;
+
+        for (var moleculeName in self.colorsJson) {
+            var minNum = Number.MAX_VALUE;
+            var maxNum = Number.MIN_VALUE;
+
+            // iterate once to find the min and max values;
+            for (var resnum in self.colorsJson.colorValues[moleculeName]) {
+                value = self.colorsJson.colorValues[moleculeName][resnum];
+                if (typeof value == 'number') {
+                    if (value < minNum)
+                        minNum = value;
+                    if (value > maxNum)
+                        maxNum = value;
+                }
+            }
+
+            // iterate again to normalize
+            for (resnum in self.colorsJson.colorValues[moleculeName]) {
+                value = self.colorsJson.colorValues[moleculeName][resnum];
+                if (typeof value == 'number') {
+                    self.colorsJson.colorValues[moleculeName][resnum] = (value - minNum ) / (maxNum - minNum);
+                }
+            }
+        }
+
+        return self;
+    };
+
+    self.parseColorText(self.colorsText);
+    return self;
+}
+
 function FornaContainer(element, passedOptions) {
     var self = this;
 
@@ -9,7 +156,7 @@ function FornaContainer(element, passedOptions) {
         "displayAllLinks": false,
         "labelInterval": 10,
         "applyForce": true,
-        "initialSize": [200,200],
+        "initialSize": null,
         "allowPanningAndZooming": true,
         "cssFileLocation": "css/fornac.css",
         "transitionDuration": 500
@@ -22,8 +169,10 @@ function FornaContainer(element, passedOptions) {
         }
     }
 
-    self.options.svgW = self.options.initialSize[0];
-    self.options.svgH = self.options.initialSize[1];
+    if (self.options != null) {
+        self.options.svgW = self.options.initialSize[0];
+        self.options.svgH = self.options.initialSize[1];
+    }
 
     var fill = d3.scale.category20();
 
@@ -228,7 +377,7 @@ function FornaContainer(element, passedOptions) {
             minX = d3.min(rnaGraph.nodes.map(function(d) { return d.x; })); 
 
             rnaGraph.nodes.forEach(function(node) {
-                node.x += (maxX - minX);
+                node.x += (maxX - minX) + 20;
                 node.px += (maxX - minX);
             });
         }
@@ -526,6 +675,9 @@ function FornaContainer(element, passedOptions) {
     };
 
     self.setSize = function() {
+        if (self.options.initialSize != null)
+            return;
+
         var svgW = $(element).width();
         var svgH = $(element).height();
 
@@ -1478,6 +1630,7 @@ function FornaContainer(element, passedOptions) {
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
             realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
+            var xlink;
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
@@ -1506,15 +1659,32 @@ function FornaContainer(element, passedOptions) {
                 var lengthMult = 7;
                 var polygonNode = d3.select(this);
 
-                var f = d; 
-                var t = d.nextNode;
+                var f1 = d;   //from 
+                var t1 = d.nextNode; //to
 
-                if (d.nextNode == null) {
-                    f = d.prevNode, t=d;
+                var f2 = d.prevNode;
+                var t2 = d;
+
+                if (t1 == null) {
+                    //last node
+                    f1 = f2
+                    t1 = t2
+                }
+
+                if (t2 == null) {
+                    //first node
+                    t2 = t1
+                    f2 = f1
+                }
+
+                if (t1 == null || f2 == null) {
+                    u = [1, 0];
+                } else {
+                    u = [(t1.x - f1.x + t2.x - f2.x), (t1.y - f1.y + t2.y - f2.y)]
                 }
 
                 //should normalize by the distance between the first two nodes
-                var u  = [(t.x - f.x), (t.y - f.y)];
+                //var u  = [(t.x - f.x), (t.y - f.y)];
                 var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
                 var v = [-u[1], u[0]];
 
@@ -1604,152 +1774,6 @@ if(typeof(String.prototype.trim) === "undefined")
         };
     }
 
-function ColorScheme(colorsText) {
-    var self = this;
-    self.colorsText = colorsText;
-
-    self.parseRange = function(rangeText) {
-        //parse a number range such as 1-10 or 3,7,9 or just 7
-        var parts = rangeText.split(',')
-        var nums = [];
-
-        for (var i = 0; i < parts.length; i++) {
-            //could be 1 or 10-11  or something like that
-            var parts1 = parts[i].split('-');
-
-            if (parts1.length == 1)
-                nums.push(parseInt(parts1[0]));
-            else if (parts1.length == 2) {
-                var from = parseInt(parts1[0]);
-                var to = parseInt(parts1[1]);
-
-                // add each number in this range
-                for (var j = from; j <= to; j++) 
-                    nums.push(j)
-            } else {
-                console.log('Malformed range (too many dashes):', rangeText);
-            }
-        }
-
-        return nums;
-    }
-
-    self.parseColorText = function(colorText) {
-        /* Parse the text of an RNA color string. Instructions and description
-         * of the format are given below.
-         *
-         * The return is a json double dictionary indexed first by the 
-         * molecule name, then by the nucleotide. This is then applied
-         * by force.js to the RNAs it is displaying. When no molecule
-         * name is specified, the color is applied to all molecules*/
-        var lines = colorText.split('\n');
-        var currMolecule = '';
-        var counter = 1;
-        var colorsJson = {colorValues: {'':{}}, range:['white', 'steelblue']};
-        var domainValues = [];
-
-
-        for (var i = 0; i < lines.length; i++) {
-
-            if (lines[i][0] == '>') {
-                // new molecule
-                currMolecule = lines[i].trim().slice(1);
-                counter = 1;
-
-                colorsJson.colorValues[currMolecule] = {};
-                continue;
-            }
-
-            words = lines[i].trim().split(/[\s]+/);
-
-            for (var j = 0; j < words.length; j++) {
-                if (isNaN(words[j])) {
-                    if (words[j].search("range") === 0) {
-                        //there's a color scale in this entry
-                        parts = words[j].split('=');
-                        partsRight = parts[1].split(':')
-                        colorsJson.range = [partsRight[0], partsRight[1]];
-                        continue;
-                    }
-
-                    if (words[j].search("domain") == 0) {
-                        //there's a color scale in this entry
-                        parts = words[j].split('=');
-                        partsRight = parts[1].split(':')
-                        colorsJson.domain = [partsRight[0], partsRight[1]];
-                        continue;
-                    }
-
-                    // it's not a number, should be a combination 
-                    // of a number (nucleotide #) and a color
-                    parts = words[j].split(':');
-                    nums = self.parseRange(parts[0]);
-                    color = parts[1]
-
-                    for (var k = 0; k < nums.length; k++) {
-                        if (isNaN(color)) {
-                            colorsJson.colorValues[currMolecule][nums[k]] = color;
-                        } else {
-                            colorsJson.colorValues[currMolecule][nums[k]] = +color;
-                            domainValues.push(Number(color));
-                        }
-                    }
-                } else {
-                    //it's a number, so we add it to the list of values
-                    //seen for this molecule
-                    colorsJson.colorValues[currMolecule][counter] = Number(words[j]);
-                    counter += 1;
-
-                    domainValues.push(Number(words[j]));
-                }
-            }
-        }
-
-        if (!('domain' in colorsJson))
-            colorsJson.domain = [Math.min.apply(null, domainValues), Math.max.apply(null, domainValues)];
-
-        self.colorsJson = colorsJson;
-
-        return self;
-    };
-
-    self.normalizeColors = function() {
-        /* 
-         * Normalize the passed in values so that they range from
-         * 0 to 1
-         */
-        var value;
-
-        for (var moleculeName in self.colorsJson) {
-            var minNum = Number.MAX_VALUE;
-            var maxNum = Number.MIN_VALUE;
-
-            // iterate once to find the min and max values;
-            for (var resnum in self.colorsJson.colorValues[moleculeName]) {
-                value = self.colorsJson.colorValues[moleculeName][resnum];
-                if (typeof value == 'number') {
-                    if (value < minNum)
-                        minNum = value;
-                    if (value > maxNum)
-                        maxNum = value;
-                }
-            }
-
-            // iterate again to normalize
-            for (resnum in self.colorsJson.colorValues[moleculeName]) {
-                value = self.colorsJson.colorValues[moleculeName][resnum];
-                if (typeof value == 'number') {
-                    self.colorsJson.colorValues[moleculeName][resnum] = (value - minNum ) / (maxNum - minNum);
-                }
-            }
-        }
-
-        return self;
-    };
-
-    self.parseColorText(self.colorsText);
-    return self;
-}
 
 function ProteinGraph(structName, size, uid) {
     var self = this;

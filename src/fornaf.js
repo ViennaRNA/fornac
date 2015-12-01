@@ -156,7 +156,7 @@ function FornaContainer(element, passedOptions) {
         "displayAllLinks": false,
         "labelInterval": 10,
         "applyForce": true,
-        "initialSize": [200,200],
+        "initialSize": null,
         "allowPanningAndZooming": true,
         "cssFileLocation": "css/fornac.css",
         "transitionDuration": 500
@@ -169,8 +169,10 @@ function FornaContainer(element, passedOptions) {
         }
     }
 
-    self.options.svgW = self.options.initialSize[0];
-    self.options.svgH = self.options.initialSize[1];
+    if (self.options != null) {
+        self.options.svgW = self.options.initialSize[0];
+        self.options.svgH = self.options.initialSize[1];
+    }
 
     var fill = d3.scale.category20();
 
@@ -375,7 +377,7 @@ function FornaContainer(element, passedOptions) {
             minX = d3.min(rnaGraph.nodes.map(function(d) { return d.x; })); 
 
             rnaGraph.nodes.forEach(function(node) {
-                node.x += (maxX - minX);
+                node.x += (maxX - minX) + 20;
                 node.px += (maxX - minX);
             });
         }
@@ -673,6 +675,9 @@ function FornaContainer(element, passedOptions) {
     };
 
     self.setSize = function() {
+        if (self.options.initialSize != null)
+            return;
+
         var svgW = $(element).width();
         var svgH = $(element).height();
 
@@ -1654,15 +1659,32 @@ function FornaContainer(element, passedOptions) {
                 var lengthMult = 7;
                 var polygonNode = d3.select(this);
 
-                var f = d; 
-                var t = d.nextNode;
+                var f1 = d;   //from 
+                var t1 = d.nextNode; //to
 
-                if (d.nextNode == null) {
-                    f = d.prevNode, t=d;
+                var f2 = d.prevNode;
+                var t2 = d;
+
+                if (t1 == null) {
+                    //last node
+                    f1 = f2
+                    t1 = t2
+                }
+
+                if (t2 == null) {
+                    //first node
+                    t2 = t1
+                    f2 = f1
+                }
+
+                if (t1 == null || f2 == null) {
+                    u = [1, 0];
+                } else {
+                    u = [(t1.x - f1.x + t2.x - f2.x), (t1.y - f1.y + t2.y - f2.y)]
                 }
 
                 //should normalize by the distance between the first two nodes
-                var u  = [(t.x - f.x), (t.y - f.y)];
+                //var u  = [(t.x - f.x), (t.y - f.y)];
                 var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
                 var v = [-u[1], u[0]];
 
