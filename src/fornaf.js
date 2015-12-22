@@ -1136,11 +1136,14 @@ function FornaContainer(element, passedOptions) {
         .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.linkType; });
 
             allLinks.exit().remove();
+            var xlink;
 
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
                 xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule]");
+
+            console.log('xlink:', xlink);
 
             domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             var colors = d3.scale.category10().domain(domain);
