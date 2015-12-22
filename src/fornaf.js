@@ -296,17 +296,18 @@ function FornaContainer(element, passedOptions) {
     };
 
     self.fromJSON = function(jsonString) {
+        var rnas, extraLinks;
         try{
             var data = JSON.parse(jsonString);
-            var rnas = data.rnas;
-            var extraLinks = data.extraLinks;
+            rnas = data.rnas;
+            extraLinks = data.extraLinks;
         } catch(err) {
             throw err;
         }
 
-        for (uid in rnas) {
+        for (var uid in rnas) {
             if (rnas[uid].type == 'rna') {
-                r = new RNAGraph()
+                r = new RNAGraph();
 
                 r.seq = rnas[uid].seq;
                 r.dotbracket = rnas[uid].dotbracket;
@@ -321,7 +322,7 @@ function FornaContainer(element, passedOptions) {
                 r.nucsToNodes = rnas[uid].nucsToNodes;
                 r.pseudoknotPairs = rnas[uid].pseudoknotPairs;
             } else {
-                r = new ProteinGraph()
+                r = new ProteinGraph();
                 r.size = rnas[uid].size;
                 r.nodes = rnas[uid].nodes;
                 r.uid = rnas[uid].uid;
@@ -514,10 +515,10 @@ function FornaContainer(element, passedOptions) {
     var svgGraph = svg.append('svg:g')
     .on('mousemove', mousemove)
     .on('mousedown', mousedown)
-    .on('mouseup', mouseup)
+    .on('mouseup', mouseup);
 
     if (self.options.allowPanningAndZooming)
-        svgGraph.call(zoomer)
+        svgGraph.call(zoomer);
 
     var rect = svgGraph.append('svg:rect')
     .attr('width', self.options.svgW)
@@ -556,21 +557,21 @@ function FornaContainer(element, passedOptions) {
                .on("brushend", function() {
                    d3.event.target.clear();
                    d3.select(this).call(d3.event.target);
-               })
+               });
 
       brush.call(self.brusher)
           .on("mousedown.brush", null)
           .on("touchstart.brush", null)                                                                      
           .on("touchmove.brush", null)                                                                       
           .on("touchend.brush", null);                                                                       
-      brush.select('.background').style('cursor', 'auto')
+      brush.select('.background').style('cursor', 'auto');
 
     function zoomstart() {
         var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
         node.each(function(d) {
                 d.selected = false;
                 d.previouslySelected = false;
-                })
+                });
         node.classed("selected", false);
     }
 
@@ -683,7 +684,7 @@ function FornaContainer(element, passedOptions) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
             var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); })
+            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
           }
 
         d3.select(this).select('.outline_node').classed("selected", function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
@@ -717,7 +718,7 @@ function FornaContainer(element, passedOptions) {
     self.resumeForce = function() {
         if (self.animation)
             self.force.resume();
-    }
+    };
 
     function dragended(d) {
         var toDrag = selectedNodes(d);
@@ -740,7 +741,7 @@ function FornaContainer(element, passedOptions) {
                 l = Math.sqrt(x * x + y * y),
                 r = node.radius + quad.point.radius;
                 if (l < r) {
-                    l = (l - r) / l * .1;
+                    l = (l - r) / l * 0.1;
                     node.x -= x *= l;
                     node.y -= y *= l;
                     quad.point.x += x;
@@ -791,7 +792,7 @@ function FornaContainer(element, passedOptions) {
         }
 
         if (ctrlKeydown) {
-          brush.select('.background').style('cursor', 'crosshair')
+          brush.select('.background').style('cursor', 'crosshair');
           brush.call(self.brusher);
         }
     }
@@ -844,7 +845,7 @@ function FornaContainer(element, passedOptions) {
         .addPositions('label', labelPositions)
         .reinforceStems()
         .reinforceLoops()
-        .updateLinkUids()
+        .updateLinkUids();
     };
 
     removeLink = function(d) {
@@ -888,7 +889,7 @@ function FornaContainer(element, passedOptions) {
         var invalidLinks = {'backbone': true,
                              'fake': true,
                              'fakeFake': true,
-                             'labelLink': true}
+                             'labelLink': true};
 
         if (d.linkType in invalidLinks ) 
             return;
@@ -925,12 +926,12 @@ function FornaContainer(element, passedOptions) {
         if (!ctrlKeydown) {
             //if the shift key isn't down, unselect everything
             var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); })
+            node.classed("selected", function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
         }
 
         // always select this node
         d3.select(this).select('circle').classed("selected", d.selected = self.options.applyForce && !d.previouslySelected);
-    }
+    };
 
     nodeMouseup = function(d) {
         if (mousedownNode) {
@@ -1088,7 +1089,7 @@ function FornaContainer(element, passedOptions) {
     function nudge(dx, dy) {
         node.filter(function(d) { return d.selected; })
         .attr("cx", function(d) { return d.x += dx; })
-        .attr("cy", function(d) { return d.y += dy; })
+        .attr("cy", function(d) { return d.y += dy; });
 
         link.filter(function(d) { return d.source.selected; })
         .attr("x1", function(d) { return d.source.x; })
@@ -1132,7 +1133,7 @@ function FornaContainer(element, passedOptions) {
         allLinks.attr('class', '')
         .classed('link', true)
         .attr("link_type", function(d) { return d.linkType; } )
-        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.linkType; })
+        .attr("class", function(d) { return d3.select(this).attr('class') + " " + d.linkType; });
 
             allLinks.exit().remove();
 
@@ -1157,9 +1158,9 @@ function FornaContainer(element, passedOptions) {
                   if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
                     return 'translate(' + [d.x, d.y] + ')'; 
                 else
-                    return ''
+                    return '';
                 })
-             .each( function(d) { d.selected = d.previouslySelected = false; })
+             .each( function(d) { d.selected = d.previouslySelected = false; });
 
             gnodesEnter
             .call(drag)
@@ -1191,10 +1192,10 @@ function FornaContainer(element, passedOptions) {
             // create nodes behind the circles which will serve to highlight them
             var nucleotideNodes = gnodesEnter.filter(function(d) { 
                 return d.nodeType == 'nucleotide' || d.nodeType == 'label' || d.nodeType == 'protein';
-            })
+            });
             nucleotideNodes.append("svg:circle")
             .attr('class', "outline_node")
-            .attr("r", function(d) { return d.radius+1; })
+            .attr("r", function(d) { return d.radius+1; });
 
             var node = gnodesEnter.append("svg:circle")
             .attr("class", "node")
@@ -1205,7 +1206,7 @@ function FornaContainer(element, passedOptions) {
                     return d.radius; 
                 }
                 })
-            .attr("node_type", function(d) { return d.nodeType; })
+            .attr("node_type", function(d) { return d.nodeType; });
             
             var labels = gnodesEnter.append("text")
             .text(function(d) { return d.name; })
