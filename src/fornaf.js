@@ -1110,8 +1110,14 @@ function FornaContainer(element, passedOptions) {
           self.force.start();
         }
 
+        var visibleLinks = self.graph.links.filter(function(d) {
+            return d.linkType == 'backbone' ||
+                   d.linkType == 'basepair' ||
+                   d.linkType == 'pseudoknot';
+            
+        });
         var allLinks = visLinks.selectAll("line.link")
-        .data(self.graph.links, linkKey);
+        .data(visibleLinks, linkKey);
 
         var linksEnter = allLinks.enter();
 
