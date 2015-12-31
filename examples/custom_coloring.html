@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+This is an RNA container.
+<div id='rna_ss'> </div>
+This after the RNA container.
+
+    <link rel='stylesheet' type='text/css' href='/css/fornac.css' />
+    <script type='text/javascript' src='/js/jquery.js'></script>
+    <script type='text/javascript' src='/js/d3.js'></script>
+    <script type='text/javascript' src='/js/fornac.js'></script>
+    <script type='text/javascript' src='/src/rnagraph.js'></script>
+    <script type='text/javascript' src='/src/fornaf.js'></script>
+
+    <script type='text/javascript'>
+        var container = new FornaContainer("#rna_ss",
+            {'applyForce': true, 'allowPanningAndZooming': true, "initialSize": [500,800]});
+
+        var options = {'structure': '....(((((...(((((((((((...(((.......)))..(((((.............)))))(.(((...(((..((((.((((((....)))))))))).......)))...))).).(((((((((((.(.....)...(((((......(((..(.(..(((((((..((((........))))...))))...........)))..).)..)))...))))))))))...))))))...)))))))))))....)))))(...((((....))))...).......(((.(....(((........)))...))))....(((((..(((.(..).)))...))))).(((((((((((((....)))..))))))))))....',
+                        'sequence': 'UGUGCCCGGCAUGGGUGCAGUCUAUAGGGUGAGAGUCCCGAACUGUGAAGGCAGAAGUAACAGUUAGCCUAACGCAAGGGUGUCCGUGGCGACAUGGAAUCUGAAGGAAGCGGACGGCAAACCUUCGGUCUGAGGAACACGAACUUCAUAUGAGGCUAGGUAUCAAUGGAUGAGUUUGCAUAACAAAACAAAGUCCUUUCUGCCAAAGUUGGUACAGAGUAAAUGAAGCAGAUUGAUGAAGGGAAAGACUGCAUUCUUACCCGGGGAGGUCUGGAAACAGAAGUCAGCAGAAGUCAUAGUACCCUGUUCGCAGGGGAAGGACGGAACAAGUAUGGCGUUCGCGCCUAAGCUUGAACCGCCGUAUACCGAACGGUACGUACGGUGGUGUGG'
+        };
+
+        colorStr = "286:rgb(8,48,107) 287:rgb(8,48,107) 288:rgb(8,48,107) 289:rgb(8,48,107) 290:rgb(8,48,107) 291:rgb(8,48,107) 292:rgb(8,48,107) 323:rgb(8,56,119) 324:rgb(8,56,119) 325:rgb(8,56,119) 326:rgb(8,56,119) 354:rgb(8,65,133) 70:rgb(10,84,158) 71:rgb(10,84,158) 72:rgb(10,84,158) 113:rgb(10,84,158) 114:rgb(10,84,158) 115:rgb(10,84,158) 40:rgb(17,93,165) 41:rgb(17,93,165) 24:rgb(23,101,171) 25:rgb(23,101,171) 26:rgb(23,101,171) 10:rgb(39,119,184) 11:rgb(39,119,184) 12:rgb(39,119,184) 257:rgb(39,119,184) 258:rgb(39,119,184) 259:rgb(39,119,184) 260:rgb(39,119,184) 121:rgb(48,128,189) 66:rgb(58,138,193) 119:rgb(58,138,193) 375:rgb(67,147,198) 376:rgb(67,147,198) 76:rgb(78,154,202) 77:rgb(78,154,202) 103:rgb(78,154,202) 104:rgb(78,154,202) 105:rgb(78,154,202) 106:rgb(78,154,202) 107:rgb(78,154,202) 108:rgb(78,154,202) 109:rgb(78,154,202) 234:rgb(89,162,207) 235:rgb(89,162,207) 236:rgb(89,162,207) 133:rgb(101,170,211) 149:rgb(114,177,215) 150:rgb(114,177,215) 151:rgb(114,177,215) 152:rgb(114,177,215) 153:rgb(114,177,215) 154:rgb(114,177,215) 221:rgb(114,177,215) 222:rgb(114,177,215) 223:rgb(114,177,215) 197:rgb(143,193,221) 198:rgb(143,193,221) 199:rgb(143,193,221) 200:rgb(143,193,221) 201:rgb(143,193,221) 202:rgb(143,193,221) 203:rgb(143,193,221) 204:rgb(143,193,221) 205:rgb(143,193,221) 206:rgb(143,193,221) 207:rgb(143,193,221) 163:rgb(155,200,224) 164:rgb(155,200,224) 211:rgb(155,200,224) 212:rgb(155,200,224) 158:rgb(167,206,228) 159:rgb(167,206,228) 216:rgb(167,206,228) 217:rgb(167,206,228) 161:rgb(178,210,232) 214:rgb(178,210,232) 172:rgb(190,215,236) 173:rgb(190,215,236) 190:rgb(190,215,236) 191:rgb(190,215,236) 192:rgb(190,215,236) 267:rgb(200,220,239) 268:rgb(200,220,239) 269:rgb(200,220,239) 282:rgb(200,220,239) 283:rgb(200,220,239) 284:rgb(200,220,239) 298:rgb(206,224,241) 299:rgb(206,224,241) 300:rgb(206,224,241) 301:rgb(206,224,241) 316:rgb(206,224,241) 317:rgb(206,224,241) 318:rgb(206,224,241) 296:rgb(212,228,243) 332:rgb(219,233,246) 333:rgb(219,233,246) 346:rgb(219,233,246) 347:rgb(219,233,246) 348:rgb(219,233,246) 82:rgb(226,237,248) 337:rgb(233,242,250) 342:rgb(233,242,250) 141:rgb(240,246,252) 142:rgb(240,246,252) 143:rgb(240,246,252) " 
+
+        container.addRNA(options.structure, options);
+        cs = ColorScheme(colorStr);
+
+        container.addCustomColors(cs.colorsJson);
+        container.changeColorScheme('custom'); 
+    </script>
