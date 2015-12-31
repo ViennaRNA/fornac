@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+This is an RNA container.
+<div id='rna_ss'> </div>
+This after the RNA container.
+
+    <link rel='stylesheet' type='text/css' href='/css/fornac.css' />
+    <script type='text/javascript' src='/js/jquery.js'></script>
+    <script type='text/javascript' src='/js/d3.js'></script>
+    <script type='text/javascript' src='/js/fornac.js'></script>
+
+    <script type='text/javascript'>
+        var container = new FornaContainer("#rna_ss",
+                {'applyForce': true, 'allowPanningAndZooming': true,
+                'cssFileLocation': '/css/fornac.css'});
+
+        var options = {'structure': '((..((....)).(((....))).))',
+                        'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+        };
+
+        container.addRNA(options.structure, options);
+    </script>
+
+<div id='rna_ss2'> </div>
+
+    <script type='text/javascript'>
+        var container = new FornaContainer("#rna_ss2",
+                {'applyForce': true, 'allowPanningAndZooming': true,
+                'cssFileLocation': '/css/fornac.css'});
+
+        var options = {'structure': '((..((....)).(((....))).))',
+                        'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+        };
+
+        container.addRNA(options.structure, options);
+    </script>
+
+<div id='rna_ss3'> </div>
+
+    <script type='text/javascript'>
+        var container = new FornaContainer("#rna_ss3",
+                {'applyForce': true, 'allowPanningAndZooming': true,
+                'cssFileLocation': '/css/fornac.css'});
+
+        var options = {'structure': '((..((....)).(((....))).))',
+                        'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+        };
+
+        container.addRNA(options.structure, options);
+    </script>
+
