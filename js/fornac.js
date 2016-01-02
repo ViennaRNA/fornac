@@ -1659,35 +1659,34 @@ function FornaContainer(element, passedOptions) {
                 var lengthMult = 7;
                 var polygonNode = d3.select(this);
 
-                var f1 = d;   //from 
-                var t1 = d.nextNode; //to
+                var f1 = d.prevNode;   //from 
+                var t1 = d; //to
 
-                var f2 = d.prevNode;
-                var t2 = d;
+                var f2 = d;
+                var t2 = d.nextNode;
 
-                if (t1 == null) {
+                var u1,u2,v1,v2;
+
+                if (f1 === null) {
                     //last node
-                    f1 = f2
-                    t1 = t2
-                }
-
-                if (t2 == null) {
-                    //first node
-                    t2 = t1
-                    f2 = f1
-                }
-
-                if (t1 == null || f2 == null) {
-                    u = [1, 0];
+                    u1 = [1,0];
                 } else {
-                    u = [(t1.x - f1.x + t2.x - f2.x), (t1.y - f1.y + t2.y - f2.y)]
+                    u1 = [(t1.x - f1.x), (t1.y - f1.y)];
+                }
+
+                if (t2 === null) {
+                    u2 = [1,0];
+                } else {
+                    u2 = [(t2.x - f2.x), (t2.y - f2.y)];
                 }
 
                 //should normalize by the distance between the first two nodes
                 //var u  = [(t.x - f.x), (t.y - f.y)];
-                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
-                var v = [-u[1], u[0]];
+                u1 = [lengthMult * u1[0] / magnitude(u1), lengthMult * u1[1] / magnitude(u1)];
+                u2 = [lengthMult * u2[0] / magnitude(u2), lengthMult * u2[1] / magnitude(u2)];
 
+                v1 = [-u1[1], u1[0]];
+                v2 = [-u2[1], u2[0]];
 
                 var df = 1.5;
                 var bf = 0.6;
@@ -1695,12 +1694,14 @@ function FornaContainer(element, passedOptions) {
                 var pf = 1.6;
                 var hf = 0.6;
 
-                polygonNode.attr('points', (-bf * u[0] + v[0]/df) + "," + (-bf * u[1] + v[1]/df) + " " +
-                                           (-hf * u[0]) + "," + (-hf * u[1]) + " " +
-                                           (-bf * u[0] - v[0]/df) + "," + (-bf * u[1] - v[1]/df) + " " +
-                                           (ff * u[0]  - v[0]/df) + "," + (ff * u[1] - v[1]/df) + " " +
-                                           (pf * u[0]/df) + "," + (pf * u[1]/df) + " " +
-                                           (ff * u[0] + v[0]/df) + "," + (ff * u[1] + v[1]/df))
+                polygonNode.attr('points', (-bf * u1[0] + v1[0]/df) + "," + (-bf * u1[1] + v1[1]/df) + " " +
+                                           (-hf * u1[0]) + "," + (-hf * u1[1]) + " " +
+                                           (-bf * u1[0] - v1[0]/df) + "," + (-bf * u1[1] - v1[1]/df) + " " +
+                                           (-v1[0]/df) + "," + (-v1[1]/df) + " " + 
+                                           (ff * u2[0]  - v2[0]/df) + "," + (ff * u2[1] - v2[1]/df) + " " +
+                                           (pf * u2[0]/df) + "," + (pf * u2[1]/df) + " " +
+                                           (ff * u2[0] + v2[0]/df) + "," + (ff * u2[1] + v2[1]/df) + " " + 
+                                           (v1[0]/df) + "," + (v1[1]/df));
             }
 
             gnodes.selectAll('polygon')
