@@ -387,7 +387,7 @@ function RNAGraph(seq, dotbracket, structName) {
             //create a node for each nucleotide
             self.nodes.push({'name': self.seq[i-1],
                              'num': i,
-                             'radius': 6,
+                             'radius': 5,
                              'rna': self,
                              'nodeType': 'nucleotide',
                              'structName': self.structName,

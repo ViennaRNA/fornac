@@ -1509,7 +1509,6 @@ function FornaContainer(element, passedOptions) {
         .on('mousedown', nodeMousedown)
         .on('mousedrag', function(d) {})
         .on('mouseup', nodeMouseup)
-        .attr("r", 6.5)
         .attr('num', function(d) { return "n" + d.num; })
         .attr('rnum', function(d) { 
             return "n" + (d.rna.rnaLength - d.num + 1); })
@@ -1529,10 +1528,11 @@ function FornaContainer(element, passedOptions) {
 
         labelAndProteinNodes.append("svg:circle")
         .attr('class', "outline_node")
-        .attr("r", function(d) { return d.radius+1; })
+        .attr("r", function(d) { return d.radius+1; });
+
         nucleotideNodes.append("svg:circle")
         .attr('class', "outline_node")
-        .attr("r", function(d) { return d.radius+1; })
+        .attr("r", function(d) { return d.radius+1; });
 
         labelAndProteinNodes.append("svg:circle")
         .attr("class", "node")
@@ -1544,9 +1544,23 @@ function FornaContainer(element, passedOptions) {
             }
         })
         .attr("node_type", function(d) { return d.nodeType; })
-        .attr('node_num', function(d) { return d.num; })
+        .attr('node_num', function(d) { return d.num; });
 
-        nucleotideNodes.append('svg:polygon')
+        nucleotideNodes.append('svg:circle')
+        .attr('class', 'node')
+        .attr("node_type", function(d) { return d.nodeType; })
+        .attr('node_num', function(d) { return d.num; })
+        .attr('r', function(d) { return d.radius; })
+        .append("svg:title")
+        .text(function(d) { 
+            if (d.nodeType == 'nucleotide') {
+                return d.structName + ":" + d.num;
+            } else {
+                return '';
+            }
+        });
+
+        nucleotideNodes.append('svg:path')
         .attr('class', 'node')
         .attr("node_type", function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
@@ -1558,6 +1572,7 @@ function FornaContainer(element, passedOptions) {
                 return '';
             }
         });
+
 
         var labels = gnodesEnter.append("text")
         .text(function(d) { return d.name; })
@@ -1656,6 +1671,28 @@ function FornaContainer(element, passedOptions) {
             }
 
             function positionAnyNode(d) {
+                var endPoint = d;
+                var startPoint = d.prevNode;
+                var lengthMult = 6;
+
+                if (startPoint === null)
+                    return;
+
+                // point back toward the previous node
+                var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+                u = [u[0] / magnitude(u), u[1] / magnitude(u)];
+                var v = [-u[1], u[0]];
+
+                var arrowTip = [d.radius * u[0], d.radius * u[1]];
+
+                var path = 'M' + 
+                            (arrowTip[0] + lengthMult * (u[0] + v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] + v[1]) / 2) + "L" +
+                            (arrowTip[0]) + "," + (arrowTip[1]) + "L" +
+                            (arrowTip[0] + lengthMult * (u[0] - v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] - v[1]) / 2);
+
+                d3.select(this).attr('d', path);
+
+                /*
                 var lengthMult = 7;
                 var polygonNode = d3.select(this);
 
@@ -1702,9 +1739,10 @@ function FornaContainer(element, passedOptions) {
                                            (pf * u2[0]/df) + "," + (pf * u2[1]/df) + " " +
                                            (ff * u2[0] + v2[0]/df) + "," + (ff * u2[1] + v2[1]/df) + " " + 
                                            (v1[0]/df) + "," + (v1[1]/df));
+                */
             }
 
-            gnodes.selectAll('polygon')
+            gnodes.selectAll('path')
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
@@ -1728,7 +1766,7 @@ function FornaContainer(element, passedOptions) {
                     return 'translate(' + [d.x, d.y] + ')'; 
                 });
 
-                gnodes.select('polygon')
+                gnodes.select('path')
                 .each(positionAnyNode);
 
             });
@@ -2135,7 +2173,7 @@ function RNAGraph(seq, dotbracket, structName) {
             //create a node for each nucleotide
             self.nodes.push({'name': self.seq[i-1],
                              'num': i,
-                             'radius': 6,
+                             'radius': 5,
                              'rna': self,
                              'nodeType': 'nucleotide',
                              'structName': self.structName,
