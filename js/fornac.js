@@ -428,6 +428,14 @@ function FornaContainer(element, passedOptions) {
         d3.select(this).attr('d', path);
     }
 
+    function realLinkFilter(d) {
+        return d.linkType == 'basepair' ||
+               d.linkType == 'backbone' ||
+               d.linkType == 'pseudoknot' ||
+               d.linkType == 'label_link' ||
+               d.linkType == 'external' ||
+               d.linkType == 'chain_chain';
+    }
 
     self.transitionRNA = function(newStructure, nextFunction) {
         //transition from an RNA which is already displayed to a new structure
@@ -452,7 +460,8 @@ function FornaContainer(element, passedOptions) {
                 return 'translate(' + [d.x, d.y] + ')'; }).duration(duration);
         }
 
-        var links = visLinks.selectAll("line.link").data(newRNAJson.links, linkKey);
+        var links = visLinks.selectAll("line.link")
+        .data(newRNAJson.links.filter(realLinkFilter), linkKey);
         var newNodes = self.createNewNodes(gnodes.enter())
         .attr("transform", function(d) { 
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
@@ -1656,7 +1665,8 @@ function FornaContainer(element, passedOptions) {
           self.force.start();
         }
 
-        var allLinks = visLinks.selectAll("line.link") .data(self.graph.links, linkKey);
+        var allLinks = visLinks.selectAll("line.link") 
+        .data(self.graph.links.filter(realLinkFilter), linkKey);
 
         allLinks.attr('class', '')
         .classed('link', true)
@@ -1690,7 +1700,7 @@ function FornaContainer(element, passedOptions) {
             if (self.displayFakeLinks)
                 xlink = allLinks;
             else
-                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=fake],[link_type=intermolecule],[link_type=external]");
+                xlink = visLinks.selectAll("[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=intermolecule],[link_type=external]");
 
             var position;
 
