@@ -159,7 +159,10 @@ function FornaContainer(element, passedOptions) {
         "initialSize": null,
         "allowPanningAndZooming": true,
         "cssFileLocation": "css/fornac.css",
-        "transitionDuration": 500
+        "transitionDuration": 500,
+        "resizeSvgOnResize": true   //change the size of the svg when resizing the container
+                                    //sometimes its beneficial to turn this off, especially when
+                                    //performance is an issue
     };
 
     if (arguments.length > 1) {
@@ -169,9 +172,12 @@ function FornaContainer(element, passedOptions) {
         }
     }
 
-    if (self.options != null) {
+    if (self.options.initialSize !== null) {
         self.options.svgW = self.options.initialSize[0];
         self.options.svgH = self.options.initialSize[1];
+    } else {
+        self.options.svgW = 800;
+        self.options.svgH = 800;
     }
 
     var fill = d3.scale.category20();
@@ -395,6 +401,34 @@ function FornaContainer(element, passedOptions) {
         return rnaGraph;
     };
 
+    function magnitude(x) {
+        return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
+    }
+
+    function positionAnyNode(d) {
+        var endPoint = d;
+        var startPoint = d.prevNode;
+        var lengthMult = 6;
+
+        if (startPoint === null)
+            return;
+
+        // point back toward the previous node
+        var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+        u = [u[0] / magnitude(u), u[1] / magnitude(u)];
+        var v = [-u[1], u[0]];
+
+        var arrowTip = [d.radius * u[0], d.radius * u[1]];
+
+        var path = 'M' + 
+                    (arrowTip[0] + lengthMult * (u[0] + v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] + v[1]) / 2) + "L" +
+                    (arrowTip[0]) + "," + (arrowTip[1]) + "L" +
+                    (arrowTip[0] + lengthMult * (u[0] - v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] - v[1]) / 2);
+
+        d3.select(this).attr('d', path);
+    }
+
+
     self.transitionRNA = function(newStructure, nextFunction) {
         //transition from an RNA which is already displayed to a new structure
         var duration = self.options.transitionDuration;
@@ -438,6 +472,9 @@ function FornaContainer(element, passedOptions) {
                 else
                     return '';
             });
+
+        gnodes.select('path')
+        .each(positionAnyNode);
 
         self.graph.nodes = gnodes.data();
         self.updateStyle();
@@ -695,14 +732,18 @@ function FornaContainer(element, passedOptions) {
         self.brusher.x(xScale)
         .y(yScale);
 
+        self.centerView();
+
+        if (!self.options.resizeSvgOnResize) {
+            return;
+        }
+
         //resize the background
         rect.attr("width", svgW)
         .attr("height", svgH);
 
         svg.attr("width", svgW)
         .attr("height", svgH);
-
-        self.centerView();
     }
 
     function changeColors(moleculeColors, d, scale) {
@@ -1653,10 +1694,6 @@ function FornaContainer(element, passedOptions) {
 
             var position;
 
-            function magnitude(x) {
-                return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
-            }
-
             function positionEndNode() {
                 var lengthMult = 10;
                 var u  = [(endNodeData.x - preEndNodeData.x)/rectangleLengthDiv, 
@@ -1668,78 +1705,6 @@ function FornaContainer(element, passedOptions) {
                                         (-u[0]/2 + v[0]/2) + "," + (-u[1]/2 + v[1]/2) + " " + 
                                         (-u[0]/2 + -v[0]/2) + "," + (-u[1]/2 + -v[1]/2) + " " + 
                                         (u[0]/2 + -v[0]/2) + "," + (u[1]/2 + -v[1]/2));
-            }
-
-            function positionAnyNode(d) {
-                var endPoint = d;
-                var startPoint = d.prevNode;
-                var lengthMult = 6;
-
-                if (startPoint === null)
-                    return;
-
-                // point back toward the previous node
-                var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
-                u = [u[0] / magnitude(u), u[1] / magnitude(u)];
-                var v = [-u[1], u[0]];
-
-                var arrowTip = [d.radius * u[0], d.radius * u[1]];
-
-                var path = 'M' + 
-                            (arrowTip[0] + lengthMult * (u[0] + v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] + v[1]) / 2) + "L" +
-                            (arrowTip[0]) + "," + (arrowTip[1]) + "L" +
-                            (arrowTip[0] + lengthMult * (u[0] - v[0]) / 2) + "," + (arrowTip[1] + lengthMult * (u[1] - v[1]) / 2);
-
-                d3.select(this).attr('d', path);
-
-                /*
-                var lengthMult = 7;
-                var polygonNode = d3.select(this);
-
-                var f1 = d.prevNode;   //from 
-                var t1 = d; //to
-
-                var f2 = d;
-                var t2 = d.nextNode;
-
-                var u1,u2,v1,v2;
-
-                if (f1 === null) {
-                    //last node
-                    u1 = [1,0];
-                } else {
-                    u1 = [(t1.x - f1.x), (t1.y - f1.y)];
-                }
-
-                if (t2 === null) {
-                    u2 = [1,0];
-                } else {
-                    u2 = [(t2.x - f2.x), (t2.y - f2.y)];
-                }
-
-                //should normalize by the distance between the first two nodes
-                //var u  = [(t.x - f.x), (t.y - f.y)];
-                u1 = [lengthMult * u1[0] / magnitude(u1), lengthMult * u1[1] / magnitude(u1)];
-                u2 = [lengthMult * u2[0] / magnitude(u2), lengthMult * u2[1] / magnitude(u2)];
-
-                v1 = [-u1[1], u1[0]];
-                v2 = [-u2[1], u2[0]];
-
-                var df = 1.5;
-                var bf = 0.6;
-                var ff = 0.3;
-                var pf = 1.6;
-                var hf = 0.6;
-
-                polygonNode.attr('points', (-bf * u1[0] + v1[0]/df) + "," + (-bf * u1[1] + v1[1]/df) + " " +
-                                           (-hf * u1[0]) + "," + (-hf * u1[1]) + " " +
-                                           (-bf * u1[0] - v1[0]/df) + "," + (-bf * u1[1] - v1[1]/df) + " " +
-                                           (-v1[0]/df) + "," + (-v1[1]/df) + " " + 
-                                           (ff * u2[0]  - v2[0]/df) + "," + (ff * u2[1] - v2[1]/df) + " " +
-                                           (pf * u2[0]/df) + "," + (pf * u2[1]/df) + " " +
-                                           (ff * u2[0] + v2[0]/df) + "," + (ff * u2[1] + v2[1]/df) + " " + 
-                                           (v1[0]/df) + "," + (v1[1]/df));
-                */
             }
 
             gnodes.selectAll('path')
