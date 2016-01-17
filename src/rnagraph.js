@@ -111,6 +111,37 @@ function RNAGraph(seq, dotbracket, structName) {
         self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
     };
 
+    self.removeBreaks = function(targetString) {
+        // Remove all chain breaks (denoted with a '&', which indicate
+        // that the input represents more than one strand)
+        var breaks = [];
+        var breakIndex = -1;
+
+        while ((breakIndex = targetString.indexOf('&')) >= 0) {
+            breaks.push(breakIndex);
+            targetString = targetString.substring(0, breakIndex) + targetString.substring(breakIndex+1, targetString.length);
+
+            console.log('targetString:', targetString);
+        }
+
+        return {targetString: targetString,  breaks: breaks};
+    };
+
+    ret = self.removeBreaks(self.dotbracket);
+    self.dotbracket = ret.targetString;
+    self.dotBracketBreaks = ret.breaks;
+
+    ret = self.removeBreaks(self.seq);
+    self.seq = ret.targetString;
+    self.seqBreaks = ret.breaks;
+
+    if (!arraysEqual(self.dotBracketBreaks, self.seqBreaks)) {
+        console.log('WARNING: Sequence and structure breaks not equal');
+        console.log('WARNING: Using the breaks in the structure');
+    }
+    
+    console.log('dotBracketBreaks', self.dotBracketBreaks);
+    console.log('sequenceBreaks', self.seqBreaks);
     self.computePairtable();
 
     self.addPositions = function(nodeType, positions) {
@@ -392,7 +423,8 @@ function RNAGraph(seq, dotbracket, structName) {
                              'nodeType': 'nucleotide',
                              'structName': self.structName,
                              'elemType': elemTypes[i],
-                             'uid': generateUUID() });
+                             'uid': generateUUID(),
+                             'linked': false});
         }
 
         for (var i = 0; i < self.nodes.length; i++) {
@@ -422,11 +454,16 @@ function RNAGraph(seq, dotbracket, structName) {
 
             if (i > 1) {
                 // backbone links
-                self.links.push({'source': self.nodes[i-2],
-                                 'target': self.nodes[i-1],
-                                 'linkType': 'backbone',
-                                 'value': 1,
-                                 'uid': generateUUID() });
+                if (self.dotBracketBreaks.indexOf(i-1) === -1) {
+                    // there is no break in the strands here
+                    // we can add a backbone link
+                    self.links.push({'source': self.nodes[i-2],
+                                    'target': self.nodes[i-1],
+                                    'linkType': 'backbone',
+                                    'value': 1,
+                                    'uid': generateUUID() });
+                    self.nodes[i-1].linked = true;
+                }
             }
         }
 

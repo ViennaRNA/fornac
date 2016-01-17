@@ -246,7 +246,7 @@ function FornaContainer(element, passedOptions) {
             }           
         }       
         return true;
-    }    
+    };
 
 
     self.createInitialLayout = function(structure, passedOptions) {
@@ -411,6 +411,10 @@ function FornaContainer(element, passedOptions) {
         var lengthMult = 6;
 
         if (startPoint === null)
+            return;
+
+        // does this node have a link pointing to it?
+        if (!d.linked)
             return;
 
         // point back toward the previous node
@@ -1704,25 +1708,10 @@ function FornaContainer(element, passedOptions) {
 
             var position;
 
-            function positionEndNode() {
-                var lengthMult = 10;
-                var u  = [(endNodeData.x - preEndNodeData.x)/rectangleLengthDiv, 
-                    (endNodeData.y - preEndNodeData.y)/rectangleLengthDiv]; 
-                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
-                var v = [-u[1], u[0]]; 
-
-                endPolygonNode.attr('points', (u[0]/2 + v[0]/2) + "," + (u[1]/2 + v[1]/2) + " " + 
-                                        (-u[0]/2 + v[0]/2) + "," + (-u[1]/2 + v[1]/2) + " " + 
-                                        (-u[0]/2 + -v[0]/2) + "," + (-u[1]/2 + -v[1]/2) + " " + 
-                                        (u[0]/2 + -v[0]/2) + "," + (u[1]/2 + -v[1]/2));
-            }
-
             gnodes.selectAll('path')
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
-            console.log('graph.links:', graph.links);
-            console.log('realNodes:', realNodes);
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),
