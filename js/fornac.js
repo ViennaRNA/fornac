@@ -246,7 +246,7 @@ function FornaContainer(element, passedOptions) {
             }           
         }       
         return true;
-    }    
+    };
 
 
     self.createInitialLayout = function(structure, passedOptions) {
@@ -411,6 +411,10 @@ function FornaContainer(element, passedOptions) {
         var lengthMult = 6;
 
         if (startPoint === null)
+            return;
+
+        // does this node have a link pointing to it?
+        if (!d.linked)
             return;
 
         // point back toward the previous node
@@ -1704,25 +1708,10 @@ function FornaContainer(element, passedOptions) {
 
             var position;
 
-            function positionEndNode() {
-                var lengthMult = 10;
-                var u  = [(endNodeData.x - preEndNodeData.x)/rectangleLengthDiv, 
-                    (endNodeData.y - preEndNodeData.y)/rectangleLengthDiv]; 
-                var u = [lengthMult * u[0] / magnitude(u), lengthMult * u[1] / magnitude(u)];
-                var v = [-u[1], u[0]]; 
-
-                endPolygonNode.attr('points', (u[0]/2 + v[0]/2) + "," + (u[1]/2 + v[1]/2) + " " + 
-                                        (-u[0]/2 + v[0]/2) + "," + (-u[1]/2 + v[1]/2) + " " + 
-                                        (-u[0]/2 + -v[0]/2) + "," + (-u[1]/2 + -v[1]/2) + " " + 
-                                        (u[0]/2 + -v[0]/2) + "," + (u[1]/2 + -v[1]/2));
-            }
-
             gnodes.selectAll('path')
             .each(positionAnyNode);
 
             xlink.on('click', linkClick);
-            console.log('graph.links:', graph.links);
-            console.log('realNodes:', realNodes);
 
             self.force.on("tick", function() {
                 var q = d3.geom.quadtree(realNodes),
@@ -1872,6 +1861,37 @@ function RNAGraph(seq, dotbracket, structName) {
         self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
     };
 
+    self.removeBreaks = function(targetString) {
+        // Remove all chain breaks (denoted with a '&', which indicate
+        // that the input represents more than one strand)
+        var breaks = [];
+        var breakIndex = -1;
+
+        while ((breakIndex = targetString.indexOf('&')) >= 0) {
+            breaks.push(breakIndex);
+            targetString = targetString.substring(0, breakIndex) + targetString.substring(breakIndex+1, targetString.length);
+
+            console.log('targetString:', targetString);
+        }
+
+        return {targetString: targetString,  breaks: breaks};
+    };
+
+    ret = self.removeBreaks(self.dotbracket);
+    self.dotbracket = ret.targetString;
+    self.dotBracketBreaks = ret.breaks;
+
+    ret = self.removeBreaks(self.seq);
+    self.seq = ret.targetString;
+    self.seqBreaks = ret.breaks;
+
+    if (!arraysEqual(self.dotBracketBreaks, self.seqBreaks)) {
+        console.log('WARNING: Sequence and structure breaks not equal');
+        console.log('WARNING: Using the breaks in the structure');
+    }
+    
+    console.log('dotBracketBreaks', self.dotBracketBreaks);
+    console.log('sequenceBreaks', self.seqBreaks);
     self.computePairtable();
 
     self.addPositions = function(nodeType, positions) {
@@ -2153,7 +2173,8 @@ function RNAGraph(seq, dotbracket, structName) {
                              'nodeType': 'nucleotide',
                              'structName': self.structName,
                              'elemType': elemTypes[i],
-                             'uid': generateUUID() });
+                             'uid': generateUUID(),
+                             'linked': false});
         }
 
         for (var i = 0; i < self.nodes.length; i++) {
@@ -2183,11 +2204,16 @@ function RNAGraph(seq, dotbracket, structName) {
 
             if (i > 1) {
                 // backbone links
-                self.links.push({'source': self.nodes[i-2],
-                                 'target': self.nodes[i-1],
-                                 'linkType': 'backbone',
-                                 'value': 1,
-                                 'uid': generateUUID() });
+                if (self.dotBracketBreaks.indexOf(i-1) === -1) {
+                    // there is no break in the strands here
+                    // we can add a backbone link
+                    self.links.push({'source': self.nodes[i-2],
+                                    'target': self.nodes[i-1],
+                                    'linkType': 'backbone',
+                                    'value': 1,
+                                    'uid': generateUUID() });
+                    self.nodes[i-1].linked = true;
+                }
             }
         }
 
@@ -2534,6 +2560,22 @@ moleculesToJson = function(moleculesJson) {
     return {"graphs": graphs, "extraLinks": extraLinks};
 }
 var numberSort = function(a,b) { return a - b; };
+
+function arraysEqual(a, b) {
+    // courtesy of 
+    // http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (a.length != b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
 
 function RNAUtilities() {
     var self = this;
