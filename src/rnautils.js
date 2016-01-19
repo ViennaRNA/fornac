@@ -3,130 +3,17 @@ var numberSort = function(a,b) { return a - b; };
 function arraysEqual(a, b) {
     // courtesy of 
     // http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
-    simpleXyCoordinates = function(pair_table)
-    {
-        var INIT_ANGLE=0.;     /* initial bending angle */
-        var INIT_X = 100.;     /* coordinate of first digit */
-        var INIT_Y = 100.;     /* see above */
-        var RADIUS =  15.;
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (a.length != b.length) return false;
 
-        var x = [], y = [];
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
 
-        var i, len;
-        var  alpha;
-
-        len = pair_table[0];
-        var angle = Array.apply(null, new Array(len+5)).map(Number.prototype.valueOf,0); 
-        var loop_size = Array.apply(null, new Array(16+Math.floor(len/5)))
-        .map(Number.prototype.valueOf, 0); 
-        var stack_size = Array.apply(null, new Array(16+Math.floor(len/5)))
-        .map(Number.prototype.valueOf, 0); 
-
-        lp = stk = 0;
-        var PIHALF = Math.PI / 2;
-
-
-        loop = function(i, j, pair_table)
-        /* i, j are the positions AFTER the last pair of a stack; i.e
-           i-1 and j+1 are paired. */
-        {
-            var count = 2;   /* counts the VERTICES of a loop polygon; that's
-                                NOT necessarily the number of unpaired bases!
-                                Upon entry the loop has already 2 vertices, namely
-                                the pair i-1/j+1.  */
-
-            var    r = 0, bubble = 0; /* bubble counts the unpaired digits in loops */
-
-            var    i_old, partner, k, l, start_k, start_l, fill, ladder;
-            var    begin, v, diff;
-            var  polygon;
-
-            var remember = Array.apply(null, new Array((1+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
-
-            i_old = i-1, j++;         /* j has now been set to the partner of the
-                                         previous pair for correct while-loop
-                                         termination.  */
-            while (i != j) {
-                partner = pair_table[i];
-                if ((!partner) || (i==0))
-                    i++, count++, bubble++;
-                else {
-                    count += 2;
-                    k = i, l = partner;    /* beginning of stack */
-                    remember[++r] = k;
-                    remember[++r] = l;
-                    i = partner+1;         /* next i for the current loop */
-
-                    start_k = k, start_l = l;
-                    ladder = 0;
-                    do {
-                        k++, l--, ladder++;        /* go along the stack region */
-                    }
-                    while (pair_table[k] == l);
-
-                    fill = ladder-2;
-                    if (ladder >= 2) {
-                        angle[start_k+1+fill] += PIHALF;   /*  Loop entries and    */
-                        angle[start_l-1-fill] += PIHALF;   /*  exits get an        */
-                        angle[start_k]        += PIHALF;   /*  additional PI/2.    */
-                        angle[start_l]        += PIHALF;   /*  Why ? (exercise)    */
-                        if (ladder > 2) {
-                            for (; fill >= 1; fill--) {
-                                angle[start_k+fill] = Math.PI;    /*  fill in the angles  */
-                                angle[start_l-fill] = Math.PI;    /*  for the backbone    */
-                            }
-                        }
-                    }
-                    stack_size[++stk] = ladder;
-                    loop(k, l, pair_table);
-                }
-            }
-
-            polygon = Math.PI*(count-2)/count; /* bending angle in loop polygon */
-            remember[++r] = j;
-            begin = i_old < 0 ? 0 : i_old;
-            for (v = 1; v <= r; v++) {
-                diff  = remember[v]-begin;
-                for (fill = 0; fill <= diff; fill++)
-                angle[begin+fill] += polygon;
-                if (v > r)
-                    break;
-                begin = remember[++v];
-            }
-            loop_size[++lp] = bubble;
-        }
-
-        loop(0, len+1, pair_table);
-        loop_size[lp] -= 2;     /* correct for cheating with function loop */
-
-        alpha = INIT_ANGLE;
-        x[0]  = INIT_X;
-        y[0]  = INIT_Y;
-
-        poss = [];
-
-        poss.push([x[0], y[0]]);
-        for (i = 1; i < len; i++) {
-            x[i] = x[i-1]+RADIUS*Math.cos(alpha);
-            y[i] = y[i-1]+RADIUS*Math.sin(alpha);
-
-            poss.push([x[i], y[i]]);
-            alpha += Math.PI-angle[i+1];
-        }
-
-        return poss;
-    }
-    if (a === b) return true;
-    if (a === null || b === null) return false;
-    if (a.length != b.length) return false;
-
-    // If you don't care about the order of the elements inside
-    // the array, you should sort both arrays here.
-
-    for (var i = 0; i < a.length; ++i) {
-        if (a[i] !== b[i]) return false;
-    }
-    return true;
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 function RNAUtilities() {
@@ -183,55 +70,55 @@ function RNAUtilities() {
     };
 
     self.backtrackMaximumMatching = function(mm, oldPt) {
-        var pt = Array.apply(null, 
-                             Array(mm.length)).map(function() { return 0 }); 
-                             //create an array containing zeros
+      var pt = Array.apply(null, 
+                           Array(mm.length)).map(function() { return 0 }); 
+                           //create an array containing zeros
 
-                             self.mmBt(mm, pt, oldPt, 1, mm.length-1);
-                             return pt;
+      self.mmBt(mm, pt, oldPt, 1, mm.length-1);
+      return pt;
     }
 
     self.mmBt = function(mm, pt, oldPt, i, j){
         // Create a pairtable from the backtracking
-        var maximum = mm[i][j];
-        var TURN = 0;
+      var maximum = mm[i][j];
+      var TURN = 0;
 
-        if(j - i - 1 < TURN) return;    /* no more pairs */
+      if(j - i - 1 < TURN) return;    /* no more pairs */
 
-        if(mm[i][j-1] == maximum){      /* j is unpaired */
-            self.mmBt(mm, pt, oldPt, i, j-1);
+      if(mm[i][j-1] == maximum){      /* j is unpaired */
+        self.mmBt(mm, pt, oldPt, i, j-1);
+        return;
+      }
+
+      for(var q = j - TURN - 1; q >= i; q--){  /* j is paired with some q */
+        if (oldPt[j] !== q)
+            continue;
+
+        var leftPart     = (q > i) ? mm[i][q-1] : 0;
+        var enclosedPart = (j - q - 1 > 0) ? mm[q+1][j-1] : 0;
+
+        if(leftPart + enclosedPart + 1 == maximum) {
+            // there's a base pair between j and q
+            pt[q] = j;
+            pt[j] = q;
+
+            if(i < q) 
+                self.mmBt(mm, pt, oldPt, i, q - 1);
+
+            self.mmBt(mm, pt, oldPt, q + 1, j - 1);
             return;
         }
+      }
 
-        for(var q = j - TURN - 1; q >= i; q--){  /* j is paired with some q */
-            if (oldPt[j] !== q)
-                continue;
-
-            var leftPart     = (q > i) ? mm[i][q-1] : 0;
-            var enclosedPart = (j - q - 1 > 0) ? mm[q+1][j-1] : 0;
-
-            if(leftPart + enclosedPart + 1 == maximum) {
-                // there's a base pair between j and q
-                pt[q] = j;
-                pt[j] = q;
-
-                if(i < q) 
-                    self.mmBt(mm, pt, oldPt, i, q - 1);
-
-                self.mmBt(mm, pt, oldPt, q + 1, j - 1);
-                return;
-            }
-        }
-
-        //alert(i + "," + j + ": backtracking failed!");
-        console.log("FAILED!!!" + i + "," + j + ": backtracking failed!");
+      //alert(i + "," + j + ": backtracking failed!");
+      console.log("FAILED!!!" + i + "," + j + ": backtracking failed!");
 
     };
 
     self.dotbracketToPairtable = function(dotbracket) {
         // create an array and initialize it to 0
         pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
-
+        
         //  the first element is always the length of the RNA molecule
         pt[0] = dotbracket.length;
 
@@ -249,7 +136,7 @@ function RNAUtilities() {
             a = dotbracket[i];
             ni = i + 1;
 
-            if (a == '.') {
+            if (a == '.' || a == 'o') {
                 // unpaired
                 pt[ni] = 0;
             } else {
@@ -336,8 +223,8 @@ function RNAUtilities() {
         var origTo = to;
 
         for (var i = from; i <= to; i++)
-        if (pt[i] !== 0 && (pt[i] < from || pt[i] > to))
-            unmatched.push([i,pt[i]]);
+            if (pt[i] !== 0 && (pt[i] < from || pt[i] > to))
+                unmatched.push([i,pt[i]]);
 
         for (i = origFrom; i <= origTo; i++) {
             while (pt[i] === 0 && i <= origTo) i++;
@@ -348,7 +235,7 @@ function RNAUtilities() {
                 i++;
                 to--;
             }
-
+            
             toRemove = toRemove.concat(self.findUnmatched(pt, i, to));
         }
 

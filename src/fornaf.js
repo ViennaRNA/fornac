@@ -285,7 +285,8 @@ function FornaContainer(element, passedOptions) {
         .reinforceStems()
         .reinforceLoops()
         .connectFakeNodes()
-        .reassignLinkUids();
+        .reassignLinkUids()
+        .breakNodesToFakeNodes();
 
         return rnaJson;
     };
@@ -1628,7 +1629,7 @@ function FornaContainer(element, passedOptions) {
         });
 
 
-        var labels = gnodesEnter.append("text")
+        var labelsEnter = gnodesEnter.append("text")
         .text(function(d) { return d.name; })
         .attr('text-anchor', 'middle')
         .attr('font-size', 8.0)
@@ -1636,7 +1637,14 @@ function FornaContainer(element, passedOptions) {
         .attr('y', 2.5)
         .attr('class', 'node-label')
         .attr("label_type", function(d) { return d.nodeType; })
-        .append("svg:title")
+
+        /*
+        labelsEnter.text(function(d) {
+            return d.num;
+        });
+        */
+
+        labelsEnter.append("svg:title")
         .text(function(d) { 
             if (d.nodeType == 'nucleotide') {
                 return d.structName + ":" + d.num;
