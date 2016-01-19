@@ -3,3 +3,4 @@
 **/*.swo
 **/*.swp
 **/.DS_Store
+bower_components/**
