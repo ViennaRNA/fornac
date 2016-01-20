@@ -36,7 +36,7 @@ simpleXyCoordinates = function(pair_table)
   var    begin, v, diff;
   var  polygon;
 
-  var remember = Array.apply(null, new Array((1+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
+  var remember = Array.apply(null, new Array((3+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
 
   i_old = i-1, j++;         /* j has now been set to the partner of the
                                previous pair for correct while-loop
@@ -57,7 +57,7 @@ simpleXyCoordinates = function(pair_table)
           do {
               k++, l--, ladder++;        /* go along the stack region */
           }
-          while (pair_table[k] == l);
+          while ((pair_table[k] == l) && (pair_table[k] > k));
 
           fill = ladder-2;
           if (ladder >= 2) {
