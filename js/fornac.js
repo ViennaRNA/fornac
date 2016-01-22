@@ -2999,7 +2999,8 @@ simpleXyCoordinates = function(pair_table)
               }
           }
           stack_size[++stk] = ladder;
-          loop(k, l, pair_table);
+          if (k <= l)
+            loop(k, l, pair_table);
       }
   }
 
