@@ -1,7 +1,9 @@
 // generated on 2016-01-26 using generator-gulp-webapp 1.1.1
 require('es6-promise').polyfill();
 
-import browserify from 'gulp-browserify';
+//import browserify from 'gulp-browserify';
+//import webpack from 'gulp-webpack';
+var webpack = require('webpack-stream');
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
@@ -25,10 +27,7 @@ gulp.task('scripts', () => {
     .pipe($.plumber())
     .pipe($.sourcemaps.init())
     .pipe($.babel())
-    .pipe(browserify({
-        insertGlobals : true,
-        debug : !gulp.env.production
-    }))
+    .pipe(webpack( require('./webpack.config.js') ))
     .pipe($.sourcemaps.write('.'))
     .pipe(gulp.dest('.tmp/scripts'))
     .pipe(reload({stream: true}));

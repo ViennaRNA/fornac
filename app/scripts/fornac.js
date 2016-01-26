@@ -152,7 +152,7 @@ function ColorScheme(colorsText) {
     return self;
 }
 
-function FornaContainer(element, passedOptions) {
+export function FornaContainer(element, passedOptions) {
     var self = this;
 
     self.options = {
