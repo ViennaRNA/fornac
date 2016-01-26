@@ -5,8 +5,6 @@
 import d3 from 'd3';
 //import 'jquery' from jquery;
 
-console.log('hi there');
-
 function ColorScheme(colorsText) {
     var self = this;
     self.colorsText = colorsText;
