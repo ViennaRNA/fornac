@@ -6,7 +6,9 @@ module.exports = {
   entry: './scripts/fornac.js',
   output: {
     path: __dirname + "/build",
-    filename: "fornac.js"
+    filename: "fornac.js",
+    libraryTarget: "var",
+    library: "fornac"
   },
   module: {
     loaders: [

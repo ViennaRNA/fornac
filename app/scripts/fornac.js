@@ -3,6 +3,9 @@
 */
 
 import d3 from 'd3';
+import $ from 'jquery';
+import {RNAGraph,moleculesToJson} from './rnagraph.js';
+import {simpleXyCoordinates} from './simplernaplot.js';
 //import 'jquery' from jquery;
 
 function ColorScheme(colorsText) {
@@ -272,10 +275,10 @@ export function FornaContainer(element, passedOptions) {
             }
         }
 
-        rg = new RNAGraph(options.sequence, structure, options.name);
+        var rg = new RNAGraph(options.sequence, structure, options.name);
         rg.circularizeExternal = options.circularizeExternal;
 
-        rnaJson = rg.recalculateElements();
+        var rnaJson = rg.recalculateElements();
 
         if (options.positions.length === 0) {
             // no provided positions means we need to calculate an initial layout
@@ -800,7 +803,7 @@ export function FornaContainer(element, passedOptions) {
 
 
         if (newColorScheme == 'sequence') {
-            scale = d3.scale.ordinal()
+            var scale = d3.scale.ordinal()
             .range(['#dbdb8d', '#98df8a', '#ff9896', '#aec7e8', '#aec7e8'])
             .domain(['A','C','G','U','T']);
             nodes.style('fill', function(d) { 
@@ -808,7 +811,7 @@ export function FornaContainer(element, passedOptions) {
             });
 
         } else if (newColorScheme == "structure") {
-            scale = d3.scale.category10()
+            var scale = d3.scale.category10()
             .domain(['s','m','i','e','t','h','x'])
             .range(['lightgreen', '#ff9896', '#dbdb8d', 'lightsalmon',
                    'lightcyan', 'lightblue', 'transparent']);
@@ -819,7 +822,7 @@ export function FornaContainer(element, passedOptions) {
 
         } else if (newColorScheme == 'positions') {
             nodes.style('fill', function(d) { 
-                scale = d3.scale.linear()
+                var scale = d3.scale.linear()
                 .range(["#98df8a", "#dbdb8d", "#ff9896"])
                 .interpolate(d3.interpolateLab)
                 .domain([1, 1 + (d.rna.rnaLength - 1) / 2, d.rna.rnaLength]);
@@ -829,7 +832,7 @@ export function FornaContainer(element, passedOptions) {
         } else if (newColorScheme == 'custom') {
             // scale to be used in case the user passes scalar
             // values rather than color names
-            scale = d3.scale.linear()
+            var scale = d3.scale.linear()
             .interpolate(d3.interpolateLab)
             .domain(self.customColors.domain)
             .range(self.customColors.range);
@@ -989,34 +992,32 @@ export function FornaContainer(element, passedOptions) {
             return {'translate': [0,0], 'scale': 1};
 
         // Get the bounding box
-        minX = d3.min(self.graph.nodes.map(function(d) {return d.x;}));
-        minY = d3.min(self.graph.nodes.map(function(d) {return d.y;}));
+        var minX = d3.min(self.graph.nodes.map(function(d) {return d.x;}));
+        var minY = d3.min(self.graph.nodes.map(function(d) {return d.y;}));
 
-        maxX = d3.max(self.graph.nodes.map(function(d) {return d.x;}));
-        maxY = d3.max(self.graph.nodes.map(function(d) {return d.y;}));
+        var maxX = d3.max(self.graph.nodes.map(function(d) {return d.x;}));
+        var maxY = d3.max(self.graph.nodes.map(function(d) {return d.y;}));
 
 
         // The width and the height of the molecule
-        molWidth = maxX - minX;
-        molHeight = maxY - minY;
+        var molWidth = maxX - minX;
+        var molHeight = maxY - minY;
 
         // how much larger the drawing area is than the width and the height
-        widthRatio = self.options.svgW / (molWidth + 1);
-        heightRatio = self.options.svgH / (molHeight + 1);
+        var widthRatio = self.options.svgW / (molWidth + 1);
+        var heightRatio = self.options.svgH / (molHeight + 1);
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most
-        minRatio = Math.min(widthRatio, heightRatio) * 0.8;
+        var minRatio = Math.min(widthRatio, heightRatio) * 0.8;
 
         // the new dimensions of the molecule
-        newMolWidth = molWidth * minRatio;
-        newMolHeight = molHeight * minRatio;
+        var newMolWidth = molWidth * minRatio;
+        var newMolHeight = molHeight * minRatio;
 
         // translate so that it's in the center of the window
-        xTrans = -(minX) * minRatio + (self.options.svgW - newMolWidth) / 2;
-        yTrans = -(minY) * minRatio + (self.options.svgH - newMolHeight) / 2;
-
-
+        var xTrans = -(minX) * minRatio + (self.options.svgW - newMolWidth) / 2;
+        var yTrans = -(minY) * minRatio + (self.options.svgH - newMolHeight) / 2;
 
         return {'translate': [xTrans, yTrans], 'scale': minRatio};
     };
@@ -1233,17 +1234,17 @@ export function FornaContainer(element, passedOptions) {
             d3.event.preventDefault(); 
     });
 
-    linkKey = function(d) {
+    var linkKey = function(d) {
         return d.uid;
     };
 
-    nodeKey = function(d) {
-        key = d.uid;
+    var nodeKey = function(d) {
+        var key = d.uid;
         return key;
     };
 
     
-    updateRnaGraph = function(r) {
+    var updateRnaGraph = function(r) {
         var nucleotidePositions = r.getPositions('nucleotide');
         var labelPositions = r.getPositions('label');
 
@@ -1261,7 +1262,7 @@ export function FornaContainer(element, passedOptions) {
         .updateLinkUids();
     };
 
-    removeLink = function(d) {
+    var removeLink = function(d) {
         // remove a link between two nodes
         index = self.graph.links.indexOf(d);
 
@@ -1294,7 +1295,7 @@ export function FornaContainer(element, passedOptions) {
         self.update();
     };
 
-    linkClick = function(d) {
+    var linkClick = function(d) {
         if (!shiftKeydown) {
             return;
         }
@@ -1333,7 +1334,7 @@ export function FornaContainer(element, passedOptions) {
         self.update();
     };
 
-    nodeMouseclick = function(d) {
+    var nodeMouseclick = function(d) {
         if (d3.event.defaultPrevented) return;
 
         if (!ctrlKeydown) {
@@ -1346,7 +1347,7 @@ export function FornaContainer(element, passedOptions) {
         d3.select(this).select('circle').classed("selected", d.selected = self.options.applyForce && !d.previouslySelected);
     };
 
-    nodeMouseup = function(d) {
+    var nodeMouseup = function(d) {
         if (mousedownNode) {
             mouseupNode = d;
 
@@ -1382,7 +1383,7 @@ export function FornaContainer(element, passedOptions) {
         }
     };
 
-    nodeMousedown = function(d) {
+    var nodeMousedown = function(d) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
             var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
@@ -1661,7 +1662,7 @@ export function FornaContainer(element, passedOptions) {
         return gnodesEnter;
     };
 
-    nodeTooltip = function(d) {
+    var nodeTooltip = function(d) {
         nodeTooltips = {};
 
         nodeTooltips.nucleotide = d.num;
@@ -1695,14 +1696,14 @@ export function FornaContainer(element, passedOptions) {
         allLinks.exit().remove();
 
 
-        domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        var domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         var colors = d3.scale.category10().domain(domain);
 
             var gnodes = visNodes.selectAll('g.gnode')
             .data(self.graph.nodes, nodeKey);
             //.attr('pointer-events', 'all');
 
-            gnodesEnter = gnodes.enter();
+            var gnodesEnter = gnodes.enter();
 
             self.createNewNodes(gnodesEnter);
             gnodes.exit().remove();
@@ -1710,7 +1711,7 @@ export function FornaContainer(element, passedOptions) {
 
             //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
             //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
-            realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
+            var realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
             var xlink;
             if (self.displayFakeLinks)
@@ -1726,9 +1727,9 @@ export function FornaContainer(element, passedOptions) {
             xlink.on('click', linkClick);
 
             self.force.on("tick", function() {
-                var q = d3.geom.quadtree(realNodes),
-                i = 0,
-                n = realNodes.length;
+                var q = d3.geom.quadtree(realNodes);
+                var i = 0;
+                var n = realNodes.length;
 
                 while (++i < n) q.visit(collide(realNodes[i]));
 

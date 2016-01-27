@@ -1,6 +1,6 @@
 var numberSort = function(a,b) { return a - b; };
 
-function arraysEqual(a, b) {
+export function arraysEqual(a, b) {
     // courtesy of 
     // http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
   if (a === b) return true;
@@ -16,7 +16,7 @@ function arraysEqual(a, b) {
   return true;
 }
 
-function RNAUtilities() {
+export function RNAUtilities() {
     var self = this;
 
     // the brackets to use when constructing dotbracket strings
@@ -25,8 +25,8 @@ function RNAUtilities() {
     self.bracketRight = ")]}>abcdefghijklmnopqrstuvwxyz".split("");
 
     self.inverseBrackets = function(bracket) {
-        res = {};
-        for (i = 0; i < bracket.length; i++) {
+        var res = {};
+        for (var i = 0; i < bracket.length; i++) {
             res[bracket[i]] = i;
         }
         return res;
@@ -39,7 +39,7 @@ function RNAUtilities() {
         var TURN = 0;    //minimal number of nucleotides in the hairpin
 
         /* array init */
-        mm = new Array(n + 1);
+        var mm = new Array(n + 1);
         for(var i = 0; i <= n; i++){
             mm[i] = new Array(n + 1);
             for(var j = i; j <= n; j++)
@@ -117,24 +117,24 @@ function RNAUtilities() {
 
     self.dotbracketToPairtable = function(dotbracket) {
         // create an array and initialize it to 0
-        pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
+        var pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
         
         //  the first element is always the length of the RNA molecule
         pt[0] = dotbracket.length;
 
         // store the pairing partners for each symbol
-        stack = {};
-        for (i = 0; i < self.bracketLeft.length; i++) {
+        var stack = {};
+        for (var i = 0; i < self.bracketLeft.length; i++) {
             stack[i] = [];
         }
 
         // lookup the index of each symbol in the bracket array
-        inverseBracketLeft = self.inverseBrackets(self.bracketLeft);
-        inverseBracketRight = self.inverseBrackets(self.bracketRight);
+        var inverseBracketLeft = self.inverseBrackets(self.bracketLeft);
+        var inverseBracketRight = self.inverseBrackets(self.bracketRight);
 
-        for (i = 0; i < dotbracket.length; i++) {
-            a = dotbracket[i];
-            ni = i + 1;
+        for (var i = 0; i < dotbracket.length; i++) {
+            var a = dotbracket[i];
+            var ni = i + 1;
 
             if (a == '.' || a == 'o') {
                 // unpaired
@@ -145,7 +145,7 @@ function RNAUtilities() {
                     stack[inverseBracketLeft[a]].push(ni);
                 } else if (a in inverseBracketRight){
                     // close pair?
-                    j = stack[inverseBracketRight[a]].pop();
+                    var j = stack[inverseBracketRight[a]].pop();
 
                     pt[ni] = j;
                     pt[j] = ni;
@@ -155,7 +155,7 @@ function RNAUtilities() {
             }
         }
 
-        for (key in stack) {
+        for (var key in stack) {
             if (stack[key].length > 0) {
                 throw "Unmatched base at position " + stack[key][0];
             }
@@ -185,14 +185,15 @@ function RNAUtilities() {
 
     self.pairtableToDotbracket = function(pt) {
         // store the pairing partners for each symbol
-        stack = {};
-        for (i = 0; i < pt[0]; i++) {
+        var stack = {};
+        for (var i = 0; i < pt[0]; i++) {
             stack[i] = [];
         }
 
-        seen = {};
-        res = "";
-        for (i = 1; i < pt[0] + 1; i++) {
+        var seen = {};
+        var res = "";
+        var i;
+        for (var i = 1; i < pt[0] + 1; i++) {
             if (pt[i] !== 0 && pt[i] in seen) {
                 throw "Invalid pairtable contains duplicate entries";
             }
@@ -221,12 +222,13 @@ function RNAUtilities() {
 
         var origFrom = from;
         var origTo = to;
+        var i;
 
         for (var i = from; i <= to; i++)
             if (pt[i] !== 0 && (pt[i] < from || pt[i] > to))
                 unmatched.push([i,pt[i]]);
 
-        for (i = origFrom; i <= origTo; i++) {
+        for (var i = origFrom; i <= origTo; i++) {
             while (pt[i] === 0 && i <= origTo) i++;
 
             to = pt[i];
@@ -272,4 +274,4 @@ function RNAUtilities() {
     };
 
 }
-rnaUtilities = new RNAUtilities();
+export var rnaUtilities = new RNAUtilities();

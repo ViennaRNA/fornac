@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "d3-context-menu": "*",
-    "d3": "~3.5.13"
+    "d3": "~3.5.13",
+    "jquery": "~2.2.0"
   }
 }

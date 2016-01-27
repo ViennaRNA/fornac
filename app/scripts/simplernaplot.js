@@ -1,4 +1,4 @@
-simpleXyCoordinates = function(pair_table)
+export function simpleXyCoordinates (pair_table)
 {
   var INIT_ANGLE=0.;     /* initial bending angle */
   var INIT_X = 100.;     /* coordinate of first digit */
@@ -17,11 +17,12 @@ simpleXyCoordinates = function(pair_table)
   var stack_size = Array.apply(null, new Array(16+Math.floor(len/5)))
                     .map(Number.prototype.valueOf, 0); 
 
-  lp = stk = 0;
+  var lp = 0;
+  var stk = 0;
   var PIHALF = Math.PI / 2;
 
 
-  loop = function(i, j, pair_table)
+  var loop = function(i, j, pair_table)
   /* i, j are the positions AFTER the last pair of a stack; i.e
      i-1 and j+1 are paired. */
   {
@@ -99,7 +100,7 @@ simpleXyCoordinates = function(pair_table)
   x[0]  = INIT_X;
   y[0]  = INIT_Y;
 
-  poss = [];
+  var poss = [];
 
   poss.push([x[0], y[0]]);
   for (i = 1; i < len; i++) {
