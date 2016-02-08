@@ -7,7 +7,7 @@
   "description": "RNA secondary structure display component",
   "main": ["dist/scripts/fornac.js",
            "dist/styles/fornac.css"],
-  "moduleType": [],
+  "moduleType": "es6",
   "keywords": [
     "RNA",
     "RNA secondary structure",
