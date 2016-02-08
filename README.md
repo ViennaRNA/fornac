@@ -27,10 +27,8 @@ This is an RNA container.
 <div id='rna_ss'> </div>
 This after the RNA container.
 
-    <link rel='stylesheet' type='text/css' href='css/fornac.css' />
-    <script type='text/javascript' src='js/jquery.js'></script>
-    <script type='text/javascript' src='js/d3.js'></script>
-    <script type='text/javascript' src='js/fornac.js'></script>
+    <link rel='stylesheet' type='text/css' href='styles/fornac.css' />
+    <script type='text/javascript' src='scripts/fornac.js'></script>
     <script type='text/javascript'>
         var container = new FornaContainer("#rna_ss", {'applyForce': false});
 
@@ -70,12 +68,23 @@ Change how often nucleotide numbers are labelled with their number.
 
 ### Installation
 
-You need [ANT](http://ant.apache.org/), [Java](http://java.com) and [GNU Make](https://www.gnu.org/software/make/) installed if you want to produce a release javascript file (compressed and optimized). Then just type:
-```sh
-$ make
+First:
+
 ```
-Optionally, you can just cat all javascript files into one file:
-```sh
-$ cat src/*.js > js/fornac.js
+npm install
+bower install
 ```
-Do not forget to run the unit tests in `test.html` to check for regressions!
+
+To debug:
+
+```
+gulp serve
+```
+
+To build:
+
+```
+gulp build
+```
+
+The output will be placed in the `dist` directory.
