@@ -7,7 +7,14 @@ svg {
 
 circle.node {
   stroke: #ccc;
-  stroke-width: 0px;
+  stroke-width: 1px;
+  opacity: 1;
+  fill: white;
+}
+
+polygon.node {
+  stroke: #ccc;
+  stroke-width: 1px;
   opacity: 1;
   fill: white;
 }
@@ -16,10 +23,10 @@ circle.node.label {
     stroke: transparent;
     stroke-width: 0;
     fill: white;
+    display: inline;
 }
 
 circle.outline_node {
-    opacity: 0;
     stroke-width: 1px;
     fill: red;
 }

@@ -1,16 +1,32 @@
-var number_sort = function(a,b) { return a - b; };
+var numberSort = function(a,b) { return a - b; };
 
-function RNAUtilities() {
+export function arraysEqual(a, b) {
+    // courtesy of 
+    // http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (a.length != b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+export function RNAUtilities() {
     var self = this;
 
     // the brackets to use when constructing dotbracket strings
     // with pseudoknots
-    self.bracket_left =  "([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    self.bracket_right = ")]}>abcdefghijklmnopqrstuvwxyz".split("");
+    self.bracketLeft =  "([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    self.bracketRight = ")]}>abcdefghijklmnopqrstuvwxyz".split("");
 
-    self.inverse_brackets = function(bracket) {
-        res = {};
-        for (i = 0; i < bracket.length; i++) {
+    self.inverseBrackets = function(bracket) {
+        var res = {};
+        for (var i = 0; i < bracket.length; i++) {
             res[bracket[i]] = i;
         }
         return res;
@@ -23,7 +39,7 @@ function RNAUtilities() {
         var TURN = 0;    //minimal number of nucleotides in the hairpin
 
         /* array init */
-        mm = new Array(n + 1);
+        var mm = new Array(n + 1);
         for(var i = 0; i <= n; i++){
             mm[i] = new Array(n + 1);
             for(var j = i; j <= n; j++)
@@ -53,16 +69,16 @@ function RNAUtilities() {
         return mm;
     };
 
-    self.backtrackMaximumMatching = function(mm, old_pt) {
+    self.backtrackMaximumMatching = function(mm, oldPt) {
       var pt = Array.apply(null, 
                            Array(mm.length)).map(function() { return 0 }); 
                            //create an array containing zeros
 
-      self.mm_bt(mm, pt, old_pt, 1, mm.length-1);
+      self.mmBt(mm, pt, oldPt, 1, mm.length-1);
       return pt;
     }
 
-    self.mm_bt = function(mm, pt, old_pt, i, j){
+    self.mmBt = function(mm, pt, oldPt, i, j){
         // Create a pairtable from the backtracking
       var maximum = mm[i][j];
       var TURN = 0;
@@ -70,26 +86,26 @@ function RNAUtilities() {
       if(j - i - 1 < TURN) return;    /* no more pairs */
 
       if(mm[i][j-1] == maximum){      /* j is unpaired */
-        self.mm_bt(mm, pt, old_pt, i, j-1);
+        self.mmBt(mm, pt, oldPt, i, j-1);
         return;
       }
 
       for(var q = j - TURN - 1; q >= i; q--){  /* j is paired with some q */
-        if (old_pt[j] !== q)
+        if (oldPt[j] !== q)
             continue;
 
-        var left_part     = (q > i) ? mm[i][q-1] : 0;
-        var enclosed_part = (j - q - 1 > 0) ? mm[q+1][j-1] : 0;
+        var leftPart     = (q > i) ? mm[i][q-1] : 0;
+        var enclosedPart = (j - q - 1 > 0) ? mm[q+1][j-1] : 0;
 
-        if(left_part + enclosed_part + 1 == maximum) {
+        if(leftPart + enclosedPart + 1 == maximum) {
             // there's a base pair between j and q
             pt[q] = j;
             pt[j] = q;
 
             if(i < q) 
-                self.mm_bt(mm, pt, old_pt, i, q - 1);
+                self.mmBt(mm, pt, oldPt, i, q - 1);
 
-            self.mm_bt(mm, pt, old_pt, q + 1, j - 1);
+            self.mmBt(mm, pt, oldPt, q + 1, j - 1);
             return;
         }
       }
@@ -101,35 +117,35 @@ function RNAUtilities() {
 
     self.dotbracketToPairtable = function(dotbracket) {
         // create an array and initialize it to 0
-        pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
+        var pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
         
         //  the first element is always the length of the RNA molecule
         pt[0] = dotbracket.length;
 
         // store the pairing partners for each symbol
-        stack = {};
-        for (i = 0; i < self.bracket_left.length; i++) {
+        var stack = {};
+        for (var i = 0; i < self.bracketLeft.length; i++) {
             stack[i] = [];
         }
 
         // lookup the index of each symbol in the bracket array
-        inverse_bracket_left = self.inverse_brackets(self.bracket_left);
-        inverse_bracket_right = self.inverse_brackets(self.bracket_right);
+        var inverseBracketLeft = self.inverseBrackets(self.bracketLeft);
+        var inverseBracketRight = self.inverseBrackets(self.bracketRight);
 
-        for (i = 0; i < dotbracket.length; i++) {
-            a = dotbracket[i];
-            ni = i + 1;
+        for (var i = 0; i < dotbracket.length; i++) {
+            var a = dotbracket[i];
+            var ni = i + 1;
 
-            if (a == '.') {
+            if (a == '.' || a == 'o') {
                 // unpaired
                 pt[ni] = 0;
             } else {
-                if (a in inverse_bracket_left) {
+                if (a in inverseBracketLeft) {
                     // open pair?
-                    stack[inverse_bracket_left[a]].push(ni);
-                } else if (a in inverse_bracket_right){
+                    stack[inverseBracketLeft[a]].push(ni);
+                } else if (a in inverseBracketRight){
                     // close pair?
-                    j = stack[inverse_bracket_right[a]].pop();
+                    var j = stack[inverseBracketRight[a]].pop();
 
                     pt[ni] = j;
                     pt[j] = ni;
@@ -139,7 +155,7 @@ function RNAUtilities() {
             }
         }
 
-        for (key in stack) {
+        for (var key in stack) {
             if (stack[key].length > 0) {
                 throw "Unmatched base at position " + stack[key][0];
             }
@@ -148,7 +164,7 @@ function RNAUtilities() {
         return pt;
     };
 
-    self.insert_into_stack = function(stack, i, j) {
+    self.insertIntoStack = function(stack, i, j) {
         var k = 0;
         while (stack[k].length > 0 && stack[k][stack[k].length - 1] < j) {
             k += 1;
@@ -158,7 +174,7 @@ function RNAUtilities() {
         return k;
     };
 
-    self.delete_from_stack = function(stack, j) {
+    self.deleteFromStack = function(stack, j) {
         var k = 0;
         while (stack[k].length === 0 || stack[k][stack[k].length-1] != j) {
             k += 1;
@@ -169,14 +185,15 @@ function RNAUtilities() {
 
     self.pairtableToDotbracket = function(pt) {
         // store the pairing partners for each symbol
-        stack = {};
-        for (i = 0; i < pt[0]; i++) {
+        var stack = {};
+        for (var i = 0; i < pt[0]; i++) {
             stack[i] = [];
         }
 
-        seen = {};
-        res = "";
-        for (i = 1; i < pt[0] + 1; i++) {
+        var seen = {};
+        var res = "";
+        var i;
+        for (var i = 1; i < pt[0] + 1; i++) {
             if (pt[i] !== 0 && pt[i] in seen) {
                 throw "Invalid pairtable contains duplicate entries";
             }
@@ -186,9 +203,9 @@ function RNAUtilities() {
                 res += '.';
             } else {
                 if (pt[i] > i) {
-                    res += self.bracket_left[self.insert_into_stack(stack, i, pt[i])];
+                    res += self.bracketLeft[self.insertIntoStack(stack, i, pt[i])];
                 } else {
-                    res += self.bracket_right[self.delete_from_stack(stack, i)];
+                    res += self.bracketRight[self.deleteFromStack(stack, i)];
                 }
             }
         }
@@ -196,22 +213,23 @@ function RNAUtilities() {
         return res;
     };
 
-    self.find_unmatched = function(pt, from, to) {
+    self.findUnmatched = function(pt, from, to) {
         /*
          * Find unmatched nucleotides in this molecule.
          */
-        var to_remove = [];
+        var toRemove = [];
         var unmatched = [];
 
-        var orig_from = from;
-        var orig_to = to;
+        var origFrom = from;
+        var origTo = to;
+        var i;
 
         for (var i = from; i <= to; i++)
             if (pt[i] !== 0 && (pt[i] < from || pt[i] > to))
                 unmatched.push([i,pt[i]]);
 
-        for (i = orig_from; i <= orig_to; i++) {
-            while (pt[i] === 0 && i <= orig_to) i++;
+        for (var i = origFrom; i <= origTo; i++) {
+            while (pt[i] === 0 && i <= origTo) i++;
 
             to = pt[i];
 
@@ -220,13 +238,13 @@ function RNAUtilities() {
                 to--;
             }
             
-            to_remove = to_remove.concat(self.find_unmatched(pt, i, to));
+            toRemove = toRemove.concat(self.findUnmatched(pt, i, to));
         }
 
         if (unmatched.length > 0)
-            to_remove.push(unmatched);
+            toRemove.push(unmatched);
 
-        return to_remove;
+        return toRemove;
     };
 
     self.removePseudoknotsFromPairtable = function(pt) {
@@ -238,14 +256,14 @@ function RNAUtilities() {
          */
 
         var mm = self.maximumMatching(pt);
-        var new_pt = self.backtrackMaximumMatching(mm, pt);
+        var newPt = self.backtrackMaximumMatching(mm, pt);
         var removed = [];
 
         for (var i = 1; i < pt.length; i++) {
             if (pt[i] < i)
                 continue;
 
-            if (new_pt[i] != pt[i])  {
+            if (newPt[i] != pt[i])  {
                 removed.push([i, pt[i]]);
                 pt[pt[i]] = 0;
                 pt[i] = 0;
@@ -256,5 +274,4 @@ function RNAUtilities() {
     };
 
 }
-
-rnaUtilities = new RNAUtilities();
+export var rnaUtilities = new RNAUtilities();

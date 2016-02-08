@@ -1,0 +1,29 @@
+{
+  "name": "fornac",
+  "homepage": "https://github.com/pkerpedjiev/fornac",
+  "authors": [
+    "Peter Kerpedjiev <pkerp@tbi.univie.ac.at>"
+  ],
+  "description": "RNA secondary structure display component",
+  "main": "js/fornac.js",
+  "moduleType": [],
+  "keywords": [
+    "RNA",
+    "secondary-structure",
+    "bioinformatics"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3-context-menu": "*",
+    "d3": "~3.5.13",
+    "jquery": "~2.2.0"
+  }
+}

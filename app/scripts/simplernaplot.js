@@ -1,4 +1,4 @@
-simpleXyCoordinates = function(pair_table)
+export function simpleXyCoordinates (pair_table)
 {
   var INIT_ANGLE=0.;     /* initial bending angle */
   var INIT_X = 100.;     /* coordinate of first digit */
@@ -17,11 +17,12 @@ simpleXyCoordinates = function(pair_table)
   var stack_size = Array.apply(null, new Array(16+Math.floor(len/5)))
                     .map(Number.prototype.valueOf, 0); 
 
-  lp = stk = 0;
+  var lp = 0;
+  var stk = 0;
   var PIHALF = Math.PI / 2;
 
 
-  loop = function(i, j, pair_table)
+  var loop = function(i, j, pair_table)
   /* i, j are the positions AFTER the last pair of a stack; i.e
      i-1 and j+1 are paired. */
   {
@@ -36,7 +37,7 @@ simpleXyCoordinates = function(pair_table)
   var    begin, v, diff;
   var  polygon;
 
-  var remember = Array.apply(null, new Array((1+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
+  var remember = Array.apply(null, new Array((3+Math.floor((j-i)/5)*2))).map(Number.prototype.valueOf, 0);
 
   i_old = i-1, j++;         /* j has now been set to the partner of the
                                previous pair for correct while-loop
@@ -57,7 +58,7 @@ simpleXyCoordinates = function(pair_table)
           do {
               k++, l--, ladder++;        /* go along the stack region */
           }
-          while (pair_table[k] == l);
+          while ((pair_table[k] == l) && (pair_table[k] > k));
 
           fill = ladder-2;
           if (ladder >= 2) {
@@ -73,7 +74,8 @@ simpleXyCoordinates = function(pair_table)
               }
           }
           stack_size[++stk] = ladder;
-          loop(k, l, pair_table);
+          if (k <= l)
+            loop(k, l, pair_table);
       }
   }
 
@@ -98,7 +100,7 @@ simpleXyCoordinates = function(pair_table)
   x[0]  = INIT_X;
   y[0]  = INIT_Y;
 
-  poss = [];
+  var poss = [];
 
   poss.push([x[0], y[0]]);
   for (i = 1; i < len; i++) {

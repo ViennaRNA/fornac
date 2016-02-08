@@ -1,3 +1,5 @@
+import {arraysEqual,RNAUtilities,rnaUtilities} from './rnautils.js';
+
 var numberSort = function(a,b) { return a - b; };
 
 function generateUUID(){                                                                                        
@@ -27,152 +29,6 @@ if(typeof(String.prototype.trim) === "undefined")
         };
     }
 
-function ColorScheme(colorsText) {
-    var self = this;
-    self.colorsText = colorsText;
-
-    self.parseRange = function(rangeText) {
-        //parse a number range such as 1-10 or 3,7,9 or just 7
-        var parts = rangeText.split(',')
-        var nums = [];
-
-        for (var i = 0; i < parts.length; i++) {
-            //could be 1 or 10-11  or something like that
-            var parts1 = parts[i].split('-');
-
-            if (parts1.length == 1)
-                nums.push(parseInt(parts1[0]));
-            else if (parts1.length == 2) {
-                var from = parseInt(parts1[0]);
-                var to = parseInt(parts1[1]);
-
-                // add each number in this range
-                for (var j = from; j <= to; j++) 
-                    nums.push(j)
-            } else {
-                console.log('Malformed range (too many dashes):', rangeText);
-            }
-        }
-
-        return nums;
-    }
-
-    self.parseColorText = function(colorText) {
-        /* Parse the text of an RNA color string. Instructions and description
-         * of the format are given below.
-         *
-         * The return is a json double dictionary indexed first by the 
-         * molecule name, then by the nucleotide. This is then applied
-         * by force.js to the RNAs it is displaying. When no molecule
-         * name is specified, the color is applied to all molecules*/
-        var lines = colorText.split('\n');
-        var currMolecule = '';
-        var counter = 1;
-        var colorsJson = {colorValues: {'':{}}, range:['white', 'steelblue']};
-        var domainValues = [];
-
-
-        for (var i = 0; i < lines.length; i++) {
-
-            if (lines[i][0] == '>') {
-                // new molecule
-                currMolecule = lines[i].trim().slice(1);
-                counter = 1;
-
-                colorsJson.colorValues[currMolecule] = {};
-                continue;
-            }
-
-            words = lines[i].trim().split(/[\s]+/);
-
-            for (var j = 0; j < words.length; j++) {
-                if (isNaN(words[j])) {
-                    if (words[j].search("range") === 0) {
-                        //there's a color scale in this entry
-                        parts = words[j].split('=');
-                        partsRight = parts[1].split(':')
-                        colorsJson.range = [partsRight[0], partsRight[1]];
-                        continue;
-                    }
-
-                    if (words[j].search("domain") == 0) {
-                        //there's a color scale in this entry
-                        parts = words[j].split('=');
-                        partsRight = parts[1].split(':')
-                        colorsJson.domain = [partsRight[0], partsRight[1]];
-                        continue;
-                    }
-
-                    // it's not a number, should be a combination 
-                    // of a number (nucleotide #) and a color
-                    parts = words[j].split(':');
-                    nums = self.parseRange(parts[0]);
-                    color = parts[1]
-
-                    for (var k = 0; k < nums.length; k++) {
-                        if (isNaN(color)) {
-                            colorsJson.colorValues[currMolecule][nums[k]] = color;
-                        } else {
-                            colorsJson.colorValues[currMolecule][nums[k]] = +color;
-                            domainValues.push(Number(color));
-                        }
-                    }
-                } else {
-                    //it's a number, so we add it to the list of values
-                    //seen for this molecule
-                    colorsJson.colorValues[currMolecule][counter] = Number(words[j]);
-                    counter += 1;
-
-                    domainValues.push(Number(words[j]));
-                }
-            }
-        }
-
-        if (!('domain' in colorsJson))
-            colorsJson.domain = [Math.min.apply(null, domainValues), Math.max.apply(null, domainValues)];
-
-        self.colorsJson = colorsJson;
-
-        return self;
-    };
-
-    self.normalizeColors = function() {
-        /* 
-         * Normalize the passed in values so that they range from
-         * 0 to 1
-         */
-        var value;
-
-        for (var moleculeName in self.colorsJson) {
-            var minNum = Number.MAX_VALUE;
-            var maxNum = Number.MIN_VALUE;
-
-            // iterate once to find the min and max values;
-            for (var resnum in self.colorsJson.colorValues[moleculeName]) {
-                value = self.colorsJson.colorValues[moleculeName][resnum];
-                if (typeof value == 'number') {
-                    if (value < minNum)
-                        minNum = value;
-                    if (value > maxNum)
-                        maxNum = value;
-                }
-            }
-
-            // iterate again to normalize
-            for (resnum in self.colorsJson.colorValues[moleculeName]) {
-                value = self.colorsJson.colorValues[moleculeName][resnum];
-                if (typeof value == 'number') {
-                    self.colorsJson.colorValues[moleculeName][resnum] = (value - minNum ) / (maxNum - minNum);
-                }
-            }
-        }
-
-        return self;
-    };
-
-    self.parseColorText(self.colorsText);
-    return self;
-}
 
 function ProteinGraph(structName, size, uid) {
     var self = this;
@@ -212,13 +68,13 @@ function ProteinGraph(structName, size, uid) {
 
 }
 
-function RNAGraph(seq, dotbracket, structName) {
+export function RNAGraph(seq, dotbracket, structName, startNumber) {
     var self = this;
 
     self.type = 'rna';
     self.circularizeExternal = false;
 
-    if (arguments.length == 0) {
+    if (arguments.length === 0) {
         self.seq = '';
         self.dotbracket = '';
         self.structName = '';
@@ -226,6 +82,10 @@ function RNAGraph(seq, dotbracket, structName) {
         self.seq = seq;
         self.dotbracket = dotbracket;  //i.e. ..((..))..
         self.structName = structName;
+    }
+
+    if (arguments.length < 4) {
+        startNumber = 1;
     }
 
     self.circular = false;
@@ -237,7 +97,6 @@ function RNAGraph(seq, dotbracket, structName) {
     }
 
     self.uid = generateUUID();
-    self.rnaLength = self.dotbracket.length;
 
     self.elements = [];            //store the elements and the 
                                    //nucleotides they contain
@@ -245,8 +104,10 @@ function RNAGraph(seq, dotbracket, structName) {
     self.nucsToNodes = {};
 
     self.addUids = function(uids) {
-        for (var i = 0; i < uids.length; i++)
-            self.nodes[i].uid = uids[i];
+        var nucleotideNodes = self.nodes.filter(function(d) { return d.nodeType == 'nucleotide'; });
+
+        for (var i = 0; i < uids.length && i < nucleotideNodes.length; i++)
+            nucleotideNodes[i].uid = uids[i];
 
         return self;
     };
@@ -255,10 +116,59 @@ function RNAGraph(seq, dotbracket, structName) {
         self.pairtable = rnaUtilities.dotbracketToPairtable(self.dotbracket);
     };
 
+    self.removeBreaks = function(targetString) {
+        // Remove all chain breaks (denoted with a '&', which indicate
+        // that the input represents more than one strand)
+        var breaks = [];
+        var breakIndex = -1;
+
+        while ((breakIndex = targetString.indexOf('&')) >= 0) {
+            breaks.push(breakIndex);
+            targetString = targetString.substring(0, breakIndex) + "oo" + targetString.substring(breakIndex+1, targetString.length);
+
+            console.log('targetString:', targetString);
+        }
+
+        return {targetString: targetString,  breaks: breaks};
+    };
+
+    var ret = self.removeBreaks(self.dotbracket);
+    self.dotbracket = ret.targetString;
+    self.dotBracketBreaks = ret.breaks;
+
+    ret = self.removeBreaks(self.seq);
+    self.seq = ret.targetString;
+    self.seqBreaks = ret.breaks;
+
+    self.calculateStartNumberArray = function() {
+        self.startNumberArray = [];
+        var breaks = 0;
+
+        for (var i = 0; i < self.dotbracket.length; i++) {
+            self.startNumberArray.push(startNumber); 
+
+            if (self.dotbracket[i] == 'o') {
+                startNumber = -i;
+            }
+        }
+
+    };
+
+    self.calculateStartNumberArray();
+
+    self.rnaLength = self.dotbracket.length;
+
+    if (!arraysEqual(self.dotBracketBreaks, self.seqBreaks)) {
+        console.log('WARNING: Sequence and structure breaks not equal');
+        console.log('WARNING: Using the breaks in the structure');
+    }
+    
+    console.log('dotBracketBreaks', self.dotBracketBreaks);
+    console.log('sequenceBreaks', self.seqBreaks);
     self.computePairtable();
 
     self.addPositions = function(nodeType, positions) {
-        labelNodes = self.nodes.filter(function(d) { return d.nodeType == nodeType; });
+        var labelNodes = self.nodes.filter(function(d) { return d.nodeType == nodeType; });
 
         for  (var i = 0; i < labelNodes.length; i++) {
             labelNodes[i].x = positions[i][0];
@@ -270,9 +180,47 @@ function RNAGraph(seq, dotbracket, structName) {
         return self;
     };
 
+    self.breakNodesToFakeNodes = function() {
+        // convert all the nodes following breaks to fake nodes
+        var labelNodes = self.nodes.filter(function(d) { return d.nodeType == 'nucleotide'; });
+
+        // if a node was an artifical break node, convert it to a middle
+        for (var i = 0; i < labelNodes.length; i++) {
+            if (self.dotbracket[i] == 'o')
+                labelNodes[i].nodeType = 'middle';
+        }
+
+        for (var i = 0; i < self.elements.length; i++) {
+            var broken = false;
+
+            // change the elemType of the other nodes in the element containing
+            // the break
+            for (var j = 0; j < self.elements[i][2].length; j++) {
+                if (self.dotBracketBreaks.indexOf(self.elements[i][2][j]) >= 0)
+                    broken = true;
+            }
+
+            if (broken) {
+                console.log('broken:', broken, self.elements[i][2]);
+                self.elements[i][2].map(function(x) {
+                    if (x == 0)
+                        return;
+                    self.nodes[x-1].elemType = 'e';
+                });
+            } else {
+                self.elements[i][2].map(function(x) {
+                    if (x == 0)
+                        return;
+                    self.nodes[x-1].elemType = self.elements[i][0];
+                });
+            }
+        }
+        return self;
+    };
+
     self.getPositions = function(nodeType) {
-        positions = [];
-        nucleotideNodes = self.nodes.filter(function(d) { return d.nodeType == nodeType; });
+        var positions = [];
+        var nucleotideNodes = self.nodes.filter(function(d) { return d.nodeType == nodeType; });
 
         for (var i = 0; i < nucleotideNodes.length; i++)
             positions.push([nucleotideNodes[i].x, nucleotideNodes[i].y]);
@@ -284,7 +232,7 @@ function RNAGraph(seq, dotbracket, structName) {
         /* Get the positions of each node so that they
          * can be passed to elementsToJson later
          */
-        uids = [];
+        var uids = [];
         for (var i = 0; i < self.dotbracket.length; i++)
             uids.push(self.nodes[i].uid);
 
@@ -292,14 +240,14 @@ function RNAGraph(seq, dotbracket, structName) {
     };
 
     self.reinforceStems = function() {
-        pt = self.pairtable;
-        relevantElements = elements.filter( function(d) {
+        var pt = self.pairtable;
+        var relevantElements = self.elements.filter( function(d) {
             return d[0] == 's' && d[2].length >= 4;
         });
 
         for (var i = 0; i < relevantElements.length; i++) {
-            allNucs = relevantElements[i][2];
-            nucs = allNucs.slice(0, allNucs.length / 2);
+            var allNucs = relevantElements[i][2];
+            var nucs = allNucs.slice(0, allNucs.length / 2);
 
             for (var j = 0; j < nucs.length-1; j++) {
                 self.addFakeNode([nucs[j], nucs[j+1], pt[nucs[j+1]], pt[nucs[j]]]);
@@ -317,15 +265,16 @@ function RNAGraph(seq, dotbracket, structName) {
             return d !== 0 && d <= self.dotbracket.length;
         };
 
-        for (i=0; i < self.elements.length; i++) {
+        for (var i = 0; i < self.elements.length; i++) {
             if (self.elements[i][0] == 's' || (!self.circularizeExternal && self.elements[i][0] == 'e'))
                 continue;
 
             var nucs = self.elements[i][2].filter(filterNucs);
 
+            console.log('self.elements[i][2]:', self.elements[i][0], self.elements[i][2]);
             if (self.elements[i][0] == 'e') {
                 var newNode1 = {'name': '',
-                    'num': -1,
+                    'num': -3,
                     //'radius': 18 * radius -6,
                     'radius': 0,
                     'rna': self,
@@ -338,7 +287,7 @@ function RNAGraph(seq, dotbracket, structName) {
                     'py': self.nodes[self.rnaLength-1].py,
                     'uid': generateUUID() };
                 var newNode2 = {'name': '',
-                    'num': -1,
+                    'num': -2,
                     //'radius': 18 * radius -6,
                     'radius': 0,
                     'rna': self,
@@ -358,6 +307,7 @@ function RNAGraph(seq, dotbracket, structName) {
             }
             
 
+            console.log('nucs:', nucs);
             self.addFakeNode(nucs);
         }
 
@@ -370,7 +320,7 @@ function RNAGraph(seq, dotbracket, structName) {
         }
 
         return self;
-    }
+    };
 
     self.addFakeNode = function(nucs) {
         var linkLength = 18; //make sure this is consistent with the value in force.js
@@ -378,12 +328,12 @@ function RNAGraph(seq, dotbracket, structName) {
         var angle = (3.1415 * 2) / (2 * nucs.length);
         var radius =  linkLength / (2 * Math.tan(angle));
 
-        var fakeNodeUid = ""
+        var fakeNodeUid = "";
 
         for (var i = 0; i < nucs.length; i++)
             fakeNodeUid += self.nodes[nucs[i]-1].uid;
 
-        newNode = {'name': '',
+        var newNode = {'name': '',
                          'num': -1,
                          //'radius': 18 * radius -6,
                          'radius': radius,
@@ -394,17 +344,16 @@ function RNAGraph(seq, dotbracket, structName) {
                          'uid': fakeNodeUid };
         self.nodes.push(newNode);
 
-        newX = 0;
-        newY = 0;
-        coordsCounted = 0;
+        var newX = 0;
+        var newY = 0;
+        var coordsCounted = 0;
 
         angle = (nucs.length - 2) * 3.14159 / (2 * nucs.length);
         radius = 0.5 / Math.cos(angle);
 
-        for (j = 0; j < nucs.length; j++) {
+        for (var j = 0; j < nucs.length; j++) {
             if (nucs[j] === 0 || nucs[j] > self.dotbracket.length)
                 continue;
-            
 
             //link to the center node
             self.links.push({'source': self.nodes[nucs[j] - 1],
@@ -422,8 +371,8 @@ function RNAGraph(seq, dotbracket, structName) {
                                  'uid': generateUUID() });
             }
 
-            ia = ((nucs.length - 2) * 3.14159) / nucs.length;
-            c = 2 * Math.cos(3.14159 / 2 - ia / 2);
+            var ia = ((nucs.length - 2) * 3.14159) / nucs.length;
+            var c = 2 * Math.cos(3.14159 / 2 - ia / 2);
             //link to over-neighbor
             self.links.push({'source': self.nodes[nucs[j] - 1],
                              'target': self.nodes[nucs[(j + 2) % nucs.length] - 1],
@@ -432,7 +381,7 @@ function RNAGraph(seq, dotbracket, structName) {
 
             // calculate the mean of the coordinats in this loop
             // and place the fake node there
-            fromNode = self.nodes[nucs[j]-1];
+            var fromNode = self.nodes[nucs[j]-1];
             if ('x' in fromNode) {
                 newX += fromNode.x;
                 newY += fromNode.y;
@@ -451,7 +400,6 @@ function RNAGraph(seq, dotbracket, structName) {
         }
 
         return self;
-
     };
 
     self.connectFakeNodes = function() {
@@ -471,10 +419,10 @@ function RNAGraph(seq, dotbracket, structName) {
         for (var i = 1; i <= self.nodes.length; i++) 
             nucsToNodes[i] = [];
 
-        for (i = 0; i < fakeNodes.length; i++) {
+        for (var i = 0; i < fakeNodes.length; i++) {
             var thisNode = fakeNodes[i];
 
-            // each fake node represents a certain set of nucleotdies (thisNode.nucs)
+            // each fake node represents a certain set of nucleotides (thisNode.nucs)
             for (var j = 0; j < thisNode.nucs.length; j++) {
                 var thisNuc = thisNode.nucs[j];
 
@@ -509,40 +457,61 @@ function RNAGraph(seq, dotbracket, structName) {
          * force-directed layout to generate a visualization of 
          * the structure.
          */
-        pt = self.pairtable;
-        elements = self.elements;
+        var pt = self.pairtable;
+        var elements = self.elements;
 
         self.nodes = [];
         self.links = [];
 
         //create a reverse lookup so we can find out the type
         //of element that a node is part of
-        elemTypes = {};
+        var elemTypes = {};
 
         //sort so that we count stems last
         self.elements.sort();
 
         for (var i = 0; i < self.elements.length; i++) {
-            nucs = self.elements[i][2];
-            for (j = 0; j < nucs.length; j++) {
+            var nucs = self.elements[i][2];
+            for (var j = 0; j < nucs.length; j++) {
                 elemTypes[nucs[j]] = self.elements[i][0];
             }
         }
 
-        for (i = 1; i <= pt[0]; i++) {
+        for (var i = 1; i <= pt[0]; i++) {
+            var nodeName = self.seq[i-1];
+
+            if (self.dotBracketBreaks.indexOf(i-1) >= 0 ||
+                self.dotBracketBreaks.indexOf(i-2) >= 0) {
+                nodeName = '';
+            }
+
             //create a node for each nucleotide
-            self.nodes.push({'name': self.seq[i-1],
-                             'num': i,
-                             'radius': 6,
+            self.nodes.push({'name': nodeName,
+                             'num': i + self.startNumberArray[i-1] - 1,
+                             'radius': 5,
                              'rna': self,
                              'nodeType': 'nucleotide',
                              'structName': self.structName,
                              'elemType': elemTypes[i],
-                             'uid': generateUUID() });
+                             'uid': generateUUID(),
+                             'linked': false});
         }
 
+        for (var i = 0; i < self.nodes.length; i++) {
+            if (i === 0) 
+                self.nodes[i].prevNode = null;
+            else {
+                self.nodes[i].prevNode = self.nodes[i-1];
+            }
 
-        for (i = 1; i <= pt[0]; i++) {
+            if (i == self.nodes.length-1) 
+                self.nodes[i].nextNode = null;
+            else {
+                self.nodes[i].nextNode = self.nodes[i+1];
+            }
+        }
+
+        for (var i = 1; i <= pt[0]; i++) {
 
             if (pt[i] !== 0) {
                 // base-pair links
@@ -555,16 +524,23 @@ function RNAGraph(seq, dotbracket, structName) {
 
             if (i > 1) {
                 // backbone links
-                self.links.push({'source': self.nodes[i-2],
-                                 'target': self.nodes[i-1],
-                                 'linkType': 'backbone',
-                                 'value': 1,
-                                 'uid': generateUUID() });
+                if (self.dotBracketBreaks.indexOf(i-1) === -1 &&
+                    self.dotBracketBreaks.indexOf(i-2) == -1 &&
+                    self.dotBracketBreaks.indexOf(i-3) == -1) {
+                    // there is no break in the strands here
+                    // we can add a backbone link
+                    self.links.push({'source': self.nodes[i-2],
+                                    'target': self.nodes[i-1],
+                                    'linkType': 'backbone',
+                                    'value': 1,
+                                    'uid': generateUUID() });
+                    self.nodes[i-1].linked = true;
+                }
             }
         }
 
         //add the pseudoknot links
-        for (i = 0; i < self.pseudoknotPairs.length; i++) {
+        for (var i = 0; i < self.pseudoknotPairs.length; i++) {
             self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
                             'target': self.nodes[self.pseudoknotPairs[i][1]-1],
                             'linkType': 'pseudoknot',
@@ -617,8 +593,29 @@ function RNAGraph(seq, dotbracket, structName) {
                 u5.push(i);
                 if (level === 0)
                     return [['e',level, u5.sort(numberSort)]];
-                else
-                    return [['h',level, u5.sort(numberSort)]];
+                else {
+                    // check to see if we have chain breaks due
+                    // to multiple strands in the input
+                    var external = false;
+                    var left = [];
+                    var right = [];
+                    for (var k = 0; k < u5.length; k++) {
+                        if (external)
+                            right.push(u5[k]);
+                        else
+                            left.push(u5[k]);
+
+                        if (self.dotBracketBreaks.indexOf(u5[k]) >= 0)
+                            external = true;
+                    }
+
+                    if (external) {
+                        return [['h',level, u5.sort(numberSort)]];
+                    }
+                    else
+                        // if not, this is a simple hairpin loop
+                        return [['h',level, u5.sort(numberSort)]];
+                }
             }
 
             if (pt[i] != j) {
@@ -656,7 +653,7 @@ function RNAGraph(seq, dotbracket, structName) {
                 u5.push(i);
                 u3.push(j);
 
-                combined = u5.concat(u3);
+                var combined = u5.concat(u3);
                 if (combined.length > 4) {
                     if (level === 0)
                         elements.push(['e',level, u5.concat(u3).sort(numberSort)]);
@@ -691,6 +688,7 @@ function RNAGraph(seq, dotbracket, structName) {
             labelInterval = 10;
         }
 
+
         if (arguments.length === 1) 
             labelInterval = 10;
 
@@ -700,17 +698,19 @@ function RNAGraph(seq, dotbracket, structName) {
         if (labelInterval <= 0) 
             console.log('The label interval entered in invalid:', labelInterval);
 
-        for (i = 1; i <= pt[0]; i++) {
+        for (var i = 1; i <= self.pairtable[0]; i++) {
             // add labels
             if (i % labelInterval === 0) {
                 //create a node for each label
                 var newX, newY;
 
-                thisNode = self.nodes[i-1]
+                var thisNode = self.nodes[i-1];
+                var prevNode, nextNode;
+                var prevVec, nextVec;
 
                 if (self.rnaLength == 1) {
-                    nextVec = [thisNode.x - 15, thisNode.y]
-                    prevVec = [thisNode.x - 15, thisNode.y]
+                    nextVec = [thisNode.x - 15, thisNode.y];
+                    prevVec = [thisNode.x - 15, thisNode.y];
                 } else {
                     // if we're labelling the first node, then label it in relation to the last
                     if (i == 1)
@@ -728,7 +728,7 @@ function RNAGraph(seq, dotbracket, structName) {
                     if (self.pairtable[nextNode.num] !== 0 &&
                         self.pairtable[prevNode.num] !== 0 &&
                         self.pairtable[thisNode.num] !== 0) {
-                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num]-1]
+                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num]-1];
                     }
 
                     // this node is paired but at least one of its neighbors is unpaired
@@ -745,15 +745,15 @@ function RNAGraph(seq, dotbracket, structName) {
                     }
                 }
 
-                combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
-                vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
-                normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
-                offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
+                var combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
+                var vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
+                var normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
+                var offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
 
-                newX = self.nodes[i-1].x + offsetVec[0];
-                newY = self.nodes[i-1].y + offsetVec[1];
+                var newX = self.nodes[i-1].x + offsetVec[0];
+                var newY = self.nodes[i-1].y + offsetVec[1];
 
-                newNode = {'name': i + startNumber - 1,
+                var newNode = {'name': i + self.startNumberArray[i-1] - 1,
                                  'num': -1,
                                  'radius': 6,
                                  'rna': self,
@@ -765,7 +765,7 @@ function RNAGraph(seq, dotbracket, structName) {
                                  'px': newX,
                                  'py': newY,
                                  'uid': generateUUID() };
-                newLink = {'source': self.nodes[i-1],
+                var newLink = {'source': self.nodes[i-1],
                             'target': newNode,
                             'value': 1,
                             'linkType': 'label_link',
@@ -814,9 +814,23 @@ function RNAGraph(seq, dotbracket, structName) {
         return self;
     };
 
+    self.reassignLinkUids = function() {
+        // reassign uids to the links, corresponding to the uids of the two nodes
+        // they connect
+        var i;
+
+        for (var i = 0; i < self.links.length; i++) {
+            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
+        }
+
+        return self;
+    }
+
     self.removePseudoknots = function() {
         if (self.pairtable.length > 1)
-            self.pseudoknotPairs = self.pseudoknotPairs.concat(rnaUtilities.removePseudoknotsFromPairtable(self.pairtable));
+            self.pseudoknotPairs = rnaUtilities.removePseudoknotsFromPairtable(self.pairtable);
+        else
+            self.pseudoknotPairs = [];
 
         return self;
     };
@@ -828,7 +842,7 @@ function RNAGraph(seq, dotbracket, structName) {
         var pt = self.pairtable;
         var pseudoknotPairs = self.pseudoknotPairs;
 
-        for (i = 0; i < pseudoknotPairs.length; i++) {
+        for (var i = 0; i < pseudoknotPairs.length; i++) {
             pt[pseudoknotPairs[i][0]] = pseudoknotPairs[i][1];
             pt[pseudoknotPairs[i][1]] = pseudoknotPairs[i][0];
         }
@@ -841,7 +855,7 @@ function RNAGraph(seq, dotbracket, structName) {
         self.recalculateElements();
 }
 
-moleculesToJson = function(moleculesJson) {
+export function moleculesToJson(moleculesJson) {
     /* Convert a list of RNA and protein molecules to a list of RNAGraph
      * ProteinGraph and extraLinks structure */
 
@@ -853,6 +867,7 @@ moleculesToJson = function(moleculesJson) {
     // Create the graphs for each molecule
     for (var i = 0; i < moleculesJson.molecules.length; i++) {
         var molecule = moleculesJson.molecules[i];
+        var rg;
 
         if (molecule.type == 'rna') {
             rg = new RNAGraph(molecule.seq, molecule.ss, molecule.header);
@@ -879,7 +894,7 @@ moleculesToJson = function(moleculesJson) {
     }
 
     //Add the extra links
-    for (i = 0; i < moleculesJson.extraLinks.length; i++) {
+    for (var i = 0; i < moleculesJson.extraLinks.length; i++) {
         link = moleculesJson.extraLinks[i];
         
         link.source = nodes[link.source];
@@ -890,4 +905,4 @@ moleculesToJson = function(moleculesJson) {
     }
 
     return {"graphs": graphs, "extraLinks": extraLinks};
-}
+};
