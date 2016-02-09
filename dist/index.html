@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title><link rel="stylesheet" href="styles/fornac.css"></head><body>This is an RNA container.<div id="rna_ss"></div>This after the RNA container.<link rel="stylesheet" href="styles/fornac.css"><script src="scripts/fornac.js"></script><script type="text/javascript">var container = new fornac.FornaContainer("#rna_ss",
+        {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+
+var options = {'structure': '..((..((...[)).(((..].))).))..',
+    'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+};
+var options1 = {'structure': '..((..((...[)).(((..].))).))..',
+    'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+};
+/*
+   var options = {'structure': '((...)).',
+   'sequence':             'CCCCCCCC'
+   };
+ */
+
+//container.transitionRNA(options1.structure);
+container.addRNA(options1.structure, options1);</script></body></html>
