@@ -3,6 +3,10 @@
   "version": "1.1.2",
   "description": "An RNA secondary structure display component",
   "main": "dist/scripts/fornac.js",
+   "repository": {
+        "type": "git",
+        "url": "https://github.com/pkerpedjiev/fornac"
+   },
   "engines": {
     "node": ">=0.12.0"
   },
