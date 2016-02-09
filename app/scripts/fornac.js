@@ -4,6 +4,7 @@
 
 import d3 from 'd3';
 import $ from 'jquery';
+
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from './rnacolorscheme.js';

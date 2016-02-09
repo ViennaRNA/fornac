@@ -21,7 +21,7 @@ function isNormalInteger(str) {
     return /^\+?(0|[1-9]\d*)$/.test(str);
 }
 
-if(typeof(String.prototype.trim) === "undefined")
+if(typeof(String.prototype.trim) === 'undefined')
     {
         String.prototype.trim = function() 
         {
@@ -30,7 +30,7 @@ if(typeof(String.prototype.trim) === "undefined")
     }
 
 
-function ProteinGraph(structName, size, uid) {
+export function ProteinGraph(structName, size, uid) {
     var self = this;
 
     self.type = 'protein';
@@ -124,7 +124,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
         while ((breakIndex = targetString.indexOf('&')) >= 0) {
             breaks.push(breakIndex);
-            targetString = targetString.substring(0, breakIndex) + "oo" + targetString.substring(breakIndex+1, targetString.length);
+            targetString = targetString.substring(0, breakIndex) + 'oo' + targetString.substring(breakIndex+1, targetString.length);
 
             console.log('targetString:', targetString);
         }
@@ -328,7 +328,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         var angle = (3.1415 * 2) / (2 * nucs.length);
         var radius =  linkLength / (2 * Math.tan(angle));
 
-        var fakeNodeUid = "";
+        var fakeNodeUid = '';
 
         for (var i = 0; i < nucs.length; i++)
             fakeNodeUid += self.nodes[nucs[i]-1].uid;
@@ -434,10 +434,10 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
                     var distance = nucsToNodes[thisNuc][k].radius + thisNode.radius;
 
-                    self.links.push({"source": nucsToNodes[thisNuc][k],
-                                      "target": thisNode,
-                                      "value": distance / linkLength,
-                                      "linkType": "fake_fake"});
+                    self.links.push({'source': nucsToNodes[thisNuc][k],
+                                      'target': thisNode,
+                                      'value': distance / linkLength,
+                                      'linkType': 'fake_fake'});
 
                     // note that we've already seen this link
                     linked.add(JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort()));
@@ -904,5 +904,5 @@ export function moleculesToJson(moleculesJson) {
         extraLinks.push(link);
     }
 
-    return {"graphs": graphs, "extraLinks": extraLinks};
+    return {'graphs': graphs, 'extraLinks': extraLinks};
 };
