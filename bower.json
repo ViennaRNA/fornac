@@ -5,8 +5,10 @@
     "Peter Kerpedjiev <pkerp@tbi.univie.ac.at>"
   ],
   "description": "RNA secondary structure display component",
-  "main": ["dist/scripts/fornac.js",
-           "dist/styles/fornac.css"],
+  "main": [
+    "dist/scripts/fornac.js",
+    "dist/styles/fornac.css"
+  ],
   "moduleType": "es6",
   "keywords": [
     "RNA",
@@ -25,5 +27,6 @@
   "dependencies": {
     "d3": "~3.5.13",
     "jquery": "~2.2.0"
-  }
+  },
+  "version": "1.1.3"
 }
