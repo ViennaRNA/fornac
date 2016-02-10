@@ -1,6 +1,7 @@
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
 import {ColorScheme} from './rnacolorscheme.js';
+import {rnaUtilities} from './rnautils.js';
 
 function isNormalInteger(str) {
     //http://stackoverflow.com/a/10834843/899470
@@ -16,7 +17,7 @@ if(typeof(String.prototype.trim) === 'undefined')
     }
 
 
-function rnaPlot() {
+export function rnaPlot() {
     var options = {
         'width': 400,
         'height': 400,
@@ -31,17 +32,17 @@ function rnaPlot() {
 
     var xScale, yScale;
 
-    function createTransformToFillViewport(xValues, yValues) {
+    function createTransformToFillViewport(xValues, yValues, molName='') {
         // create transform that will scale the x and y values so that
         // they fill the available viewport
     
         // find out leftmost, rightmost, topmost, bottommost positions of each
         // nucleotide so that we can create a scale
-        var xExtent = d3.extent(rg.nodes.map(function(d) { return d.x; })) 
-        var yExtent = d3.extent(rg.nodes.map(function(d) { return d.y; })) 
+        var xExtent = d3.extent(xValues);
+        var yExtent = d3.extent(yValues); 
 
         var NAME_OFFSET = 30;
-        if (rg.name != '')
+        if (molName != '')
             yExtent[1] += NAME_OFFSET;
 
         // add the radius of the nucleotides
@@ -216,7 +217,7 @@ function rnaPlot() {
         selection.each(function(data) {
             // data should be a dictionary containing at least a structure
             // and possibly a sequence
-            rg = new RNAGraph(data.sequence, data.structure, data.name)
+            let rg = new RNAGraph(data.sequence, data.structure, data.name)
                     .recalculateElements()
                     .elementsToJson()
                     .addName(data.name);
@@ -578,5 +579,3 @@ function RNAUtilities() {
     };
 
 }
-
-rnaUtilities = new RNAUtilities();

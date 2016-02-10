@@ -2,20 +2,21 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  context: __dirname + "/app",
-  entry: './scripts/fornac.js',
+  context: __dirname + '/app',
+  entry: {fornac: './scripts/fornac.js',
+      rnaplot: './scripts/rnaplot.js'},
   output: {
-    path: __dirname + "/build",
-    filename: "fornac.js",
-    libraryTarget: "var",
-    library: "fornac"
+    path: __dirname + '/build',
+    filename: '[name].js',
+    libraryTarget: 'var',
+    library: '[name]'
   },
   module: {
     loaders: [
       { 
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
         query: {
           presets: ['es2015']
         }

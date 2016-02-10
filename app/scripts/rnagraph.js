@@ -451,6 +451,26 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
     };
 
+    self.addExtraLinks = function(extraLinks) {
+        if (typeof extraLinks == 'undefined')
+            return self;
+
+        for (var i = 0; i < extraLinks.length; i++) {
+            var source = self.getNodeFromNucleotides(extraLinks[i].from);
+            var target = self.getNodeFromNucleotides(extraLinks[i].to);
+
+            var newLink = {'source': source, 'target': target, 'linkType': 'extra',
+                'extraLinkType': extraLinks[i].linkType, 'uid': generateUUID() };
+
+                console.log('newLink:', newLink);
+
+                self.links.push(newLink);
+        }
+
+        return self;
+    }
+
+
     self.elementsToJson = function() {
         /* Convert a set of secondary structure elements to a json
          * representation of the graph that can be used with d3's
@@ -850,6 +870,17 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         self.pseudoknotPairs = [];
         return self;
     };
+
+    self.addName = function(name) {
+        if (typeof name == 'undefined') {
+            self.name = '';
+            return self;
+        } else {
+            self.name = name;
+            return self;
+        }
+    };
+
 
     if (self.rnaLength > 0)
         self.recalculateElements();
