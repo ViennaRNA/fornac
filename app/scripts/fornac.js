@@ -5,6 +5,8 @@
 import d3 from 'd3';
 import $ from 'jquery';
 
+import '../styles/fornac.css';
+
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from './rnacolorscheme.js';
@@ -764,6 +766,7 @@ export function FornaContainer(element, passedOptions) {
 
     // set css for svg
     var style = svg.append('svg:style');
+    
     $.get(self.options.cssFileLocation, function(content){
         style.text(content.replace(/[\s\n]/g, ''));
     });
