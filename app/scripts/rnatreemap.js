@@ -1,4 +1,6 @@
-function rnaTreemapChart() {
+import {rnaPlot} from './rnaplot.js';
+
+export function rnaTreemapChart() {
     var width = 550;
     var height = 400;
 
@@ -6,11 +8,11 @@ function rnaTreemapChart() {
         // create a background rectangle for each RNA structure
         selection.each(function(d) {
             d3.select(this)
-            .attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ')' })
+            .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')' })
             .append('rect')
             .classed('structure-background-rect', true)
-            .attr("width", function(d) { return Math.max(0, d.dx); })
-            .attr("height", function(d) { return Math.max(0, d.dy); })
+            .attr('width', function(d) { return Math.max(0, d.dx); })
+            .attr('height', function(d) { return Math.max(0, d.dy); })
 
             // draw the actual RNA structure
             var chart = rnaPlot()
@@ -44,7 +46,7 @@ function rnaTreemapChart() {
             // this may be a little redundant, since we expect the calling
             // selection to contain their own g elements
             var gEnter = d3.select(this).append('g');
-            var treemapGnodes = gEnter.datum(data).selectAll(".treemapNode")
+            var treemapGnodes = gEnter.datum(data).selectAll('.treemapNode')
             .data(treemap.nodes)
             .enter()
             .append('g')

@@ -4,7 +4,8 @@ var webpack = require('webpack');
 module.exports = {
   context: __dirname + '/app',
   entry: {fornac: './scripts/fornac.js',
-      rnaplot: './scripts/rnaplot.js'},
+      rnaplot: ['./scripts/rnaplot.js'],
+      rnatreemap: './scripts/rnatreemap.js'},
   output: {
     path: __dirname + '/build',
     filename: '[name].js',
