@@ -3,6 +3,8 @@ import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
 import {ColorScheme} from './rnacolorscheme.js';
 import {rnaUtilities} from './rnautils.js';
 
+import '../styles/rnaplot.css';
+
 function isNormalInteger(str) {
     //http://stackoverflow.com/a/10834843/899470
     return /^\+?(0|[1-9]\d*)$/.test(str);
