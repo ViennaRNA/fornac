@@ -66,7 +66,60 @@ be allowed to flop around as the force layout dictates:
 
 Change how often nucleotide numbers are labelled with their number.
 
-### Installation
+
+#### Implementation
+
+Each RNA molecule is represented as a JSON file which encodes all of the
+information necessary to display it. The example shows a trivial and slightly
+modified example. `nodeType` can be either `nucleotide` or `label` or `middle`,
+the latter of which is used only as a placeholder for maintaining an aesthetically
+pleasing layout.
+
+The links can be any of `basepair` (representing a basepair between two
+nucleotides), `backbone` (backbone bond between adjacent nodes), `pseudoknot`
+(pseudoknot, extracted from the specified structure using maximum matching
+algorithm), `extra` (extra links specified by the user), `label_link` (links
+between nucleotides and their nucleotide number labels), `fake` (invisible
+links for maintaining the layout),  and `fake_fake` (invisible links for
+maintaining the layout).
+
+This structure is initially created in `rnagraph.js` starting from a sequence
+and dotbracket string.
+
+'''
+{
+  "nodes": 
+    [ {
+      "name": "A",
+      "num": 1,
+      "radius": 5,
+      "rna": null,
+      "nodeType": "nucleotide",
+      "structName": "empty",
+      "elemType": "e",
+      "uid": "44edb966-aca9-4058-a6bc-784a34959329",
+      "linked": false,
+      "prevNode": null,
+      "nextNode": null,
+      "x": 100,
+      "px": 100,
+      "y": 100,
+      "py": 100
+    }
+  "links": 
+    [ {
+      "source": null,
+      "target": null,
+      "linkType": "basepair",
+      "value": 1,
+      "uid": "6664a569-5af1-4d86-8ada-d1c00da72a899f87a224-52a0-4ede-a29c-04fddc09e4c4"
+      }
+    ]
+}
+'''
+
+
+### Development
 
 First:
 

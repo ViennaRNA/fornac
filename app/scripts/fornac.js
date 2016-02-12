@@ -155,6 +155,21 @@ export function FornaContainer(element, passedOptions) {
     self.addRNA = function(structure, passedOptions) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
 
+        /*
+         * Code to display the JSONs representing the structure
+         *
+        rnaJson.nodes[0].rna = null;
+        rnaJson.nodes[0].nextNode = null;
+
+        rnaJson.links[0].source = null;
+        rnaJson.links[0].target = null;
+
+        console.log(rnaJson.nodes[0]);
+        console.log(rnaJson.links[0]);
+        console.log(JSON.stringify(rnaJson.nodes[0],null,2));
+        console.log(JSON.stringify(rnaJson.links[0],null,2));
+        */
+
         if (arguments.length === 1)
             passedOptions = {};
 
