@@ -67,7 +67,7 @@ be allowed to flop around as the force layout dictates:
 Change how often nucleotide numbers are labelled with their number.
 
 
-#### Implementation
+## Implementation
 
 Each RNA molecule is represented as a JSON file which encodes all of the
 information necessary to display it. The example shows a trivial and slightly
@@ -122,7 +122,7 @@ and dotbracket string.
 ```
 
 
-### Development
+## Development
 
 First:
 
