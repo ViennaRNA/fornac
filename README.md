@@ -86,7 +86,7 @@ maintaining the layout).
 This structure is initially created in `rnagraph.js` starting from a sequence
 and dotbracket string.
 
-'''
+```
 {
   "nodes": 
     [ {
@@ -116,7 +116,7 @@ and dotbracket string.
       }
     ]
 }
-'''
+```
 
 
 ### Development
