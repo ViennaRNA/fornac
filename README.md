@@ -105,7 +105,9 @@ and dotbracket string.
       "px": 100,
       "y": 100,
       "py": 100
-    }
+    },
+    ...
+    ],
   "links": 
     [ {
       "source": null,
@@ -113,7 +115,8 @@ and dotbracket string.
       "linkType": "basepair",
       "value": 1,
       "uid": "6664a569-5af1-4d86-8ada-d1c00da72a899f87a224-52a0-4ede-a29c-04fddc09e4c4"
-      }
+      },
+      ...
     ]
 }
 ```
