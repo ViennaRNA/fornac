@@ -3,7 +3,6 @@
 */
 
 import d3 from 'd3';
-import $ from 'jquery';
 
 import '../styles/fornac.css';
 
@@ -21,7 +20,6 @@ export function FornaContainer(element, passedOptions) {
         'applyForce': true,
         'initialSize': null,
         'allowPanningAndZooming': true,
-        'cssFileLocation': 'css/fornac.css',
         'transitionDuration': 500,
         'resizeSvgOnResize': true   //change the size of the svg when resizing the container
                                     //sometimes its beneficial to turn this off, especially when
@@ -761,13 +759,6 @@ export function FornaContainer(element, passedOptions) {
     .attr('height', self.options.svgH)
     .attr('id', 'plotting-area');
 
-    // set css for svg
-    var style = svg.append('svg:style');
-    
-    $.get(self.options.cssFileLocation, function(content){
-        style.text(content.replace(/[\s\n]/g, ''));
-    });
-    
     self.options.svg = svg;
 
     var svgGraph = svg.append('svg:g')
@@ -1034,7 +1025,6 @@ export function FornaContainer(element, passedOptions) {
 
         if (shiftKeydown) return;
 
-        keyIsDown = true;
         switch (d3.event.keyCode) {
             case 16:
                 shiftKeydown = true;
