@@ -87,4 +87,4 @@ To build:
 gulp build
 ```
 
-The output will be placed in the `dist` directory.
+The output will be placed in the `dist` directory. To use `fornac` in a web page, simply include `dist/scripts/fornac.js` in your web page.

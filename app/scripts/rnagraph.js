@@ -126,7 +126,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
             breaks.push(breakIndex);
             targetString = targetString.substring(0, breakIndex) + 'oo' + targetString.substring(breakIndex+1, targetString.length);
 
-            console.log('targetString:', targetString);
         }
 
         return {targetString: targetString,  breaks: breaks};
@@ -163,8 +162,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         console.log('WARNING: Using the breaks in the structure');
     }
     
-    console.log('dotBracketBreaks', self.dotBracketBreaks);
-    console.log('sequenceBreaks', self.seqBreaks);
     self.computePairtable();
 
     self.addPositions = function(nodeType, positions) {
@@ -201,7 +198,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
             }
 
             if (broken) {
-                console.log('broken:', broken, self.elements[i][2]);
                 self.elements[i][2].map(function(x) {
                     if (x == 0)
                         return;
@@ -271,7 +267,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
             var nucs = self.elements[i][2].filter(filterNucs);
 
-            console.log('self.elements[i][2]:', self.elements[i][0], self.elements[i][2]);
             if (self.elements[i][0] == 'e') {
                 var newNode1 = {'name': '',
                     'num': -3,
@@ -307,7 +302,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
             }
             
 
-            console.log('nucs:', nucs);
             self.addFakeNode(nucs);
         }
 
@@ -461,8 +455,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
             var newLink = {'source': source, 'target': target, 'linkType': 'extra',
                 'extraLinkType': extraLinks[i].linkType, 'uid': generateUUID() };
-
-                console.log('newLink:', newLink);
 
                 self.links.push(newLink);
         }

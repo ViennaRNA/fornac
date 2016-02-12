@@ -43,7 +43,6 @@ export function FornaContainer(element, passedOptions) {
         self.options.svgH = 800;
     }
 
-    console.log('d3:', d3);
     var fill = d3.scale.category20();
 
     // mouse event vars
@@ -163,7 +162,6 @@ export function FornaContainer(element, passedOptions) {
 
         if ('extraLinks' in passedOptions) {
             // presumably the passed in links are within the passed molecule
-            console.log('rnaJson:', rnaJson, passedOptions.extraLinks);
             var newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
             
             self.extraLinks = self.extraLinks.concat(newLinks);
@@ -179,7 +177,6 @@ export function FornaContainer(element, passedOptions) {
     };
 
     self.addExternalLinks = function(rnaJson, externalLinks) {
-        console.log('rnaJson:', rnaJson);
         var newLinks = [];
 
         for (var i = 0; i < externalLinks.length; i++) {
