@@ -603,9 +603,9 @@ export function FornaContainer(element, passedOptions) {
         if (self.options.initialSize != null)
             return;
 
-        var svgW = $(element).width();
-        var svgH = $(element).height();
-
+        var svgH = d3.select(element).node().offsetHeight;
+        var svgW = d3.select(element).node().offsetWidth;
+        
         self.options.svgW = svgW;
         self.options.svgH = svgH;
 
