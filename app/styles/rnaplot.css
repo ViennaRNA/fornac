@@ -100,7 +100,6 @@ line.fake {
     stroke-width: 0;
     stroke-opacity: 0;
     opacity: 0;
-    visibility: hidden;
 }
 
 .d3-tip {

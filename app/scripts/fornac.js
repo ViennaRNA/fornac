@@ -699,13 +699,19 @@ export function FornaContainer(element, passedOptions) {
         } else if (newColorScheme == 'custom') {
             // scale to be used in case the user passes scalar
             // values rather than color names
-            var scale = d3.scale.linear()
-            .interpolate(d3.interpolateLab)
-            .domain(self.customColors.domain)
-            .range(self.customColors.range);
+            console.log('self.customColors:', self.customColors);
+            if (typeof self.customColors != 'undefined' &&
+                'domain' in self.customColors &&
+               'range' in self.customColors) {
+                var scale = d3.scale.linear()
+                .interpolate(d3.interpolateLab)
+                .domain(self.customColors.domain)
+                .range(self.customColors.range);
+            }
 
             nodes.style('fill', function(d) {
-                if (typeof self.customColors == 'undefined') {
+                if (typeof self.customColors == 'undefined' ||
+                   !self.customColors.hasOwnProperty('colorValues')) {
                     return 'white';
                 }
                 

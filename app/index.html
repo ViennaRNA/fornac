@@ -16,14 +16,22 @@ This after the RNA container.
 
 <script type='text/javascript'>
 var container = new fornac.FornaContainer("#rna_ss",
-        {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+        {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
 
 var options = {'structure': '..((..((...[)).(((..].))).))..',
     'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
 };
-var options1 = {'structure': '.(.[..)].',
-    'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+/*
+var options1 = {'structure': '.((((....)))).',
+    'sequence': 'GCGGCGAUUGCCGG'
 };
+*/
+
+var options1 = {'structure': '..............',
+    'sequence': 'GCGGCGAUUGCCGG'
+};
+
+container.changeColorScheme('custom')
 /*
    var options = {'structure': '((...)).',
    'sequence':             'CCCCCCCC'
