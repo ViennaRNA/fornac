@@ -699,7 +699,6 @@ export function FornaContainer(element, passedOptions) {
         } else if (newColorScheme == 'custom') {
             // scale to be used in case the user passes scalar
             // values rather than color names
-            console.log('self.customColors:', self.customColors);
             if (typeof self.customColors != 'undefined' &&
                 'domain' in self.customColors &&
                'range' in self.customColors) {
