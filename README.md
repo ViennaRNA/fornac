@@ -39,6 +39,24 @@ This after the RNA container.
         container.addRNA(options.structure, options);
     </script>
 ```
+
+### Co-folded sequences
+
+Display two cofolded sequences using the format of [RNAcofold](http://rna.tbi.univie.ac.at/cgi-bin/RNAcofold.cgi):
+
+![Cofolded sequences](https://raw.githubusercontent.com/pkerpedjiev/fornac/develop/doc/img/cofold_example.png "An example of cofolded sequences displayed using the FornaContainer")
+
+```javascript
+    var container = new fornac.FornaContainer("#cofold_ss",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+                                                     
+    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
+        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
+    };                                                                                     
+    container.addRNA(options.structure, options);
+    container.setSize(); 
+```
+
 ## Options
 
 The `FornaContainer` supports a number of options to allow users to customize how the RNA will be presented.
