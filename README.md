@@ -40,7 +40,7 @@ This after the RNA container.
     </script>
 ```
 
-### Co-folded sequences
+### Cofolded sequences
 
 Display two cofolded sequences using the format of [RNAcofold](http://rna.tbi.univie.ac.at/cgi-bin/RNAcofold.cgi):
 
