@@ -21,22 +21,22 @@ var container = new fornac.FornaContainer("#rna_ss",
 var options = {'structure': '..((..((...[)).(((..].))).))..',
     'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
 };
-/*
 var options1 = {'structure': '.((((....)))).',
+    'sequence': 'GCGACGAUUGUCGG'
+};
+
+var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+    'structure': '..((((((....((((((....))))))....))))))..'}
+
+var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+    'structure': '..((((((....))))))....((((((....))))))..'}
+/*
+var options1 = {'structure': '..............',
     'sequence': 'GCGGCGAUUGCCGG'
 };
 */
 
-var options1 = {'structure': '..............',
-    'sequence': 'GCGGCGAUUGCCGG'
-};
-
 container.changeColorScheme('custom')
-/*
-   var options = {'structure': '((...)).',
-   'sequence':             'CCCCCCCC'
-   };
- */
 
 //container.transitionRNA(options1.structure);
 container.addRNA(options1.structure, options1);
