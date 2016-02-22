@@ -44,7 +44,7 @@ This after the RNA container.
 
 Display two cofolded sequences using the format of [RNAcofold](http://rna.tbi.univie.ac.at/cgi-bin/RNAcofold.cgi):
 
-![Cofolded sequences](https://raw.githubusercontent.com/pkerpedjiev/fornac/develop/doc/img/cofold_example.png "An example of cofolded sequences displayed using the FornaContainer")
+![Cofolded sequences](https://raw.githubusercontent.com/pkerpedjiev/fornac/master/doc/img/cofold_example.png "An example of cofolded sequences displayed using the FornaContainer")
 
 ```javascript
     var container = new fornac.FornaContainer("#cofold_ss",
