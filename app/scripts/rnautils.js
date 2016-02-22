@@ -111,7 +111,7 @@ export function RNAUtilities() {
       }
 
       //alert(i + "," + j + ": backtracking failed!");
-      console.log("FAILED!!!" + i + "," + j + ": backtracking failed!");
+      console.log('FAILED!!!' + i + ',' + j + ': backtracking failed!');
 
     };
 

@@ -1,26 +1,46 @@
-<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title></head><body>This is an RNA container.<div id="rna_ss"></div>This after the RNA container.<script src="scripts/fornac.js"></script><script type="text/javascript">var container = new fornac.FornaContainer("#rna_ss",
-        {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title></head><body>This is an RNA container:<div id="rna_ss"></div>This is an output of an RNA folded using RNAcofold:<div id="cofold_ss"></div><script src="scripts/fornac.js"></script><script type="text/javascript">"use strict"
 
-var options = {'structure': '..((..((...[)).(((..].))).))..',
-    'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
-};
+function normalContainer() {
+    let container = new fornac.FornaContainer("#rna_ss",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+
+    let options = {'structure': '..((..((...[)).(((..].))).))..',
+        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    };
+    container.addRNA(options.structure, options);
+    container.setSize();
+}
+
+
+function cofoldContainer() {
+    var container = new fornac.FornaContainer("#cofold_ss",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+
+    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
+        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
+    };
+    container.addRNA(options.structure, options);
+    container.setSize();
+}
+
+normalContainer();
+cofoldContainer();
+
+
 /*
 var options1 = {'structure': '.((((....)))).',
+    'sequence': 'GCGACGAUUGUCGG'
+};
+
+var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+    'structure': '..((((((....((((((....))))))....))))))..'}
+
+var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+    'structure': '..((((((....))))))....((((((....))))))..'}
+var options1 = {'structure': '..............',
     'sequence': 'GCGGCGAUUGCCGG'
 };
 */
 
-var options1 = {'structure': '..............',
-    'sequence': 'GCGGCGAUUGCCGG'
-};
-
-container.changeColorScheme('custom')
-/*
-   var options = {'structure': '((...)).',
-   'sequence':             'CCCCCCCC'
-   };
- */
-
-//container.transitionRNA(options1.structure);
-container.addRNA(options1.structure, options1);
-container.setSize();</script></body></html>
+//container.changeColorScheme('custom')
+//container.transitionRNA(options1.structure);</script></body></html>

@@ -627,8 +627,10 @@ export function FornaContainer(element, passedOptions) {
         }
 
         //resize the background
+        /*
         rect.attr('width', svgW)
         .attr('height', svgH);
+        */
 
         svg.attr('width', svgW)
         .attr('height', svgH);
@@ -789,14 +791,16 @@ export function FornaContainer(element, passedOptions) {
     if (self.options.allowPanningAndZooming)
         svgGraph.call(self.zoomer);
 
+    /*
     var rect = svgGraph.append('svg:rect')
     .attr('width', self.options.svgW)
     .attr('height', self.options.svgH)
     .attr('fill', 'white')
-    .attr('stroke', 'grey')
-    .attr('stroke-width', 1)
+    //.attr('stroke', 'grey')
+    //.attr('stroke-width', 1)
     //.attr('pointer-events', 'all')
     .attr('id', 'zrect');
+    */
 
     var brush = svgGraph.append('g')
     .datum(function() { return {selected: false, previouslySelected: false}; })
@@ -1346,7 +1350,7 @@ export function FornaContainer(element, passedOptions) {
     
     self.updateStyle = function() {
         // Background
-        rect.classed('transparent', !self.displayParameters.displayBackground);
+        //rect.classed('transparent', !self.displayParameters.displayBackground);
         // Numbering
         visNodes.selectAll('[node_type=label]').classed('transparent', !self.displayParameters.displayNumbering);
         visNodes.selectAll('[label_type=label]').classed('transparent', !self.displayParameters.displayNumbering);
