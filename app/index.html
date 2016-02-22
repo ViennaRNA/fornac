@@ -6,21 +6,48 @@
 </head>
 <body>
 
-This is an RNA container.
+This is an RNA container:
 <div id='rna_ss'> </div>
-This after the RNA container.
+
+This is an output of an RNA folded using RNAcofold:
+<div id='cofold_ss'></div>
+
+
 
 <!-- build:js scripts/fornac.js -->
 <script src='scripts/fornac.js'></script>
 <!-- endbuild -->
 
 <script type='text/javascript'>
-var container = new fornac.FornaContainer("#rna_ss",
-        {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+"use strict"
 
-var options = {'structure': '..((..((...[)).(((..].))).))..',
-    'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
-};
+function normalContainer() {
+    let container = new fornac.FornaContainer("#rna_ss",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+
+    let options = {'structure': '..((..((...[)).(((..].))).))..',
+        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    };
+    container.addRNA(options.structure, options);
+    container.setSize();
+}
+
+
+function cofoldContainer() {
+    var container = new fornac.FornaContainer("#cofold_ss",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+
+    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
+        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
+    };
+    container.addRNA(options.structure, options);
+    container.setSize();
+}
+
+normalContainer();
+cofoldContainer();
+
+
 /*
 var options1 = {'structure': '.((((....)))).',
     'sequence': 'GCGACGAUUGUCGG'
@@ -38,8 +65,6 @@ var options1 = {'structure': '..............',
 
 //container.changeColorScheme('custom')
 //container.transitionRNA(options1.structure);
-container.addRNA(options.structure, options);
-container.setSize();
 
 </script>
 </body>
