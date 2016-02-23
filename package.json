@@ -40,7 +40,9 @@
     "main-bower-files": "^2.5.0",
     "style-loader": "~0.13.0",
     "webpack-stream": "^3.1.0",
-    "wiredep": "^2.2.2"
+    "wiredep": "^2.2.2",
+    "rnautils": "~0.8.1",
+    "gulp-jasmine": "~2.3.0"
   },
   "eslintConfig": {
     "env": {

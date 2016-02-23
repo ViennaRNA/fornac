@@ -1,4 +1,4 @@
-import {arraysEqual,RNAUtilities,rnaUtilities} from './rnautils.js';
+import {arraysEqual,RNAUtilities,rnaUtilities} from 'rnautils';
 
 var numberSort = function(a,b) { return a - b; };
 

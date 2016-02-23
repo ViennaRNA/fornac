@@ -1,4 +1,17 @@
-<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title></head><body>This is an RNA container:<div id="rna_ss"></div>This is an output of an RNA folded using RNAcofold:<div id="cofold_ss"></div><script src="scripts/fornac.js"></script><script type="text/javascript">"use strict"
+<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title></head><body>This is an RNA container:<div id="rna_ss"></div>This is an output of an RNA folded using RNAcofold:<div id="cofold_ss"></div>This is a custom-colored RNA:<div id="custom_colors"></div><script src="scripts/fornac.js"></script><script type="text/javascript">"use strict"
+
+function customColorsContainer() {
+    let container = new fornac.FornaContainer("#custom_colors",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
+
+    let options = {'structure': '..((((....))))..',
+        'sequence':             'AACGCUUCAUAUAAUC'
+    };
+    container.addRNA(options.structure, options);
+    container.setSize();
+
+    container.addCustomColorsText('10:red');
+}
 
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
@@ -25,6 +38,7 @@ function cofoldContainer() {
 
 normalContainer();
 cofoldContainer();
+customColorsContainer();
 
 
 /*

@@ -8,7 +8,7 @@ import '../styles/fornac.css';
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
-import {ColorScheme} from './rnacolorscheme.js';
+import {ColorScheme} from 'rnautils';
 //import 'jquery' from jquery;
 
 export function FornaContainer(element, passedOptions) {
@@ -531,6 +531,12 @@ export function FornaContainer(element, passedOptions) {
         self.customColors = json;
     };
 
+    self.addCustomColorsText = function(customColorsText) {
+        let cs = new ColorScheme(customColorsText);
+        self.customColors = cs.colorsJson;
+        self.changeColorScheme('custom');
+    };
+
     self.clearNodes = function clearNodes() {
         self.graph.nodes = [];
         self.graph.links = [];
@@ -638,7 +644,7 @@ export function FornaContainer(element, passedOptions) {
 
     function changeColors(moleculeColors, d, scale) {
         if (moleculeColors.hasOwnProperty(d.num)) {
-            val = parseFloat(moleculeColors[d.num]);
+            let val = parseFloat(moleculeColors[d.num]);
 
             if (isNaN(val)) {
                 // passed in color is not a scalar, so 
@@ -720,10 +726,10 @@ export function FornaContainer(element, passedOptions) {
                     self.customColors.colorValues[d.structName].hasOwnProperty(d.num)) {
                     // if a molecule name is specified, it supercedes the default colors
                     // (for which no molecule name has been specified)
-                    moleculeColors = self.customColors.colorValues[d.structName];
+                    let moleculeColors = self.customColors.colorValues[d.structName];
                     return changeColors(moleculeColors, d, scale);
                 } else if (self.customColors.colorValues.hasOwnProperty('')) {
-                    moleculeColors = self.customColors.colorValues[''];
+                    let moleculeColors = self.customColors.colorValues[''];
                     return changeColors(moleculeColors, d, scale);
                 }
 
