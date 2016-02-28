@@ -4,13 +4,13 @@ function customColorsContainer() {
     let container = new fornac.FornaContainer("#custom_colors",
             {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
 
-    let options = {'structure': '..((((....))))..',
-        'sequence':             'AACGCUUCAUAUAAUC'
+    let options = {'structure': '..((((....)))).....',
+        'sequence':             'AACGCUUCAUAUAAUCAAA'
     };
     container.addRNA(options.structure, options);
     container.setSize();
 
-    container.addCustomColorsText('10:red');
+    container.addCustomColorsText('1:red         9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8');
 }
 
 function normalContainer() {
