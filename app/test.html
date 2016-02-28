@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+<meta charset="utf-8">
+<title>Fornac Example</title>
+</head>
+<body>
+
+This is an RNA container:
+<div id='rna_ss'> </div>
+
+This is an output of an RNA folded using RNAcofold:
+<div id='cofold_ss'></div>
+
+This is a custom-colored RNA:
+<div id="custom_colors"></div>
+
+<!-- build:js scripts/fornac.js -->
+<script src='scripts/fornac.js'></script>
+<!-- endbuild -->
+
+<script type='text/javascript'>
+"use strict"
+
+    let container = new fornac.FornaContainer("#custom_colors",
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200],
+              'labelInterval': 0});
+
+    /*
+    let options = {'structure': '((((((((((((((((.(((((.(((((.((((.((...))))))))))).)))))))))))))))))))))',
+        'sequence':             'UGUCGGGUAGCUUAUCAGACUGAUGUUGACUGUUGAAUCUCAUGGCAACACCAGUCGAUGGGCUGUCUGACA'
+    };
+    */
+
+    let options = {'structure': '.(((.((((...)))).)))(((.(((........))).))).......',
+        'sequence':             'UGUCGGGUAGCUUAUCAGACUGAUGUUGACUGUUGAAUCUCAUGGCAAC'
+    };
+    
+    container.addRNA(options.structure, options);
+    container.setSize();
+
+    container.addCustomColorsText('');
+
+//container.changeColorScheme('custom')
+//container.transitionRNA(options1.structure);
+
+</script>
+</body>
+</html>
