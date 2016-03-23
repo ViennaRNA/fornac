@@ -1637,11 +1637,15 @@ export function FornaContainer(element, passedOptions) {
                 gnodes.selectAll('[node_type=nucleotide]')
                 .filter((d,i) => { if (i == 0) return true; else return false; })
                 .each((d,i) => {
-                    console.log(d.num, d.x, d.y);
+                    console.log("pos", d.num, d.x, d.y);
                 });
 
-                for (let uid in self.rnas)
-                    console.log(self.rnas[uid].pairtable)
+                for (let uid in self.rnas) {
+                    for (let i = 1; i < self.rnas[uid].pairtable[0]; i++) {
+                        console.log('pt', i, self.rnas[uid].pairtable[i]);
+                    }
+                }
+
             });
             
         self.changeColorScheme(self.colorScheme);
