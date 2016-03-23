@@ -1,10 +1,10 @@
-var Loop = require("./loop");
-var Base = require("./base");
-var Region = require("./region");
-var Connection = require("./connection");
-var Radloop = require("./radloop");
+import {Radloop} from './radloop.js';
+import {Connection} from './connection.js';
+import {Region} from './region.js';
+import {Base} from './base.js';
+import {Loop} from './loop.js';
 
-var NAView = module.exports = function(){
+export function NAView(){
     this.ANUM = 9999.0;
 	this.MAXITER = 500;
 
@@ -34,18 +34,13 @@ var NAView = module.exports = function(){
 	this.BACKBONE_DISTANCE = 27;
 }
 
-NAView.prototype.naview_xy_coordinates = function(pair_table2){
+NAView.prototype.naview_xy_coordinates = function(pair_table){
     var x = [];
 	var y = [];
-    if (pair_table2.length === 0){
+    if (pair_table.length === 0 || pair_table[0] === 0){
         return 0;
     }
     var i;
-    var pair_table = [];
-    pair_table.push(pair_table2.length);
-    for (var j = 0; j < pair_table2.length; j++){
-        pair_table.push(pair_table2[j] + 1);
-    }
     this.nbase = pair_table[0];
     this.bases = [];
     for (var index = 0; index < this.nbase + 1; index++){
@@ -147,6 +142,7 @@ NAView.prototype.construct_loop = function construct_loop(ibase){
     var cp = new Connection();
     var rp = new Region();
     var rlp = new Radloop();
+    console.log('rlp:', rlp);
     retloop = this.loops[this.loop_count++];
     retloop.setNconnection(0);
     retloop.setDepth(0);
@@ -223,7 +219,7 @@ NAView.prototype.find_central_loop = function find_central_loop(){
     var maxdepth = null;
     var i = null;
 
-    determine_depths();
+    determine_depths.bind(this)();
     maxconn = 0;
     maxdepth = -1;
     for (i = 0; i < this.loop_count; i++) {

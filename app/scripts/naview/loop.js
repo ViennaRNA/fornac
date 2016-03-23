@@ -1,4 +1,6 @@
-var Loop = module.exports = function(){
+import {Connection} from './connection.js';
+
+export function Loop() {
 	this.nconnection = null;
 	this.connections = [];
 	this._connections = [];
@@ -19,7 +21,6 @@ Loop.prototype.setNconnection = function(nconnection) {
 }
 
 Loop.prototype.setConnection = function(i, c){
-	var Connection = require("./connection");
 	if (c != null){
 		this._connections[i] = c;
     }

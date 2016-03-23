@@ -1,7 +1,7 @@
-var Loop = require("./loop");
-var Region = require("./region");
+import {Loop} from './loop.js';
+import {Region} from './region.js';
 
-var Connection = module.exports = function(){
+export function Connection() {
 	this.loop = new Loop();
 	this.region = new Region();
 	// Start and end form the 1st base pair of the region.

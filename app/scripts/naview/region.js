@@ -1,4 +1,4 @@
-var Region = module.exports = function(){
+export function Region() {
 	this._start1 = null;
     this._end1 = null;
     this._start2 = null;

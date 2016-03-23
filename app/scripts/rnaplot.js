@@ -227,7 +227,10 @@ export function rnaPlot() {
             // calculate the position of each nucleotide
             // the positions of the labels will be calculated in
             // the addLabels function
-            var positions = simpleXyCoordinates(rg.pairtable);
+            //var positions = simpleXyCoordinates(rg.pairtable);
+            var NAView = new NAView();
+
+            var positions = naview.naview_xy_coordinates(rg.pairtable);
             rg.addPositions('nucleotide', positions)
             .reinforceStems()
             .reinforceLoops()

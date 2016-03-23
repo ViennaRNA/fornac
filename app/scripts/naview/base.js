@@ -1,6 +1,6 @@
-var Region = require("./region");
+import {Region} from './region.js';
 
-var Base = module.exports = function(){
+export function Base() {
 	this.mate = null;
 	this.x = null;
     this.y = null;

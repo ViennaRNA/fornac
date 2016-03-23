@@ -7,6 +7,7 @@ import '../styles/fornac.css';
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from 'rnautils';
+import {NAView} from './naview/naview.js'
 //import 'jquery' from jquery;
 
 export function FornaContainer(element, passedOptions) {
@@ -134,7 +135,17 @@ export function FornaContainer(element, passedOptions) {
 
         if (options.positions.length === 0) {
             // no provided positions means we need to calculate an initial layout
-            options.positions = simpleXyCoordinates(rnaJson.pairtable);
+            //options.positions = simpleXyCoordinates(rnaJson.pairtable);
+
+            var naview = new NAView();
+            console.log('sxy', simpleXyCoordinates(rnaJson.pairtable));
+
+            let naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
+            options.positions = []
+            for (let i = 0; i < naViewPositions.nbase; i++)
+                options.positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
+
+            console.log('options.positions:', options.positions);
         }
 
         rnaJson = rnaJson.elementsToJson()

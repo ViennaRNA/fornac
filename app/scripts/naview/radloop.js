@@ -1,4 +1,4 @@
-var Radloop = module.exports = function(){
+export function Radloop() {
 	this.radius = null;
 	this.loopnumber = null;
 	this.next = null;
