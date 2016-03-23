@@ -6249,7 +6249,7 @@
       };
     }
     force.tick = function() {
-      if ((alpha *= .99) < .005) {
+      if ((alpha *= .90) < .005) {
         timer = null;
         event.end({
           type: "end",

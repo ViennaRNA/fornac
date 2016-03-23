@@ -25,7 +25,13 @@ This is a custom-colored RNA:
 
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[500,500]
+                'friction': 0.35,
+                'middleCharge': -30,
+                'otherCharge': -30,
+                'linkDistanceMultiplier': 15,
+                'chargeDistance': 110
+            });
 
     let options = {'structure': '....(((((...(((((((((((...(((.......)))..(((((.............)))))(.(((...(((..((((.((((((....)))))))))).......)))...))).).(((((((((((.(.....)...(((((......(((..(.(..(((((((..((((........))))...))))...........)))..).)..)))...))))))))))...))))))...)))))))))))....)))))(...((((....))))...).......(((.(....(((........)))...))))....(((((..(((.(..).)))...))))).(((((((((((((....)))..))))))))))....',
         'sequence': 'UGUGCCCGGCAUGGGUGCAGUCUAUAGGGUGAGAGUCCCGAACUGUGAAGGCAGAAGUAACAGUUAGCCUAACGCAAGGGUGUCCGUGGCGACAUGGAAUCUGAAGGAAGCGGACGGCAAACCUUCGGUCUGAGGAACACGAACUUCAUAUGAGGCUAGGUAUCAAUGGAUGAGUUUGCAUAACAAAACAAAGUCCUUUCUGCCAAAGUUGGUACAGAGUAAAUGAAGCAGAUUGAUGAAGGGAAAGACUGCAUUCUUACCCGGGGAGGUCUGGAAACAGAAGUCAGCAGAAGUCAUAGUACCCUGUUCGCAGGGGAAGGACGGAACAAGUAUGGCGUUCGCGCCUAAGCUUGAACCGCCGUAUACCGAACGGUACGUACGGUGGUGUGG'
