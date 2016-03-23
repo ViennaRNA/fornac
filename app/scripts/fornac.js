@@ -2,8 +2,6 @@
 * Date: 2015-03-15
 */
 
-import d3 from 'd3';
-
 import '../styles/fornac.css';
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
