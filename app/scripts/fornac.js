@@ -17,6 +17,11 @@ export function FornaContainer(element, passedOptions) {
         'displayAllLinks': false,
         'labelInterval': 10,
         'applyForce': true,
+        'chargeDistance': 110,
+        'friction': 0.35,
+        'middleCharge': -30,
+        'otherCharge': -30,
+        'linkDistanceMultiplier': 15,
         'initialSize': null,
         'allowPanningAndZooming': true,
         'transitionDuration': 500,
@@ -138,14 +143,11 @@ export function FornaContainer(element, passedOptions) {
             //options.positions = simpleXyCoordinates(rnaJson.pairtable);
 
             var naview = new NAView();
-            console.log('sxy', simpleXyCoordinates(rnaJson.pairtable));
 
             let naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
             options.positions = []
             for (let i = 0; i < naViewPositions.nbase; i++)
                 options.positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
-
-            console.log('options.positions:', options.positions);
         }
 
         rnaJson = rnaJson.elementsToJson()
@@ -928,13 +930,12 @@ export function FornaContainer(element, passedOptions) {
 
     self.force = d3.layout.force()
     .charge(function(d) { if (d.nodeType == 'middle')  {
-            return -30; 
+            return self.options.middleCharge; 
     }
         else 
-            return -30;})
-    .chargeDistance(300)
-    .friction(0.35)
-    .linkDistance(function(d) { return 15 * d.value; })
+            return self.options.otherCharge;})
+    .friction(self.options.friction)
+    .linkDistance(function(d) { return self.options.linkDistanceMultiplier * d.value; })
     .linkStrength(function(d) { if (d.linkType in self.linkStrengths) {
                                   return self.linkStrengths[d.linkType];
                                 } else {
@@ -943,7 +944,7 @@ export function FornaContainer(element, passedOptions) {
     .gravity(0.000)
     .nodes(self.graph.nodes)
     .links(self.graph.links)
-    .chargeDistance(110)
+    .chargeDistance(self.options.chargeDistance)
     .size([self.options.svgW, self.options.svgH]);
 
     // line displayed when dragging new nodes
@@ -1629,6 +1630,21 @@ export function FornaContainer(element, passedOptions) {
 
                 gnodes.select('path')
                 .each(positionAnyNode);
+
+            });
+
+            self.force.on('end', () => {
+                gnodes.selectAll('[node_type=nucleotide]')
+                .filter((d,i) => { if (i == 0) return true; else return false; })
+                .each((d,i) => {
+                    console.log("pos", d.num, d.x, d.y);
+                });
+
+                for (let uid in self.rnas) {
+                    for (let i = 1; i < self.rnas[uid].pairtable[0]; i++) {
+                        console.log('pt', i, self.rnas[uid].pairtable[i]);
+                    }
+                }
 
             });
             

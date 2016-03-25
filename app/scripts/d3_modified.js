@@ -6227,6 +6227,7 @@
   };
   d3.layout.force = function() {
     var force = {}, event = d3.dispatch("start", "tick", "end"), timer, size = [ 1, 1 ], drag, alpha, friction = .9, linkDistance = d3_layout_forceLinkDistance, linkStrength = d3_layout_forceLinkStrength, charge = -30, chargeDistance2 = d3_layout_forceChargeDistance2, gravity = .1, theta2 = .64, nodes = [], links = [], distances, strengths, charges;
+    var multiplier = 1.10;
     function repulse(node) {
       return function(quad, x1, _, x2) {
         if (quad.point !== node) {
@@ -6249,7 +6250,11 @@
       };
     }
     force.tick = function() {
-      if ((alpha *= .99) < .005) {
+        console.log('alpha:', alpha)
+      if (alpha > 0.1)
+          multiplier = 0.99
+
+      if ((alpha *= multiplier) < .001) {
         timer = null;
         event.end({
           type: "end",
@@ -6360,6 +6365,11 @@
       theta2 = x * x;
       return force;
     };
+    force.multiplier = function(x) { 
+        if (!arguments.length) return multiplier;
+        multiplier = x;
+        return force;
+    }
     force.alpha = function(x) {
       if (!arguments.length) return alpha;
       x = +x;
@@ -6427,6 +6437,7 @@
       return force.resume();
     };
     force.resume = function() {
+        force.multiplier(0.99)
       return force.alpha(.1);
     };
     force.stop = function() {

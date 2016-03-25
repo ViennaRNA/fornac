@@ -142,7 +142,6 @@ NAView.prototype.construct_loop = function construct_loop(ibase){
     var cp = new Connection();
     var rp = new Region();
     var rlp = new Radloop();
-    console.log('rlp:', rlp);
     retloop = this.loops[this.loop_count++];
     retloop.setNconnection(0);
     retloop.setDepth(0);
