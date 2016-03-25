@@ -23,45 +23,19 @@ This is a custom-colored RNA:
 <script type='text/javascript'>
 "use strict"
 
-function customColorsContainer() {
-    let container = new fornac.FornaContainer("#custom_colors",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
-
-    let options = {'structure': '..((((....)))).....',
-        'sequence':             'AACGCUUCAUAUAAUCAAA'
-    };
-    container.addRNA(options.structure, options);
-    container.setSize();
-
-    container.addCustomColorsText('1:red         9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8');
-}
-
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
             {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
 
-    let options = {'structure': '..((..((...[)).(((..].))).))..',
-        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    let options = {'structure': '....(((((...(((((((((((...(((.......)))..(((((.............)))))(.(((...(((..((((.((((((....)))))))))).......)))...))).).(((((((((((.(.....)...(((((......(((..(.(..(((((((..((((........))))...))))...........)))..).)..)))...))))))))))...))))))...)))))))))))....)))))(...((((....))))...).......(((.(....(((........)))...))))....(((((..(((.(..).)))...))))).(((((((((((((....)))..))))))))))....',
+        'sequence': 'UGUGCCCGGCAUGGGUGCAGUCUAUAGGGUGAGAGUCCCGAACUGUGAAGGCAGAAGUAACAGUUAGCCUAACGCAAGGGUGUCCGUGGCGACAUGGAAUCUGAAGGAAGCGGACGGCAAACCUUCGGUCUGAGGAACACGAACUUCAUAUGAGGCUAGGUAUCAAUGGAUGAGUUUGCAUAACAAAACAAAGUCCUUUCUGCCAAAGUUGGUACAGAGUAAAUGAAGCAGAUUGAUGAAGGGAAAGACUGCAUUCUUACCCGGGGAGGUCUGGAAACAGAAGUCAGCAGAAGUCAUAGUACCCUGUUCGCAGGGGAAGGACGGAACAAGUAUGGCGUUCGCGCCUAAGCUUGAACCGCCGUAUACCGAACGGUACGUACGGUGGUGUGG'
     };
     container.addRNA(options.structure, options);
     container.setSize();
 }
 
-
-function cofoldContainer() {
-    var container = new fornac.FornaContainer("#cofold_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
-
-    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
-        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
-    };
-    container.addRNA(options.structure, options);
-    container.setSize();
-}
 
 normalContainer();
-cofoldContainer();
-customColorsContainer();
 
 
 /*
