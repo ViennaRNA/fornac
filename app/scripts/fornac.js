@@ -10,6 +10,9 @@ import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from 'rnautils';
 //import 'jquery' from jquery;
+//
+
+export {RNAGraph} from './rnagraph.js';
 
 export function FornaContainer(element, passedOptions) {
     var self = this;
