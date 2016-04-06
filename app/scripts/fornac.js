@@ -4,6 +4,8 @@
 
 import '../styles/fornac.css';
 
+import d3 from 'd3';
+
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from 'rnautils';
@@ -26,6 +28,7 @@ export function FornaContainer(element, passedOptions) {
         'otherCharge': -30,
         'linkDistanceMultiplier': 15,
         'initialSize': null,
+        'layout': 'standard-polygonal',
         'allowPanningAndZooming': true,
         'transitionDuration': 500,
         'resizeSvgOnResize': true   //change the size of the svg when resizing the container
@@ -143,14 +146,17 @@ export function FornaContainer(element, passedOptions) {
 
         if (options.positions.length === 0) {
             // no provided positions means we need to calculate an initial layout
-            //options.positions = simpleXyCoordinates(rnaJson.pairtable);
 
-            var naview = new NAView();
+            if (self.options.layout == 'naview') {
+                var naview = new NAView();
 
-            let naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
-            options.positions = []
-            for (let i = 0; i < naViewPositions.nbase; i++)
-                options.positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
+                let naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
+                options.positions = []
+                for (let i = 0; i < naViewPositions.nbase; i++)
+                    options.positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
+            } else {
+                options.positions = simpleXyCoordinates(rnaJson.pairtable);
+            }
         }
 
         rnaJson = rnaJson.elementsToJson()
