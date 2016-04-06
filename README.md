@@ -162,3 +162,9 @@ gulp build
 ```
 
 The output will be placed in the `dist` directory. To use `fornac` in a web page, simply include `dist/scripts/fornac.js` in your web page.
+
+## Acknowledgements
+
+Thanks to [Benedikt Rauscher](https://github.com/bene200) for the Javascript
+version of the NAView layout and to the creators of
+[VARNA](http://varna.lri.fr/) for the java implementation that it's based on.
