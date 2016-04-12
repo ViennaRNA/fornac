@@ -407,7 +407,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
         var nucsToNodes = {};
         var fakeNodes = self.nodes.filter(filterOutNonFakeNodes);
-        var linked = new Set();
+        var linked = {};
 
         // initialize the nucleotides to nodes
         for (var i = 1; i <= self.nodes.length; i++) 
@@ -423,7 +423,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
                 // check to see if this nucleotide has been seen in another fake node
                 // if it has, then we add a link between the two nodes
                 for (var k = 0; k < nucsToNodes[thisNuc].length; k++) {
-                    if (linked.has(JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort())))
+                    if (JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort()) in linked)
                         continue; //already linked
 
                     var distance = nucsToNodes[thisNuc][k].radius + thisNode.radius;
@@ -434,7 +434,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
                                       'linkType': 'fake_fake'});
 
                     // note that we've already seen this link
-                    linked.add(JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort()));
+                    linked[JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort())] = true;
                 }
 
                 nucsToNodes[thisNuc].push(thisNode);
