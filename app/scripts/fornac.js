@@ -5,6 +5,7 @@
 import '../styles/fornac.css';
 
 import d3 from 'd3';
+import {contextMenu} from './d3-context-menu.js';
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
@@ -19,6 +20,7 @@ export function FornaContainer(element, passedOptions) {
     var self = this;
 
     self.options = {
+        'editable': false,
         'displayAllLinks': false,
         'labelInterval': 10,
         'applyForce': true,
@@ -49,6 +51,33 @@ export function FornaContainer(element, passedOptions) {
     } else {
         self.options.svgW = 800;
         self.options.svgH = 800;
+    }
+
+    if (self.options.editable == true) {
+        let menu = [
+            {
+                title: 'Item #1',
+                action: function(elm, d, i) {
+                    console.log('Item #1 clicked!');
+                    console.log('The data for this circle is: ' + d);
+                },
+                disabled: false // optional, defaults to false
+            },
+            {
+                title: 'Item #2',
+                action: function(elm, d, i) {
+                    console.log('You have clicked the second item!');
+                    console.log('The data for this circle is: ' + d);
+                }
+            }
+        ]
+
+        self.nodeContextMenu = contextMenu(menu);
+        self.backgroundContextMenu = contextMenu(menu);
+
+    }  else {
+        console.log('empty context menu');
+        self.nodeContextMenu = function() {};
     }
 
     var fill = d3.scale.category20();
@@ -268,7 +297,6 @@ export function FornaContainer(element, passedOptions) {
         // when it is modified, it is replaced in the global list of RNAs
         //
         var maxX, minX;
-
         if (avoidOthers) {
             if (self.graph.nodes.length > 0)
                 maxX = d3.max(self.graph.nodes.map(function(d) { return d.x; }));
@@ -817,6 +845,9 @@ export function FornaContainer(element, passedOptions) {
     if (self.options.allowPanningAndZooming)
         svgGraph.call(self.zoomer);
 
+    if (self.options.editable)
+        svgGraph.on('contextmenu', self.backgroundContextMenu);
+
     /*
     var rect = svgGraph.append('svg:rect')
     .attr('width', self.options.svgW)
@@ -1158,7 +1189,7 @@ export function FornaContainer(element, passedOptions) {
 
     var removeLink = function(d) {
         // remove a link between two nodes
-        index = self.graph.links.indexOf(d);
+        let index = self.graph.links.indexOf(d);
 
         if (index > -1) {
             //remove a link
@@ -1467,6 +1498,7 @@ export function FornaContainer(element, passedOptions) {
         .attr('rnum', function(d) { 
             return 'n' + (d.rna.rnaLength - d.num + 1); })
         .on('click', nodeMouseclick)
+        .on('contextmenu', self.nodeContextMenu)
         .transition()
         .duration(750)
         .ease('elastic');
@@ -1646,12 +1678,12 @@ export function FornaContainer(element, passedOptions) {
                 gnodes.selectAll('[node_type=nucleotide]')
                 .filter((d,i) => { if (i == 0) return true; else return false; })
                 .each((d,i) => {
-                    console.log("pos", d.num, d.x, d.y);
+                    //console.log("pos", d.num, d.x, d.y);
                 });
 
                 for (let uid in self.rnas) {
                     for (let i = 1; i < self.rnas[uid].pairtable[0]; i++) {
-                        console.log('pt', i, self.rnas[uid].pairtable[i]);
+                        //console.log('pt', i, self.rnas[uid].pairtable[i]);
                     }
                 }
 
