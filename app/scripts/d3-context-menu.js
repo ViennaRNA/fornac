@@ -31,11 +31,14 @@ export function contextMenu(menu, opts) {
     // this gets executed when a contextmenu event occurs
     return function(data, index) {
         var elm = this;
+        var contextMenuPos = null;
+        console.log('pos:', d3.mouse(this));
 
         d3.selectAll('.d3-context-menu').html('');
         var list = d3.selectAll('.d3-context-menu')
             .on('contextmenu', function(d) {
                 d3.select('.d3-context-menu').style('display', 'none'); 
+
                 d3.event.preventDefault();
                 d3.event.stopPropagation();
             })

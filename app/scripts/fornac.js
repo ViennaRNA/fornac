@@ -54,12 +54,19 @@ export function FornaContainer(element, passedOptions) {
     }
 
     if (self.options.editable == true) {
-        let menu = [
+        let backgroundMenu = [
             {
-                title: 'Item #1',
+                title: 'Add Node',
                 action: function(elm, d, i) {
                     console.log('Item #1 clicked!');
                     console.log('The data for this circle is: ' + d);
+
+                    console.log('this:', this, d);
+                    let mousePos = d3.mouse(this);
+                    console.log('mousePos:', mousePos);
+                    
+                    self.addRNA('.', {'sequence': 'A'});
+
                 },
                 disabled: false // optional, defaults to false
             },
@@ -72,8 +79,26 @@ export function FornaContainer(element, passedOptions) {
             }
         ]
 
-        self.nodeContextMenu = contextMenu(menu);
-        self.backgroundContextMenu = contextMenu(menu);
+        let nodeMenu = [
+            {
+                title: 'Delete Node',
+                action: function(elm, d, i) {
+                    console.log('Item #1 clicked!');
+                    console.log('The data for this circle is: ' + d);
+                },
+                disabled: false // optional, defaults to false
+            },
+            {
+                title: 'Change Node',
+                action: function(elm, d, i) {
+                    console.log('You have clicked the second item!');
+                    console.log('The data for this circle is: ' + d);
+                }
+            }
+        ]
+
+        self.nodeContextMenu = contextMenu(nodeMenu);
+        self.backgroundContextMenu = contextMenu(backgroundMenu);
 
     }  else {
         console.log('empty context menu');
@@ -233,7 +258,6 @@ export function FornaContainer(element, passedOptions) {
             self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
         else
             self.addRNAJSON(rnaJson, true);
-
 
         return rnaJson;
     };
@@ -793,7 +817,7 @@ export function FornaContainer(element, passedOptions) {
     function mousemove() {
         if (!mousedownNode) return;
 
-        mpos = d3.mouse(vis.node());
+        let mpos = d3.mouse(vis.node());
         // update drag line
         dragLine
         .attr('x1', mousedownNode.x)
