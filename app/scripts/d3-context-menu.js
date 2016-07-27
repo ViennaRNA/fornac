@@ -32,7 +32,7 @@ export function contextMenu(menu, opts) {
     return function(data, index) {
         var elm = this;
         var contextMenuPos = null;
-        console.log('pos:', d3.mouse(this));
+        var mousePos =  d3.mouse(this);
 
         d3.selectAll('.d3-context-menu').html('');
         var list = d3.selectAll('.d3-context-menu')
@@ -70,7 +70,7 @@ export function contextMenu(menu, opts) {
             .on('click', function(d, i) {
                 if (d.disabled) return; // do nothing if disabled
                 if (!d.action) return; // headers have no "action"
-                d.action(elm, data, index);
+                d.action(elm, data, index, mousePos);
                 d3.select('.d3-context-menu').style('display', 'none');
 
                 if (closeCallback) {

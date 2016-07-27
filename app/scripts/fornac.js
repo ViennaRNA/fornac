@@ -57,15 +57,13 @@ export function FornaContainer(element, passedOptions) {
         let backgroundMenu = [
             {
                 title: 'Add Node',
-                action: function(elm, d, i) {
-                    console.log('Item #1 clicked!');
-                    console.log('The data for this circle is: ' + d);
+                action: function(elm, d, i, mousePos) {
+                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+                    let canvasMousePos = [xScale.invert(mousePos[0]),
+                                          yScale.invert(mousePos[1])];
+                    console.log('canvasMousePos', canvasMousePos);
 
-                    console.log('this:', this, d);
-                    let mousePos = d3.mouse(this);
-                    console.log('mousePos:', mousePos);
-                    
-                    self.addRNA('.', {'sequence': 'A'});
+                    self.addRNA('.', {'sequence': 'A', 'centerPos': canvasMousePos});
 
                 },
                 disabled: false // optional, defaults to false
@@ -254,10 +252,14 @@ export function FornaContainer(element, passedOptions) {
             self.extraLinks = self.extraLinks.concat(newLinks);
         }
 
-        if ('avoidOthers' in passedOptions)
-            self.addRNAJSON(rnaJson, passedOptions.avoidOthers);
+        if ('centerPos' in passedOptions)
+            self.addRNAJSON(rnaJson, {centerPos: passedOptions.centerPos,
+                                      centerView: false})
+        else if ('avoidOthers' in passedOptions)
+            self.addRNAJSON(rnaJson, {avoidOthers: passedOptions.avoidOthers});
         else
             self.addRNAJSON(rnaJson, true);
+
 
         return rnaJson;
     };
@@ -314,13 +316,42 @@ export function FornaContainer(element, passedOptions) {
         return newLinks;
     };
 
-    self.addRNAJSON = function(rnaGraph, avoidOthers) {
+    self.addRNAJSON = function(rnaGraph, 
+                               { avoidOthers = false,
+                                centerPos = null,
+                                centerView = true} ) {
         // Add an RNAGraph, which contains nodes and links as part of the
         // structure
         // Each RNA will have uid to identify it
         // when it is modified, it is replaced in the global list of RNAs
         //
         var maxX, minX;
+
+        if (centerPos != null) {
+            // center the newly created RNA at a given position
+            let totalX = 0;
+            let totalY = 0;
+            let nodeCount = 0;
+
+            rnaGraph.nodes.forEach(function(node) {
+                totalX += node.x;
+                totalY += node.y;
+                nodeCount += 1;
+            });
+
+            if (nodeCount > 0) {
+                // center the nodes at centerPos
+
+                rnaGraph.nodes.forEach(function(node) {
+                    node.x = node.x + centerPos[0] - totalX / nodeCount;
+                    node.y = node.y + centerPos[1] - totalY / nodeCount;
+
+                    node.px = node.x;
+                    node.py = node.y;
+                });
+            }
+        }
+
         if (avoidOthers) {
             if (self.graph.nodes.length > 0)
                 maxX = d3.max(self.graph.nodes.map(function(d) { return d.x; }));
@@ -343,7 +374,9 @@ export function FornaContainer(element, passedOptions) {
         self.recalculateGraph();
 
         self.update();
-        self.centerView();
+
+        if (centerView)
+            self.centerView();
 
         return rnaGraph;
     };
