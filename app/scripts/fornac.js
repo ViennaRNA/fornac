@@ -5,6 +5,7 @@
 import '../styles/fornac.css';
 
 import d3 from 'd3';
+import slugid from 'slugid';
 import {contextMenu} from './d3-context-menu.js';
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
@@ -571,7 +572,7 @@ export function FornaContainer(element, passedOptions) {
             
             if (self.extraLinks[i].linkType == 'intermolecule') {
                 //remove links to middle nodes
-                fakeLinks = self.graph.links.filter(function(d) { 
+                let fakeLinks = self.graph.links.filter(function(d) { 
                     return ((d.source == self.extraLinks[i].source || d.source == self.extraLinks[i].target ||
                             d.target == self.extraLinks[i].source || d.target == self.extraLinks[i].source) &&
                             d.linkType == 'fake');
@@ -1300,7 +1301,8 @@ export function FornaContainer(element, passedOptions) {
         // appropriately
         //
         if (newLink.source.rna == newLink.target.rna) {
-            r = newLink.source.rna;
+            // must be a basepair
+            let r = newLink.source.rna;
 
             r.pairtable[newLink.source.num] = newLink.target.num;
             r.pairtable[newLink.target.num] = newLink.source.num;
@@ -1334,15 +1336,18 @@ export function FornaContainer(element, passedOptions) {
             mouseupNode = d;
 
             if (mouseupNode == mousedownNode) { resetMouseVars(); return; }
-            var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid:generateUUID()};
+            var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: slugid.nice()};
 
-            for (i = 0; i < self.graph.links.length; i++) {
+            for (let i = 0; i < self.graph.links.length; i++) {
                 if ((self.graph.links[i].source == mousedownNode)  || 
                     (self.graph.links[i].target == mousedownNode) ||
                         (self.graph.links[i].source == mouseupNode) ||
                             (self.graph.links[i].target == mouseupNode)) {
 
+                    // if any of the nodes are already involved in a basepair or a pseudoknot
+                    // then we can't make a link
                     if (self.graph.links[i].linkType == 'basepair' || self.graph.links[i].linkType == 'pseudoknot') {
+                        // although should be able to make a backbone link
                         return;
                     }
                 }
@@ -1351,6 +1356,9 @@ export function FornaContainer(element, passedOptions) {
                      (self.graph.links[i].target == mousedownNode)) ||
                          ((self.graph.links[i].source == mousedownNode)  && 
                           (self.graph.links[i].target == mouseupNode))) {
+
+                    // if we're trying to make a link between two nodes which already have
+                    // a backbone between them, then we can't make a link
                     if (self.graph.links[i].linkType == 'backbone') {
                         return;
                     }
@@ -1359,6 +1367,10 @@ export function FornaContainer(element, passedOptions) {
 
             if (mouseupNode.nodeType == 'middle' || mousedownNode.nodeType == 'middle' || mouseupNode.nodeType == 'label' || mousedownNode.nodeType == 'label')
                 return;
+
+            if (newLink.source.rna != newLink.target.rna) {
+                // could be either a backbone link or an intermolecule link
+            }
 
             self.addLink(newLink);
 
