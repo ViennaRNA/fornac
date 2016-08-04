@@ -110,6 +110,7 @@ export function FornaContainer(element, passedOptions) {
     var mousedownLink = null,
         mousedownNode = null,
         mouseupNode = null;
+    let linkContextMenuShown = false;
 
     var xScale = d3.scale.linear()
     .domain([0,self.options.svgW]).range([0,self.options.svgW]);
@@ -863,8 +864,11 @@ export function FornaContainer(element, passedOptions) {
 
     function mouseup() {
         if (mousedownNode) {
-            dragLine
-            .attr('class', 'drag_line_hidden');
+           
+            console.log('linkContextMenuShown', linkContextMenuShown);
+            if (!linkContextMenuShown)
+                dragLine
+                .attr('class', 'drag_line_hidden');
         }
 
         // clear mouse event vars
@@ -1046,6 +1050,7 @@ export function FornaContainer(element, passedOptions) {
     .size([self.options.svgW, self.options.svgH]);
 
     // line displayed when dragging new nodes
+    console.log('create drag line');
     var dragLine = vis.append('line')
     .attr('class', 'drag_line')
     .attr('x1', 0)
@@ -1300,6 +1305,7 @@ export function FornaContainer(element, passedOptions) {
         // to recalculate the structure and change the colors
         // appropriately
         //
+        console.log('adding new link');
         if (newLink.source.rna == newLink.target.rna) {
             // must be a basepair
             let r = newLink.source.rna;
@@ -1311,6 +1317,7 @@ export function FornaContainer(element, passedOptions) {
 
         } else {
             //Add an extra link
+            console.log('intermolecule');
             newLink.linkType = 'intermolecule';
             self.extraLinks.push(newLink);
         }
@@ -1329,9 +1336,11 @@ export function FornaContainer(element, passedOptions) {
 
         // always select this node
         d3.select(this).select('circle').classed('selected', d.selected = self.options.applyForce && !d.previouslySelected);
+        d3.event.stopPropagation();
     };
 
-    var nodeMouseup = function(d) {
+    var nodeMouseup = function(d,i) {
+
         if (mousedownNode) {
             mouseupNode = d;
 
@@ -1369,10 +1378,41 @@ export function FornaContainer(element, passedOptions) {
                 return;
 
             if (newLink.source.rna != newLink.target.rna) {
+                let newLinkMenu = [
+                    { title: "Add Backbone Link", action: function(elm, d, i, mousePos) {
+                            newLink.type="backbone"; } },
+                    {   title: "Add Base Pair Link", action: function(eld, d, i, mousePos) {
+                        newLink.type="basepair"; }}]
+
                 // could be either a backbone link or an intermolecule link
             }
 
-            self.addLink(newLink);
+            let linkMenu = [
+                {
+                    title: 'Backbone Link',
+                    action: function(elm, d, i) {
+                        linkContextMenuShown = false;
+                        console.log('Item #1 clicked!');
+                        console.log('The data for this circle is: ' + d);
+                    },
+                    disabled: false // optional, defaults to false
+                },
+                {
+                    title: 'Basepair Link',
+                    action: function(elm, d, i) {
+                        linkContextMenuShown = false;
+                        console.log('You have clicked the second item!');
+                        console.log('The data for this circle is: ' + d);
+                        dragLine.attr('class', 'drag_line_hidden');
+                        self.addLink(newLink);
+                    }
+                }
+            ]
+            linkContextMenuShown = true;
+            let linkContextMenu = contextMenu(linkMenu);
+            console.log('newLinkMenu');
+            linkContextMenu.apply(this, [d,i,true, 
+                                  function() { dragLine.attr('class', 'drag_line_hidden') }]);
 
         }
     };

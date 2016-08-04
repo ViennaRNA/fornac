@@ -2,6 +2,8 @@ import '../styles/d3-context-menu.css';
 import d3 from 'd3';
 
 export function contextMenu(menu, opts) {
+    let previouslyMouseUp = false;
+    let clickAway = {};
 
     var openCallback,
         closeCallback;
@@ -22,6 +24,15 @@ export function contextMenu(menu, opts) {
 
     // close menu
     d3.select('body').on('click.d3-context-menu', function() {
+        console.log('mouseUp', previouslyMouseUp);
+
+        if (previouslyMouseUp) {
+            previouslyMouseUp = false;
+            return;
+        }
+
+        clickAway();
+        console.log('close2');
         d3.select('.d3-context-menu').style('display', 'none');
         if (closeCallback) {
             closeCallback();
@@ -29,14 +40,19 @@ export function contextMenu(menu, opts) {
     });
 
     // this gets executed when a contextmenu event occurs
-    return function(data, index) {
+    return function(data, index, pMouseUp=false,
+                    clickAwayFunc = function() { } ) {
         var elm = this;
         var contextMenuPos = null;
         var mousePos =  d3.mouse(this);
+        clickAway = clickAwayFunc;
+
+        previouslyMouseUp = pMouseUp;
 
         d3.selectAll('.d3-context-menu').html('');
         var list = d3.selectAll('.d3-context-menu')
             .on('contextmenu', function(d) {
+                console.log('hiding');
                 d3.select('.d3-context-menu').style('display', 'none'); 
 
                 d3.event.preventDefault();
@@ -68,6 +84,7 @@ export function contextMenu(menu, opts) {
                 return (typeof d.title === 'string') ? d.title : d.title(data);
             })
             .on('click', function(d, i) {
+                console.log('click');
                 if (d.disabled) return; // do nothing if disabled
                 if (!d.action) return; // headers have no "action"
                 d.action(elm, data, index, mousePos);
@@ -92,7 +109,14 @@ export function contextMenu(menu, opts) {
             .style('top', (d3.event.pageY - 2) + 'px')
             .style('display', 'block');
 
+        console.log('preventing');
+
+        if (previouslyMouseUp)
+            return;
+
         d3.event.preventDefault();
         d3.event.stopPropagation();
+        //d3.event.stopImmediatePropagation();
+
     };
 };
