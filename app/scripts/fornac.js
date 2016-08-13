@@ -1378,41 +1378,43 @@ export function FornaContainer(element, passedOptions) {
                 return;
 
             if (newLink.source.rna != newLink.target.rna) {
-                let newLinkMenu = [
-                    { title: "Add Backbone Link", action: function(elm, d, i, mousePos) {
-                            newLink.type="backbone"; } },
-                    {   title: "Add Base Pair Link", action: function(eld, d, i, mousePos) {
-                        newLink.type="basepair"; }}]
+                    // could be either a backbone link or an intermolecule link
 
-                // could be either a backbone link or an intermolecule link
-            }
-
-            let linkMenu = [
-                {
-                    title: 'Backbone Link',
-                    action: function(elm, d, i) {
-                        linkContextMenuShown = false;
-                        console.log('Item #1 clicked!');
-                        console.log('The data for this circle is: ' + d);
+                if ((newLink.source.num == 1 && newLink.target.num == newLink.target.rna.rnaLength) ||
+                    (newLink.target.num == 1 && newLink.source.num == newLink.source.rna.rnaLength)) {
+                let linkMenu = [
+                    {
+                        title: 'Backbone Link',
+                        action: function(elm, d, i) {
+                            linkContextMenuShown = false;
+                            console.log('Item #1 clicked!');
+                            console.log('The data for this circle is: ' + d);
+                        },
+                        disabled: false // optional, defaults to false
                     },
-                    disabled: false // optional, defaults to false
-                },
-                {
-                    title: 'Basepair Link',
-                    action: function(elm, d, i) {
-                        linkContextMenuShown = false;
-                        console.log('You have clicked the second item!');
-                        console.log('The data for this circle is: ' + d);
-                        dragLine.attr('class', 'drag_line_hidden');
+                    {
+                        title: 'Basepair Link',
+                        action: function(elm, d, i) {
+                            linkContextMenuShown = false;
+                            console.log('You have clicked the second item!');
+                            console.log('The data for this circle is: ' + d);
+                            dragLine.attr('class', 'drag_line_hidden');
+                            self.addLink(newLink);
+                        }
+                    }
+                ]
+                linkContextMenuShown = true;
+                let linkContextMenu = contextMenu(linkMenu);
+                console.log('newLinkMenu');
+                linkContextMenu.apply(this, [d,i,true, 
+                                      function() { dragLine.attr('class', 'drag_line_hidden') }]);
+                    } else {
                         self.addLink(newLink);
                     }
-                }
-            ]
-            linkContextMenuShown = true;
-            let linkContextMenu = contextMenu(linkMenu);
-            console.log('newLinkMenu');
-            linkContextMenu.apply(this, [d,i,true, 
-                                  function() { dragLine.attr('class', 'drag_line_hidden') }]);
+
+            } else {
+                self.addLink(newLink);
+            }
 
         }
     };

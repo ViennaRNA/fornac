@@ -31,7 +31,6 @@ export function contextMenu(menu, opts) {
             return;
         }
 
-        clickAway();
         console.log('close2');
         d3.select('.d3-context-menu').style('display', 'none');
         if (closeCallback) {
