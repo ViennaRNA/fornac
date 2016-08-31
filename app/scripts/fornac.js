@@ -10,7 +10,7 @@ import {contextMenu} from './d3-context-menu.js';
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
-import {ColorScheme} from 'rnautils';
+import {ColorScheme, rnaUtilities} from 'rnautils';
 import {NAView} from './naview/naview.js'
 //import 'jquery' from jquery;
 //
@@ -417,6 +417,7 @@ export function FornaContainer(element, passedOptions) {
     function realLinkFilter(d) {
         return d.linkType == 'basepair' ||
                d.linkType == 'backbone' ||
+               d.linkType == 'intermolecule' ||
                d.linkType == 'pseudoknot' ||
                d.linkType == 'label_link' ||
                d.linkType == 'external' ||
@@ -1168,7 +1169,12 @@ export function FornaContainer(element, passedOptions) {
 
         if (shiftKeydown) return;
 
+        console.log('keyCode:', d3.event.keyCode);
+
         switch (d3.event.keyCode) {
+            case 68:
+                console.log('dotbracket:', self.getStructuresDotBracket());
+                break;
             case 16:
                 shiftKeydown = true;
                 break;
@@ -1250,6 +1256,27 @@ export function FornaContainer(element, passedOptions) {
         .updateLinkUids();
     };
 
+    var removeBackBoneLink = function(d) {
+        if (d.target.num - d.source.num != 1) {
+            console.log('ERROR: non adjacent nodes. Target:', d.target, 
+                        'Source:', d.source, 'Link:', d);
+            return;
+        }
+
+        // Remove all base pairs that are between these two nodes and add them as extra
+        // links
+        
+        // extract the dotbracket string of the rna
+        // cut it at the position of this backbone bond
+        
+        // get the nucleotide positions
+        // cut them at the positions of the backbone bond
+        
+        // create two new rnas
+        // add their positions
+        // add them back to the plot
+    }
+
     var removeLink = function(d) {
         // remove a link between two nodes
         let index = self.graph.links.indexOf(d);
@@ -1262,13 +1289,24 @@ export function FornaContainer(element, passedOptions) {
             // 1. The link is within a single molecule
 
             if (d.source.rna == d.target.rna) {
-                var r = d.source.rna;
+                if (d.linkType == 'backbone') {
+                    console.log('trying to remove a backbone link', d.source.num, d.target.num);
 
-                r.addPseudoknots();
-                r.pairtable[d.source.num] = 0;
-                r.pairtable[d.target.num] = 0;
+                    removeBackBoneLink(d);
 
-                updateRnaGraph(r);
+                    return;
+
+
+                } else {
+                    var r = d.source.rna;
+
+                    r.addPseudoknots();
+                    r.pairtable[d.source.num] = 0;
+                    r.pairtable[d.target.num] = 0;
+
+                    updateRnaGraph(r);
+                }
+
 
             } else {
                 // 2. The link is between two different molecules
@@ -1288,7 +1326,7 @@ export function FornaContainer(element, passedOptions) {
             return;
         }
 
-        var invalidLinks = {'backbone': true,
+        var invalidLinks = { //'backbone': true,
                              'fake': true,
                              'fake_fake': true,
                              'label_link': true};
@@ -1299,6 +1337,77 @@ export function FornaContainer(element, passedOptions) {
         removeLink(d);
     };
 
+    self.getStructuresDotBracket = function() {
+        console.log('self.rnas:', self.rnas);
+        let sequence = [];
+        let currIdx = 1;
+        let nodeIdxs = {};
+        let breaks = [];
+        let pairtable = [];
+
+        // add the nodes
+        for (let uid in self.rnas) {
+            let rna = self.rnas[uid];
+
+            for (let j = 0; j < rna.nodes.length; j++) {
+                let node = rna.nodes[j];
+
+                if (node.nodeType != 'nucleotide')
+                    continue;
+
+                console.log('node:', node);
+                nodeIdxs[node.uid] = currIdx;
+                currIdx += 1;
+
+                sequence.push(node.name);
+            }
+
+            breaks.push(currIdx);
+        }
+
+        pairtable = [currIdx-1]
+        for (let i = 0; i < currIdx; i++)
+            pairtable.push(0)
+
+        // add the links
+        for (let uid in self.rnas) {
+            let rna = self.rnas[uid];
+
+            for (let j = 0; j < rna.links.length; j++) {
+                let link = rna.links[j];
+
+                if (link.linkType != 'basepair')
+                    continue;
+
+                let idx1 = nodeIdxs[link.source.uid];
+                let idx2 = nodeIdxs[link.target.uid];
+                pairtable[idx1] = idx2;
+                pairtable[idx2] = idx1;
+            }
+        }
+
+        for (let i = 0; i < self.extraLinks.length; i++) {
+            let link = self.extraLinks[i];
+
+            let idx1 = nodeIdxs[link.source.uid];
+            let idx2 = nodeIdxs[link.target.uid];
+
+            pairtable[idx1] = idx2;
+            pairtable[idx2] = idx1;
+        }
+
+        let structure = rnaUtilities.pairtableToDotbracket(pairtable).split('');
+
+        for (let i = 0; i < breaks.length - 1; i++) {
+            console.log('breaks[i]:', breaks[i]);
+            sequence.splice(breaks[i] + i - 1, 0, '&');
+            structure.splice(breaks[i] + i - 1, 0, '&');
+        }
+
+        console.log('sequence:', sequence, sequence.join(''));
+        console.log('structure:', structure, structure.join(''));
+        return [sequence.join(''), structure.join('')];
+    };
 
     self.addLink =  function(newLink) {
         // this means we have a new json, which means we have

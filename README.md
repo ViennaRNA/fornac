@@ -85,6 +85,18 @@ be allowed to flop around as the force layout dictates:
 Change how often nucleotide numbers are labelled with their number.
 
 
+### Obtaining the sequence and structure
+
+```
+fornac.getStructuresDotBracket()
+```
+
+Yields
+
+```
+["AAAACCCC&UUUUGGGG", ".(....).&.(....)."]
+```
+
 ## Implementation
 
 Each RNA molecule is represented as a JSON file which encodes all of the
