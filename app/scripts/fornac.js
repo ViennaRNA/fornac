@@ -564,6 +564,7 @@ export function FornaContainer(element, passedOptions) {
         for (i = 0; i < self.extraLinks.length; i++) {
             // the actual node objects may have changed, so we hae to recreate
             // the extra links based on the uids
+            console.log('self.extraLinks[i]', self.extraLinks[i]);
 
             if (!(self.extraLinks[i].target.uid in uidsToNodes)) {
                 console.log('not there:', self.extraLinks[i]);
@@ -1263,14 +1264,80 @@ export function FornaContainer(element, passedOptions) {
             return;
         }
 
+        let rna = d.target.rna;
+        let toRemove = [];
+
+        for (let i = 0; i < rna.links.length; i++) {
+            let link = rna.links[i];
+
+            if (link.linkType != 'basepair')
+                continue;
+
+            if (link.source.num <= d.source.num && link.target.num >= d.target.num) {
+                console.log('crossing basepair', link); 
+                toRemove.push(link);
+            }
+        }
+
+
         // Remove all base pairs that are between these two nodes and add them as extra
         // links
+        console.log('toRemove:', toRemove);
+        
+        for (let i = 0; i < toRemove.length; i++) {
+            rna.pairtable[toRemove[i].source.num] = 0;
+            rna.pairtable[toRemove[i].target.num] = 0;
+
+            toRemove[i].from = toRemove[i].source.num;
+            toRemove[i].to = toRemove[i].target.num - d.source.num;
+        }
         
         // extract the dotbracket string of the rna
         // cut it at the position of this backbone bond
+        let sequence = rna.seq;
+        let sequence1 = rna.seq.slice(0, d.source.num);
+        let sequence2 = rna.seq.slice(d.source.num);
+
+        let rnaDotBracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
+        console.log('rnaDotBracket:', rnaDotBracket);
+        let dotBracket1 = rnaDotBracket.slice(0, d.source.num);
+        let dotBracket2 = rnaDotBracket.slice(d.source.num)
+
+        console.log('dotBracket1:', dotBracket1);
+        console.log('dotBracket2:', dotBracket2);
         
         // get the nucleotide positions
         // cut them at the positions of the backbone bond
+        let positions = rna.getPositions('nucleotide')
+        let uids = rna.getUids();
+
+        let positions1 = positions.slice(0, d.source.num);
+        let positions2 = positions.slice(d.source.num);
+
+        let uids1 = uids.slice(0, d.source.num);
+        let uids2 = uids.slice(d.source.num);
+
+        console.log('positions1:', positions1);
+        console.log('positions2:', positions2);
+
+        delete self.rnas[rna.uid];
+        let rna1 = self.addRNA(dotBracket1, { 'sequence': sequence1,
+                                   'positions': positions1 });
+        let rna2 = self.addRNA(dotBracket2, { 'sequence': sequence2,
+                                   'positions': positions2 });
+        for (let i = 0; i < toRemove.length; i++) {
+            console.log('rna1:', rna1);
+            self.extraLinks.push(
+                {'source': rna1.nodes[toRemove[i].from-1],
+                 'target': rna2.nodes[toRemove[i].to-1],
+                 'value': 1,
+                 'uid': slugid.nice(),
+                 'linkType': 'intermolecule'});
+                self.recalculateGraph();
+                self.update();
+
+        }
+        //self.extraLinks.push({'source': rna1.nodes[
         
         // create two new rnas
         // add their positions
@@ -1280,6 +1347,7 @@ export function FornaContainer(element, passedOptions) {
     var removeLink = function(d) {
         // remove a link between two nodes
         let index = self.graph.links.indexOf(d);
+        console.log('removing link:', index);
 
         if (index > -1) {
             //remove a link
@@ -1331,6 +1399,7 @@ export function FornaContainer(element, passedOptions) {
                              'fake_fake': true,
                              'label_link': true};
 
+        console.log('d.linkType:', d.linkType);
         if (d.linkType in invalidLinks ) 
             return;
 
@@ -1407,6 +1476,52 @@ export function FornaContainer(element, passedOptions) {
         console.log('sequence:', sequence, sequence.join(''));
         console.log('structure:', structure, structure.join(''));
         return [sequence.join(''), structure.join('')];
+    };
+
+    self.addBackBoneLink = function(newLink) {
+        // opposite of deleting a link
+        // get the two dotbracket strings
+        let rna1 = newLink.source.rna;
+        let rna2 = newLink.target.rna;
+
+        let dotbracket1 = rnaUtilities.pairtableToDotbracket(rna1.pairtable);
+        let dotbracket2 = rnaUtilities.pairtableToDotbracket(rna2.pairtable);
+
+        let seq1 = newLink.source.rna.seq;
+        let seq2 = newLink.target.rna.seq;
+
+        let positions1 = rna1.getPositions('nucleotide');
+        let positions2 = rna2.getPositions('nucleotide');
+
+        // concatenate them
+        let newDotbracket = dotbracket1 + dotbracket2;
+        let newSeq = seq1 + seq2;
+        let newPositions = positions1.concat(positions2);
+
+        let toAdd = [];
+
+        for (let i = 0; i < self.extraLinks; i++) {
+            if (self.extraLinks[i].source == rna1 && self.extraLinks[i].target == rna2) {
+                self.extraLinks[i].from = self.extraLinks[i].source.num;
+                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].target.num;
+                toAdd.push(self.extraLinks[i]);
+            } else if (self.extraLinks[i].target == rna1 && self.extraLinks[i].source == rna1) {
+                self.extraLinks[i].from = self.extraLinks[i].target.num;
+                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].source.num;
+
+                toAdd.push(self.extraLinks[i]);
+            }
+        }
+
+        delete self.rnas[rna1.uid];
+        delete self.rnas[rna2.uid];
+
+        // create a new RNA
+        let newRna = self.addRNA(newDotbracket, { 'sequence': newSeq,
+                                                  'positions': newPositions });
+
+        // add the extra links between them as base pairs
+        // remove the old ones
     };
 
     self.addLink =  function(newLink) {
@@ -1498,6 +1613,8 @@ export function FornaContainer(element, passedOptions) {
                             linkContextMenuShown = false;
                             console.log('Item #1 clicked!');
                             console.log('The data for this circle is: ' + d);
+                            dragLine.attr('class', 'drag_line_hidden');
+                            self.addBackBoneLink(newLink);
                         },
                         disabled: false // optional, defaults to false
                     },

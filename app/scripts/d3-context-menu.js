@@ -24,14 +24,12 @@ export function contextMenu(menu, opts) {
 
     // close menu
     d3.select('body').on('click.d3-context-menu', function() {
-        console.log('mouseUp', previouslyMouseUp);
 
         if (previouslyMouseUp) {
             previouslyMouseUp = false;
             return;
         }
 
-        console.log('close2');
         d3.select('.d3-context-menu').style('display', 'none');
         if (closeCallback) {
             closeCallback();
