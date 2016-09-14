@@ -106,8 +106,9 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
     self.addUids = function(uids) {
         var nucleotideNodes = self.nodes.filter(function(d) { return d.nodeType == 'nucleotide'; });
 
-        for (var i = 0; i < uids.length && i < nucleotideNodes.length; i++)
+        for (var i = 0; i < uids.length && i < nucleotideNodes.length; i++) {
             nucleotideNodes[i].uid = uids[i];
+        }
 
         return self;
     };

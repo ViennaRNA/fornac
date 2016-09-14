@@ -19,7 +19,7 @@ This is an RNA container:
 
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[500,300], 
+            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300], 
              'editable': true});
 
     /*
@@ -31,7 +31,7 @@ function normalContainer() {
         'sequence': '12345678',
         avoidOthers: true
     };
-    container.addRNA(options.structure, options);
+    //container.addRNA(options.structure, options);
     container.addRNA(options.structure, options);
     container.setSize();
 }
