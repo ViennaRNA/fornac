@@ -192,6 +192,7 @@ export function FornaContainer(element, passedOptions) {
             }
         }
 
+        console.log('options.uids:', options.uids);
         var rg = new RNAGraph(options.sequence, structure, options.name);
         rg.circularizeExternal = options.circularizeExternal;
 
@@ -601,10 +602,9 @@ export function FornaContainer(element, passedOptions) {
         for (i = 0; i < self.extraLinks.length; i++) {
             // the actual node objects may have changed, so we hae to recreate
             // the extra links based on the uids
-            console.log('self.extraLinks[i]', self.extraLinks[i]);
-
             if (!(self.extraLinks[i].target.uid in uidsToNodes)) {
                 console.log('not there:', self.extraLinks[i]);
+                continue;
             }
 
             self.extraLinks[i].source = uidsToNodes[self.extraLinks[i].source.uid];
@@ -904,7 +904,6 @@ export function FornaContainer(element, passedOptions) {
     function mouseup() {
         if (mousedownNode) {
            
-            console.log('linkContextMenuShown', linkContextMenuShown);
             if (!linkContextMenuShown)
                 dragLine
                 .attr('class', 'drag_line_hidden');
@@ -1089,7 +1088,6 @@ export function FornaContainer(element, passedOptions) {
     .size([self.options.svgW, self.options.svgH]);
 
     // line displayed when dragging new nodes
-    console.log('create drag line');
     var dragLine = vis.append('line')
     .attr('class', 'drag_line')
     .attr('x1', 0)
@@ -1207,10 +1205,8 @@ export function FornaContainer(element, passedOptions) {
 
         if (shiftKeydown) return;
 
-        console.log('keyCode:', d3.event.keyCode);
-
         switch (d3.event.keyCode) {
-            case 68:
+            case 68:    //'d' key
                 console.log('dotbracket:', self.getStructuresDotBracket());
                 break;
             case 16:
@@ -1359,11 +1355,15 @@ export function FornaContainer(element, passedOptions) {
 
         delete self.rnas[rna.uid];
         let rna1 = self.addRNA(dotBracket1, { 'sequence': sequence1,
-                                   'positions': positions1 });
+                                   'positions': positions1,
+                                   'uids': uids1 });
         let rna2 = self.addRNA(dotBracket2, { 'sequence': sequence2,
-                                   'positions': positions2 });
+                                   'positions': positions2,
+                                   'uids': uids2 });
         for (let i = 0; i < toRemove.length; i++) {
             console.log('rna1:', rna1);
+            console.log('rna2:', rna2);
+            console.log('toRemove[i]', toRemove[i]);
             self.extraLinks.push(
                 {'source': rna1.nodes[toRemove[i].from-1],
                  'target': rna2.nodes[toRemove[i].to-1],
@@ -1374,6 +1374,7 @@ export function FornaContainer(element, passedOptions) {
                 self.update();
 
         }
+        console.log('self.extraLinks:', self.extraLinks);
         //self.extraLinks.push({'source': rna1.nodes[
         
         // create two new rnas
@@ -1415,7 +1416,7 @@ export function FornaContainer(element, passedOptions) {
 
             } else {
                 // 2. The link is between two different molecules
-                extraLinkIndex = self.extraLinks.indexOf(d);
+                let extraLinkIndex = self.extraLinks.indexOf(d);
 
                 self.extraLinks.splice(extraLinkIndex, 1);
             }
@@ -1554,8 +1555,12 @@ export function FornaContainer(element, passedOptions) {
         delete self.rnas[rna2.uid];
 
         // create a new RNA
-        let newRna = self.addRNA(newDotbracket, { 'sequence': newSeq,
-                                                  'positions': newPositions });
+        if (self.options.applyForce)
+            self.addRNA(newDotbracket, { 'sequence': newSeq,
+                                                      'positions': newPositions });
+        else
+            self.addRNA(newDotbracket, { 'sequence': newSeq });
+
 
         // add the extra links between them as base pairs
         // remove the old ones
