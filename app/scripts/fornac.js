@@ -82,8 +82,7 @@ export function FornaContainer(element, passedOptions) {
             {
                 title: 'Delete Node',
                 action: function(elm, d, i) {
-                    console.log('Item #1 clicked!');
-                    console.log('The data for this circle is: ' + d);
+                    self.deleteNode(d);
                 },
                 disabled: false // optional, defaults to false
             },
@@ -265,6 +264,44 @@ export function FornaContainer(element, passedOptions) {
 
         return rnaJson;
     };
+
+    self.deleteNode = function(node) {
+        console.log('deleting...', node);
+        // get the dotbracket string for this rna
+        let rna = node.rna;
+        let pair = rna.pairtable[node.num];
+
+        // remove basepairs for this node
+        if (pair != 0) {
+            rna.pairtable[node.num] = 0;
+            rna.pairtable[pair] = 0;
+        }
+
+        let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
+        let positions = rna.getPositions();
+        let sequence = rna.seq
+        let uids = rna.getUids();
+
+        let newDotbracket = dotbracket.slice(0, node.num-1) + dotbracket.slice(node.num)
+        let newPositions = positions.slice(0, node.num-1)
+                .concat(positions.slice(node.num));
+        let newSequence = sequence.slice(0, node.num-1) + sequence.slice(node.num)
+        let newUids = uids.slice(0, node.num-1)
+                .concat(uids.slice(node.num));
+
+        delete self.rnas[rna.uid];
+        let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
+                                 'positions': newPositions,
+                                 'uids': newUids});
+
+        console.log('new dotbracket:', newDotbracket);
+        //self.recalculateGraph();
+        
+        //remove backbone links associated with this node
+        
+        //remove this node
+        
+    }
 
     self.addExternalLinks = function(rnaJson, externalLinks) {
         var newLinks = [];

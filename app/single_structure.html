@@ -27,12 +27,12 @@ function normalContainer() {
         'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
     };
     */
-    let options = {'structure': '.(....).',
+    let options = {'structure': '.((..)).',
         'sequence': '12345678',
         avoidOthers: true
     };
     container.addRNA(options.structure, options);
-    container.addRNA(options.structure, options);
+    //container.addRNA(options.structure, options);
     container.setSize();
 }
 
