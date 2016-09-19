@@ -67,6 +67,7 @@ export function FornaContainer(element, passedOptions) {
                     self.addRNA('.', {'sequence': 'A', 'centerPos': canvasMousePos});
 
                 },
+                children: [{'title': 'hey'}, {'title': 'there'}],
                 disabled: false // optional, defaults to false
             },
             {
