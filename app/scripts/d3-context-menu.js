@@ -51,16 +51,7 @@ export function contextMenu(menu, opts) {
                     clickAwayFunc = function() { } ) {
         var elm = this;
         var contextMenuPos = null;
-        let mousePos = null;
-        console.log('old mousePos:', mousePos);
-
-        if (initialPos != null)
-            // the caller has requested the menu be placed somewhere else
-            mousePos = initialPos;
-        else
-            mousePos =  d3.mouse(this);
-        
-        console.log('new mousePos:', mousePos);
+        let mousePos = d3.mouse(this);
 
         clickAway = clickAwayFunc;
         let openChildMenuUid = null;
@@ -167,10 +158,13 @@ export function contextMenu(menu, opts) {
             }
         }
 
+        if (initialPos == null)
+            initialPos = [d3.event.pageX, d3.event.pageY];
+
         // display context menu
         d3.select('.d3-context-menu-' + uid)
-            .style('left', (d3.event.pageX - 2) + 'px')
-            .style('top', (d3.event.pageY - 2) + 'px')
+            .style('left', (initialPos[0] - 2) + 'px')
+            .style('top', (initialPos[1] - 2) + 'px')
             .style('display', 'block');
 
         console.log('preventing');
