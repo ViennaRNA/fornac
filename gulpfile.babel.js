@@ -5,6 +5,7 @@ require('es6-promise').polyfill();
 //import webpack from 'gulp-webpack';
 var webpack = require('webpack-stream');
 import gulp from 'gulp';
+import gulpUtil from 'gulp-util';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
@@ -55,16 +56,16 @@ gulp.task('html', ['styles', 'scripts'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.debug())
-    .pipe($.if('*.js', $.uglify()))
-    .pipe($.if('*.css', $.cssnano()))
-    .pipe($.if('*.html', $.htmlmin({collapseWhitespace: true})))
+    //.pipe($.if('*.js', $.uglify().on('error', gulpUtil.log)))
+    //.pipe($.if('*.css', $.cssnano().on('error', gulpUtil.log)))
+    //.pipe($.if('*.html', $.htmlmin({collapseWhitespace: true}).on('error', gulpUtil.log)))
     .pipe(gulp.dest('dist'));
 });
 
 gulp.task('buildJs', ['styles', 'scripts'], () => {
     return gulp.src(['.tmp/scripts/rnatreemap.js'])
-    .pipe($.uglify())
-    .pipe(gulp.dest('dist/scripts'))
+    //.pipe($.uglify())
+    .pipe(gulp.dest('dist/scripts').on('error', gulpUtil.log))
 });
 
 gulp.task('images', () => {
