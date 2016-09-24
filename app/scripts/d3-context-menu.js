@@ -6,6 +6,7 @@ export function contextMenu(menu, opts) {
     let previouslyMouseUp = false;
     let clickAway = {};
     let uid = slugid.nice();
+
     let initialPos = null;
 
     var openCallback,
@@ -32,6 +33,7 @@ export function contextMenu(menu, opts) {
         .classed('d3-context-menu-' + uid, true)
 
     // close menu
+    console.log('uid:', uid);
     d3.select('body').on('click.d3-context-menu-' + uid, function() {
         /*
         if (previouslyMouseUp) {
@@ -98,19 +100,29 @@ export function contextMenu(menu, opts) {
                 if (d.disabled) return; // do nothing if disabled
                 if (!d.action) return; // headers have no "action"
                 d.action(elm, data, index, mousePos);
-                d3.select('.d3-context-menu-' + uid).style('display', 'none');
+
+                // close all context menus
+                d3.selectAll('.d3-context-menu').style('display', 'none');
 
                 if (closeCallback) {
                     closeCallback();
                 }
             })
             .on('mouseenter', function(d, i) {
+                d3.select(this)
+                    .classed('d3-context-menu-selected', true)
+
                 if (openChildMenuUid != null) {
                     // there's a child menu open
                     if (typeof d.children == 'undefined') {
                         // no children, so hide any open child menus
                         d3.select('.d3-context-menu-' + openChildMenuUid)
                         .style('display', 'none');
+
+                        // unselect all items
+                        d3.select('.d3-context-menu-' + uid)
+                            .selectAll('li')
+                            .classed('d3-context-menu-selected', false);
 
                         openChildMenuUid = null;
                         return;
@@ -130,24 +142,33 @@ export function contextMenu(menu, opts) {
                         openChildMenuUid = null;
 
                     }
+
                 }             
 
                 // there should be no menu open right now
                 if (typeof d.children != 'undefined') {
+
                     let boundingRect = this.getBoundingClientRect();
 
                     // need to open a new menu
                     let childrenContextMenu = contextMenu(d.children, 
                                       {'pos': [ boundingRect.left + boundingRect.width,
-                                                boundingRect.top]});
+                                                boundingRect.top - 2]});
                     d.childUid = childrenContextMenu.apply(this, [d,i,true,
                                                            function() { console.log('applying'); }]);
                     openChildMenuUid = d.childUid;
                 }
+
+
+                d3.select(this)
+                    .classed('d3-context-menu-selected', true)
             
             })
             .on('mouseleave', function(d, i) {
-                
+                if (openChildMenuUid == null) {
+                    d3.select(this)
+                        .classed('d3-context-menu-selected', false);
+                }
             });
 
         // the openCallback allows an action to fire before the menu is displayed
@@ -158,14 +179,23 @@ export function contextMenu(menu, opts) {
             }
         }
 
-        if (initialPos == null)
-            initialPos = [d3.event.pageX, d3.event.pageY];
+        d3.select('.d3-context-menu-' + uid)
+            .style('display', 'block');
+
+        if (initialPos == null) {
+            d3.select('.d3-context-menu-' + uid)
+            .style('left', (d3.event.pageX - 2) + 'px')
+            .style('top', (d3.event.pageY - 2) + 'px')
+        } else {
+            d3.select('.d3-context-menu-' + uid)
+            .style('left', initialPos[0] + 'px')
+            .style('top', initialPos[1] + 'px')
+            
+        }
+
+        console.log('initalPos:', initialPos);
 
         // display context menu
-        d3.select('.d3-context-menu-' + uid)
-            .style('left', (initialPos[0] - 2) + 'px')
-            .style('top', (initialPos[1] - 2) + 'px')
-            .style('display', 'block');
 
         console.log('preventing');
 

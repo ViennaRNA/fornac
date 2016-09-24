@@ -35,6 +35,11 @@
 	color: #fefefe;
 }
 
+.d3-context-menu-selected {
+	background-color: #4677f8;
+	color: #fefefe;
+}
+
 /*
 	Header
 */
