@@ -59,25 +59,56 @@ export function FornaContainer(element, passedOptions) {
             {
                 title: 'Add Node',
                 action: function(elm, d, i, mousePos) {
-                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
-                    let canvasMousePos = [xScale.invert(mousePos[0]),
-                                          yScale.invert(mousePos[1])];
-                    console.log('canvasMousePos', canvasMousePos);
-
-                    self.addRNA('.', {'sequence': 'A', 'centerPos': canvasMousePos});
 
                 },
                 children: [{
-                    'title': 'hey',
+                    'title': 'A',
                     action: function(elm, d, i, mousePos) {
+                        console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+                        let canvasMousePos = [xScale.invert(mousePos[0]),
+                                              yScale.invert(mousePos[1])];
+                        console.log('canvasMousePos', canvasMousePos);
+
+                        self.addRNA('.', {'sequence': 'A', 'centerPos': canvasMousePos});
+                    }
+                }, 
+                {
+                    'title': 'C',
+                    action: function(elm, d, i, mousePos) {
+                        console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+                        let canvasMousePos = [xScale.invert(mousePos[0]),
+                                              yScale.invert(mousePos[1])];
+                        console.log('canvasMousePos', canvasMousePos);
+
+                        self.addRNA('.', {'sequence': 'C', 'centerPos': canvasMousePos});
+                    }
+
+                    },
+                {
+                    'title': 'G',
+                    action: function(elm, d, i, mousePos) {
+                        console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+                        let canvasMousePos = [xScale.invert(mousePos[0]),
+                                              yScale.invert(mousePos[1])];
+                        console.log('canvasMousePos', canvasMousePos);
+
+                        self.addRNA('.', {'sequence': 'G', 'centerPos': canvasMousePos});
+                    }
+
+                    },
+                {
+                    'title': 'U',
+                    action: function(elm, d, i, mousePos) {
+                        console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+                        let canvasMousePos = [xScale.invert(mousePos[0]),
+                                              yScale.invert(mousePos[1])];
+                        console.log('canvasMousePos', canvasMousePos);
+
+                        self.addRNA('.', {'sequence': 'U', 'centerPos': canvasMousePos});
 
                     }
-                }, {
-                    'title': 'there',
-                    action: function(elm, d, i, mousePos) {
-
-                    }
-                }],
+                }
+                ],
                 disabled: false // optional, defaults to false
             },
             {
@@ -103,6 +134,44 @@ export function FornaContainer(element, passedOptions) {
                     console.log('You have clicked the second item!');
                     console.log('The data for this circle is: ' + d);
                 }
+            },
+            { 
+                title: 'Insert Before',
+                action: function(elm, d, i) {
+
+                }
+            },
+            {
+                title: 'Insert After',
+                action: function(elm, d, i) {
+
+                },
+                children: [
+                    {
+                        title: 'A',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'C',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'G',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'U',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                ]
             }
         ]
 
