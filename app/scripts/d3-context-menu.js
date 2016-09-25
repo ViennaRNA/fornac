@@ -114,15 +114,17 @@ export function contextMenu(menu, opts) {
 
                 if (openChildMenuUid != null) {
                     // there's a child menu open
+
+                    // unselect all items
+                    d3.select('.d3-context-menu-' + uid)
+                        .selectAll('li')
+                        .classed('d3-context-menu-selected', false);
+
                     if (typeof d.children == 'undefined') {
                         // no children, so hide any open child menus
                         d3.select('.d3-context-menu-' + openChildMenuUid)
                         .style('display', 'none');
 
-                        // unselect all items
-                        d3.select('.d3-context-menu-' + uid)
-                            .selectAll('li')
-                            .classed('d3-context-menu-selected', false);
 
                         openChildMenuUid = null;
                         return;
@@ -154,7 +156,7 @@ export function contextMenu(menu, opts) {
                     let childrenContextMenu = contextMenu(d.children, 
                                       {'pos': [ boundingRect.left + boundingRect.width,
                                                 boundingRect.top - 2]});
-                    d.childUid = childrenContextMenu.apply(this, [d,i,true,
+                    d.childUid = childrenContextMenu.apply(this, [data,i,true,
                                                            function() { console.log('applying'); }]);
                     openChildMenuUid = d.childUid;
                 }
@@ -165,6 +167,7 @@ export function contextMenu(menu, opts) {
             
             })
             .on('mouseleave', function(d, i) {
+
                 if (openChildMenuUid == null) {
                     d3.select(this)
                         .classed('d3-context-menu-selected', false);

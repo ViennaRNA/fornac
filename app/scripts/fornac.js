@@ -139,17 +139,45 @@ export function FornaContainer(element, passedOptions) {
                 title: 'Insert Before',
                 action: function(elm, d, i) {
 
-                }
+                },
+                children: [
+                    {
+                        title: 'A',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'C',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'G',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                    {
+                        title: 'U',
+                        action: function(elm, d, i) {
+
+                        }
+                    },
+                ]
             },
             {
                 title: 'Insert After',
                 action: function(elm, d, i) {
+                    console.log('d:', d);
 
                 },
                 children: [
                     {
                         title: 'A',
                         action: function(elm, d, i) {
+                            console.log('inserting:', d);
 
                         }
                     },
