@@ -57,6 +57,19 @@ Display two cofolded sequences using the format of [RNAcofold](http://rna.tbi.un
     container.setSize(); 
 ```
 
+## Programmatic Use
+
+### Extracting the secondary structure (dot-bracket string)
+
+```
+fornac.getStructuresDotBracket()
+```
+
+Returns a dot-bracket representation of the visible structure. This is useful
+if integrating this component with structure editing functionality. Returns an 
+array of length 2 (e.g. `['CCCCAAAAGGGG', '((((....))))']`).
+
+
 ## Options
 
 The `FornaContainer` supports a number of options to allow users to customize how the RNA will be presented.
