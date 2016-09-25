@@ -144,25 +144,27 @@ export function FornaContainer(element, passedOptions) {
                     {
                         title: 'A',
                         action: function(elm, d, i) {
-
+                            self.insertNodeBeforeOrAfter('A', d, -1);
                         }
                     },
                     {
                         title: 'C',
                         action: function(elm, d, i) {
+                            self.insertNodeBeforeOrAfter('C', d, -1);
 
                         }
                     },
                     {
                         title: 'G',
                         action: function(elm, d, i) {
+                            self.insertNodeBeforeOrAfter('G', d, -1);
 
                         }
                     },
                     {
                         title: 'U',
                         action: function(elm, d, i) {
-
+                            self.insertNodeBeforeOrAfter('U', d, -1);
                         }
                     },
                 ]
@@ -177,26 +179,26 @@ export function FornaContainer(element, passedOptions) {
                     {
                         title: 'A',
                         action: function(elm, d, i) {
-                            console.log('inserting:', d);
+                            self.insertNodeBeforeOrAfter('A', d, 0);
 
                         }
                     },
                     {
                         title: 'C',
                         action: function(elm, d, i) {
-
+                            self.insertNodeBeforeOrAfter('C', d, 0);
                         }
                     },
                     {
                         title: 'G',
                         action: function(elm, d, i) {
-
+                            self.insertNodeBeforeOrAfter('G', d, 0);
                         }
                     },
                     {
                         title: 'U',
                         action: function(elm, d, i) {
-
+                            self.insertNodeBeforeOrAfter('U', d, 0);
                         }
                     },
                 ]
@@ -373,6 +375,34 @@ export function FornaContainer(element, passedOptions) {
 
         return rnaJson;
     };
+
+    self.insertNodeBeforeOrAfter = function(nodeName, referenceNode, positionOffset) {
+        //insert a new node before or after another one
+        //positionOffset specifies who far from the original to insert the new node
+        let rna = referenceNode.rna;
+
+        let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
+        let positions = rna.getPositions();
+        let sequence = rna.seq
+        let uids = rna.getUids();
+
+        let newNodeNum = referenceNode.num + positionOffset;
+
+        let newDotbracket = dotbracket.slice(0,newNodeNum) + '.' + dotbracket.slice(newNodeNum);
+        let newSequence = sequence.slice(0,newNodeNum) +  nodeName + sequence.slice(newNodeNum);
+
+        console.log('newSequence:', newSequence);
+
+        let newUids = uids.splice(newNodeNum, 0, slugid.nice());
+        let newPositions = positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+
+
+        delete self.rnas[rna.uid];
+        let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
+                                 'positions': newPositions,
+                                 'uids': newUids});
+
+    }
 
     self.deleteNode = function(node) {
         console.log('deleting...', node);
