@@ -1,1 +1,1 @@
-rm -rf /tmp/dist/; cp -r dist /tmp; git checkout gh-pages; cp -r /tmp/dist/* .
+gulp build; rm -rf /tmp/dist/; cp -r dist /tmp; git checkout gh-pages; cp -r /tmp/dist/* .
