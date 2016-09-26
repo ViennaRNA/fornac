@@ -130,19 +130,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (self.options.editable == true) {
 	        var backgroundMenu = [{
 	            title: 'Add Node',
-	            action: function action(elm, d, i, mousePos) {
-	                console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
-	                var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
-	                console.log('canvasMousePos', canvasMousePos);
-
-	                self.addRNA('.', { 'sequence': 'A', 'centerPos': canvasMousePos });
-	            },
+	            action: function action(elm, d, i, mousePos) {},
 	            children: [{
-	                'title': 'hey',
-	                action: function action(elm, d, i, mousePos) {}
+	                'title': 'A',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'A', 'centerPos': canvasMousePos });
+	                }
 	            }, {
-	                'title': 'there',
-	                action: function action(elm, d, i, mousePos) {}
+	                'title': 'C',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'C', 'centerPos': canvasMousePos });
+	                }
+
+	            }, {
+	                'title': 'G',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'G', 'centerPos': canvasMousePos });
+	                }
+
+	            }, {
+	                'title': 'U',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'U', 'centerPos': canvasMousePos });
+	                }
 	            }],
 	            disabled: false // optional, defaults to false
 	        }, {
@@ -165,6 +191,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	                console.log('You have clicked the second item!');
 	                console.log('The data for this circle is: ' + d);
 	            }
+	        }, {
+	            title: 'Insert Before',
+	            action: function action(elm, d, i) {},
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('A', d, -1);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('C', d, -1);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('G', d, -1);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('U', d, -1);
+	                }
+	            }]
+	        }, {
+	            title: 'Insert After',
+	            action: function action(elm, d, i) {
+	                console.log('d:', d);
+	            },
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('A', d, 0);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('C', d, 0);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('G', d, 0);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('U', d, 0);
+	                }
+	            }]
 	        }];
 
 	        self.nodeContextMenu = (0, _d3ContextMenu.contextMenu)(nodeMenu);
@@ -311,6 +387,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, true);
 
 	        return rnaJson;
+	    };
+
+	    self.insertNodeBeforeOrAfter = function (nodeName, referenceNode, positionOffset) {
+	        //insert a new node before or after another one
+	        //positionOffset specifies who far from the original to insert the new node
+	        var rna = referenceNode.rna;
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions();
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newNodeNum = referenceNode.num + positionOffset;
+
+	        var newDotbracket = dotbracket.slice(0, newNodeNum) + '.' + dotbracket.slice(newNodeNum);
+	        var newSequence = sequence.slice(0, newNodeNum) + nodeName + sequence.slice(newNodeNum);
+
+	        console.log('newSequence:', newSequence);
+
+	        var newUids = uids.splice(newNodeNum, 0, _slugid2.default.nice());
+	        var newPositions = positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': newUids });
 	    };
 
 	    self.deleteNode = function (node) {
@@ -14952,6 +15054,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var previouslyMouseUp = false;
 	    var clickAway = {};
 	    var uid = _slugid2.default.nice();
+
 	    var initialPos = null;
 
 	    var openCallback, closeCallback;
@@ -14973,6 +15076,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _d2.default.selectAll('.d3-context-menu-' + uid).data([1]).enter().append('div').classed('d3-context-menu', true).classed('d3-context-menu-' + uid, true);
 
 	    // close menu
+	    console.log('uid:', uid);
 	    _d2.default.select('body').on('click.d3-context-menu-' + uid, function () {
 	        /*
 	        if (previouslyMouseUp) {
@@ -15035,14 +15139,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (d.disabled) return; // do nothing if disabled
 	            if (!d.action) return; // headers have no "action"
 	            d.action(elm, data, index, mousePos);
-	            _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+
+	            // close all context menus
+	            _d2.default.selectAll('.d3-context-menu').style('display', 'none');
 
 	            if (closeCallback) {
 	                closeCallback();
 	            }
 	        }).on('mouseenter', function (d, i) {
+	            _d2.default.select(this).classed('d3-context-menu-selected', true);
+
 	            if (openChildMenuUid != null) {
 	                // there's a child menu open
+
+	                // unselect all items
+	                _d2.default.select('.d3-context-menu-' + uid).selectAll('li').classed('d3-context-menu-selected', false);
+
 	                if (typeof d.children == 'undefined') {
 	                    // no children, so hide any open child menus
 	                    _d2.default.select('.d3-context-menu-' + openChildMenuUid).style('display', 'none');
@@ -15066,16 +15178,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // there should be no menu open right now
 	            if (typeof d.children != 'undefined') {
+
 	                var boundingRect = this.getBoundingClientRect();
 
 	                // need to open a new menu
-	                var childrenContextMenu = contextMenu(d.children, { 'pos': [boundingRect.left + boundingRect.width, boundingRect.top] });
-	                d.childUid = childrenContextMenu.apply(this, [d, i, true, function () {
+	                var childrenContextMenu = contextMenu(d.children, { 'pos': [boundingRect.left + boundingRect.width, boundingRect.top - 2] });
+	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {
 	                    console.log('applying');
 	                }]);
 	                openChildMenuUid = d.childUid;
 	            }
-	        }).on('mouseleave', function (d, i) {});
+
+	            _d2.default.select(this).classed('d3-context-menu-selected', true);
+	        }).on('mouseleave', function (d, i) {
+
+	            if (openChildMenuUid == null) {
+	                _d2.default.select(this).classed('d3-context-menu-selected', false);
+	            }
+	        });
 
 	        // the openCallback allows an action to fire before the menu is displayed
 	        // an example usage would be closing a tooltip
@@ -15085,10 +15205,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        if (initialPos == null) initialPos = [_d2.default.event.pageX, _d2.default.event.pageY];
+	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
+
+	        if (initialPos == null) {
+	            _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
+	        } else {
+	            _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] + 'px').style('top', initialPos[1] + 'px');
+	        }
+
+	        console.log('initalPos:', initialPos);
 
 	        // display context menu
-	        _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] - 2 + 'px').style('top', initialPos[1] - 2 + 'px').style('display', 'block');
 
 	        console.log('preventing');
 
@@ -15137,7 +15264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	// module
-	exports.push([module.id, ".d3-context-menu {\n\tposition: absolute;\n\tdisplay: none;\n\tbackground-color: #f2f2f2;\n\tborder-radius: 4px;\n\n\tfont-family: Arial, sans-serif;\n\tfont-size: 14px;\n\tmin-width: 150px;\n\tborder: 1px solid #d4d4d4;\n\n\tz-index:1200;\n}\n\n.d3-context-menu ul {\n\tlist-style-type: none;\n\tmargin: 4px 0px;\n\tpadding: 0px;\n\tcursor: default;\n}\n\n.d3-context-menu ul li {\n\tpadding: 4px 16px;\n\n\t-webkit-touch-callout: none; /* iOS Safari */\n\t-webkit-user-select: none;   /* Chrome/Safari/Opera */\n\t-khtml-user-select: none;    /* Konqueror */\n\t-moz-user-select: none;      /* Firefox */\n\t-ms-user-select: none;       /* Internet Explorer/Edge */\n\tuser-select: none;\n}\n\n.d3-context-menu ul li:hover {\n\tbackground-color: #4677f8;\n\tcolor: #fefefe;\n}\n\n/*\n\tHeader\n*/\n\n.d3-context-menu ul li.is-header,\n.d3-context-menu ul li.is-header:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #444;\n\tfont-weight: bold;\n\tfont-style: italic;\n}\n\n/*\n\tDisabled\n*/\n\n.d3-context-menu ul li.is-disabled,\n.d3-context-menu ul li.is-disabled:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #888;\n\tcursor: not-allowed;\n}\n\n/*\n\tDivider\n*/\n\n.d3-context-menu ul li.is-divider {\n\tpadding: 0px 0px;\n}\n\n.d3-context-menu ul li.is-divider:hover {\n\tbackground-color: #f2f2f2;\n}\n\n.d3-context-menu ul hr {\n\tborder: 0;\n    height: 0;\n    border-top: 1px solid rgba(0, 0, 0, 0.1);\n    border-bottom: 1px solid rgba(255, 255, 255, 0.3);\n}", ""]);
+	exports.push([module.id, ".d3-context-menu {\n\tposition: absolute;\n\tdisplay: none;\n\tbackground-color: #f2f2f2;\n\tborder-radius: 4px;\n\n\tfont-family: Arial, sans-serif;\n\tfont-size: 14px;\n\tmin-width: 150px;\n\tborder: 1px solid #d4d4d4;\n\n\tz-index:1200;\n}\n\n.d3-context-menu ul {\n\tlist-style-type: none;\n\tmargin: 4px 0px;\n\tpadding: 0px;\n\tcursor: default;\n}\n\n.d3-context-menu ul li {\n\tpadding: 4px 16px;\n\n\t-webkit-touch-callout: none; /* iOS Safari */\n\t-webkit-user-select: none;   /* Chrome/Safari/Opera */\n\t-khtml-user-select: none;    /* Konqueror */\n\t-moz-user-select: none;      /* Firefox */\n\t-ms-user-select: none;       /* Internet Explorer/Edge */\n\tuser-select: none;\n}\n\n.d3-context-menu ul li:hover {\n\tbackground-color: #4677f8;\n\tcolor: #fefefe;\n}\n\n.d3-context-menu-selected {\n\tbackground-color: #4677f8;\n\tcolor: #fefefe;\n}\n\n/*\n\tHeader\n*/\n\n.d3-context-menu ul li.is-header,\n.d3-context-menu ul li.is-header:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #444;\n\tfont-weight: bold;\n\tfont-style: italic;\n}\n\n/*\n\tDisabled\n*/\n\n.d3-context-menu ul li.is-disabled,\n.d3-context-menu ul li.is-disabled:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #888;\n\tcursor: not-allowed;\n}\n\n/*\n\tDivider\n*/\n\n.d3-context-menu ul li.is-divider {\n\tpadding: 0px 0px;\n}\n\n.d3-context-menu ul li.is-divider:hover {\n\tbackground-color: #f2f2f2;\n}\n\n.d3-context-menu ul hr {\n\tborder: 0;\n    height: 0;\n    border-top: 1px solid rgba(0, 0, 0, 0.1);\n    border-bottom: 1px solid rgba(255, 255, 255, 0.3);\n}\n", ""]);
 
 	// exports
 
