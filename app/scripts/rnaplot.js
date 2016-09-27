@@ -231,7 +231,11 @@ export function rnaPlot() {
             //var positions = simpleXyCoordinates(rg.pairtable);
             var naview = new NAView();
 
-            var positions = naview.naview_xy_coordinates(rg.pairtable);
+            var naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
+            var positions = [];
+            for (var i = 0; i < naViewPositions.nbase; i++) {
+                positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
+            }
             rg.addPositions('nucleotide', positions)
             .reinforceStems()
             .reinforceLoops()
