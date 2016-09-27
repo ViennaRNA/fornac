@@ -1,5 +1,6 @@
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
+import {NAView} from './naview/naview.js';
 import {rnaUtilities,ColorScheme} from 'rnautils';
 
 import '../styles/rnaplot.css';
@@ -11,7 +12,7 @@ function isNormalInteger(str) {
 
 if(typeof(String.prototype.trim) === 'undefined')
     {
-        String.prototype.trim = function() 
+        String.prototype.trim = function()
         {
             return String(this).replace(/^\s+|\s+$/g, '');
         };
@@ -36,11 +37,11 @@ export function rnaPlot() {
     function createTransformToFillViewport(xValues, yValues, molName='') {
         // create transform that will scale the x and y values so that
         // they fill the available viewport
-    
+
         // find out leftmost, rightmost, topmost, bottommost positions of each
         // nucleotide so that we can create a scale
         var xExtent = d3.extent(xValues);
-        var yExtent = d3.extent(yValues); 
+        var yExtent = d3.extent(yValues);
 
         var NAME_OFFSET = 30;
         if (molName != '')
@@ -64,12 +65,12 @@ export function rnaPlot() {
         // once we have a scale for one dimension, we can create the scale for the other
         // keeping the same expansion / shrinking ratio
         function createOtherScale(firstScale, newDomain, newRange) {
-            var scaleFactor = (firstScale.range()[1] - firstScale.range()[0]) / 
+            var scaleFactor = (firstScale.range()[1] - firstScale.range()[0]) /
                               (firstScale.domain()[1] - firstScale.domain()[0]);
             var newWidth = (newDomain[1] - newDomain[0]) * scaleFactor
             var newMargin = ((newRange[1] - newRange[0]) - newWidth) / 2;
 
-            return {'scaleFactor': scaleFactor, 
+            return {'scaleFactor': scaleFactor,
                     'scale': d3.scale.linear()
                                      .domain(newDomain)
                                      .range([newRange[0] + newMargin, newRange[1] - newMargin])};
@@ -98,8 +99,8 @@ export function rnaPlot() {
         var xOffset = xScale.range()[0] - xScale.domain()[0];
         var yOffset = yScale.range()[0] - yScale.domain()[0];
 
-        return 'translate(' + -(xScale.domain()[0] * ret.scaleFactor - xScale.range()[0]) + 
-                  ',' + -(yScale.domain()[0] * ret.scaleFactor - yScale.range()[0]) + ')' + 
+        return 'translate(' + -(xScale.domain()[0] * ret.scaleFactor - xScale.range()[0]) +
+                  ',' + -(yScale.domain()[0] * ret.scaleFactor - yScale.range()[0]) + ')' +
             'scale(' + ret.scaleFactor + ')';
     }
 
@@ -110,8 +111,8 @@ export function rnaPlot() {
         .data(nucleotideNodes)
         .enter()
         .append('svg:g')
-        .attr('transform', function(d) { 
-            return 'translate(' + d.x + ',' + d.y + ')'; 
+        .attr('transform', function(d) {
+            return 'translate(' + d.x + ',' + d.y + ')';
         });
 
         var circles = gs.append('svg:circle')
@@ -132,13 +133,13 @@ export function rnaPlot() {
     function createLabels(selection, labelNodes) {
         // create groupings for each nucleotide and label
 
-        var gs = selection 
+        var gs = selection
         .selectAll('.rnaLabel')
         .data(labelNodes)
         .enter()
         .append('svg:g')
-        .attr('transform', function(d) { 
-            return 'translate(' + d.x + ',' + d.y + ')'; 
+        .attr('transform', function(d) {
+            return 'translate(' + d.x + ',' + d.y + ')';
         });
 
         var numberLabels = gs.append('svg:text')
@@ -187,7 +188,7 @@ export function rnaPlot() {
 
         for (var i = 0; i < results.length; i++) {
             var edge_subpoint_data = results[i];
-            // for each of the arrays in the results 
+            // for each of the arrays in the results
             // draw a line between the subdivions points for that edge
 
             selection.append('path').attr('d', d3line(edge_subpoint_data))
@@ -196,7 +197,7 @@ export function rnaPlot() {
             .attr('extra-link-type', function(d) { return linksList[i].extraLinkType; })
             .style('stroke-opacity',0.4); //use opacity as blending
         }
-        
+
     }
 
     function createLinks(selection, links) {
@@ -247,8 +248,8 @@ export function rnaPlot() {
             .append('g')
             .attr('transform', fillViewportTransform);
 
-            var nucleotideNodes = rg.nodes.filter(function(d) { 
-                return d.nodeType == 'nucleotide'; 
+            var nucleotideNodes = rg.nodes.filter(function(d) {
+                return d.nodeType == 'nucleotide';
             });
 
             var labelNodes = rg.nodes.filter(function(d) {
@@ -258,12 +259,12 @@ export function rnaPlot() {
             var links = rg.links;
 
             createLinks(gTransform, links);
-            createNucleotides(gTransform, nucleotideNodes);            
+            createNucleotides(gTransform, nucleotideNodes);
             createLabels(gTransform, labelNodes);
             createName(gTransform, data.name);
 
             if (options.bundleExternalLinks) {
-                makeExternalLinksBundle(gTransform, links); 
+                makeExternalLinksBundle(gTransform, links);
             }
 
         });
@@ -381,8 +382,8 @@ function RNAUtilities() {
     };
 
     self.backtrackMaximumMatching = function(mm, old_pt) {
-      var pt = Array.apply(null, 
-                           Array(mm.length)).map(function() { return 0 }); 
+      var pt = Array.apply(null,
+                           Array(mm.length)).map(function() { return 0 });
                            //create an array containing zeros
 
       self.mm_bt(mm, pt, old_pt, 1, mm.length-1);
@@ -413,7 +414,7 @@ function RNAUtilities() {
             pt[q] = j;
             pt[j] = q;
 
-            if(i < q) 
+            if(i < q)
                 self.mm_bt(mm, pt, old_pt, i, q - 1);
 
             self.mm_bt(mm, pt, old_pt, q + 1, j - 1);
@@ -429,7 +430,7 @@ function RNAUtilities() {
     self.dotbracketToPairtable = function(dotbracket) {
         // create an array and initialize it to 0
         pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf,0);
-        
+
         //  the first element is always the length of the RNA molecule
         pt[0] = dotbracket.length;
 
@@ -546,7 +547,7 @@ function RNAUtilities() {
                 i++;
                 to--;
             }
-            
+
             to_remove = to_remove.concat(self.find_unmatched(pt, i, to));
         }
 
