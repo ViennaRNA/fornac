@@ -6,6 +6,7 @@ export function contextMenu(menu, opts) {
     let previouslyMouseUp = false;
     let clickAway = {};
     let uid = slugid.nice();
+    let rootElement = null;
 
     let initialPos = null;
 
@@ -20,6 +21,9 @@ export function contextMenu(menu, opts) {
         closeCallback = opts.onClose;
     }
 
+    if ('rootElement' in opts)
+        rootElement = opts['rootElement']
+
     if ('pos' in opts) {
         // do we want to place this menu somewhere specific?
         initialPos = opts.pos;
@@ -33,7 +37,6 @@ export function contextMenu(menu, opts) {
         .classed('d3-context-menu-' + uid, true)
 
     // close menu
-    console.log('uid:', uid);
     d3.select('body').on('click.d3-context-menu-' + uid, function() {
         /*
         if (previouslyMouseUp) {
@@ -53,7 +56,14 @@ export function contextMenu(menu, opts) {
                     clickAwayFunc = function() { } ) {
         var elm = this;
         var contextMenuPos = null;
-        let mousePos = d3.mouse(this);
+        let mousePos = null;
+        let currentThis = this;
+
+        if (rootElement == null)
+            mousePos = d3.mouse(this);
+        else
+            mousePos = d3.mouse(rootElement); // for recursive menus, we need the mouse
+                                              // position relative to another element
 
         clickAway = clickAwayFunc;
         let openChildMenuUid = null;
@@ -63,7 +73,6 @@ export function contextMenu(menu, opts) {
         d3.selectAll('.d3-context-menu-' + uid).html('');
         var list = d3.selectAll('.d3-context-menu-' + uid)
             .on('contextmenu', function(d) {
-                console.log('hiding');
                 d3.select('.d3-context-menu-' + uid).style('display', 'none'); 
 
                 d3.event.preventDefault();
@@ -96,7 +105,6 @@ export function contextMenu(menu, opts) {
                 return (typeof d.title === 'string') ? d.title : d.title(data);
             })
             .on('click', function(d, i) {
-                console.log('click');
                 if (d.disabled) return; // do nothing if disabled
                 if (!d.action) return; // headers have no "action"
                 d.action(elm, data, index, mousePos);
@@ -155,9 +163,10 @@ export function contextMenu(menu, opts) {
                     // need to open a new menu
                     let childrenContextMenu = contextMenu(d.children, 
                                       {'pos': [ boundingRect.left + boundingRect.width,
-                                                boundingRect.top - 2]});
+                                                boundingRect.top - 2],
+                                       'rootElement': currentThis });
                     d.childUid = childrenContextMenu.apply(this, [data,i,true,
-                                                           function() { console.log('applying'); }]);
+                                                           function() { }]);
                     openChildMenuUid = d.childUid;
                 }
 
@@ -196,11 +205,7 @@ export function contextMenu(menu, opts) {
             
         }
 
-        console.log('initalPos:', initialPos);
-
         // display context menu
-
-        console.log('preventing');
 
         if (previouslyMouseUp)
             return uid;
