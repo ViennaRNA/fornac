@@ -133,7 +133,35 @@ export function FornaContainer(element, passedOptions) {
                 action: function(elm, d, i) {
                     console.log('You have clicked the second item!');
                     console.log('The data for this circle is: ' + d);
-                }
+                },
+                children: [
+                    {
+                        title: 'A',
+                        action: function(elm, d, i) {
+                            self.changeNode('A', d);
+                        }
+                    },
+                    {
+                        title: 'C',
+                        action: function(elm, d, i) {
+                            self.changeNode('C', d);
+
+                        }
+                    },
+                    {
+                        title: 'G',
+                        action: function(elm, d, i) {
+                            self.changeNode('G', d);
+
+                        }
+                    },
+                    {
+                        title: 'U',
+                        action: function(elm, d, i) {
+                            self.changeNode('U', d);
+                        }
+                    },
+                ]
             },
             { 
                 title: 'Insert Before',
@@ -338,6 +366,7 @@ export function FornaContainer(element, passedOptions) {
 
     self.addRNA = function(structure, passedOptions) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
+        let centerView = false;
 
         /*
          * Code to display the JSONs representing the structure
@@ -370,11 +399,40 @@ export function FornaContainer(element, passedOptions) {
         else if ('avoidOthers' in passedOptions)
             self.addRNAJSON(rnaJson, {avoidOthers: passedOptions.avoidOthers});
         else
-            self.addRNAJSON(rnaJson, true);
-
+            self.addRNAJSON(rnaJson, {centerView: passedOptions.centerView});
 
         return rnaJson;
     };
+
+    self.changeNode = function(nodeName, referenceNode) {
+        //insert a new node before or after another one
+        //positionOffset specifies who far from the original to insert the new node
+        let rna = referenceNode.rna;
+
+        let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
+        let positions = rna.getPositions();
+        let sequence = rna.seq
+        let uids = rna.getUids();
+
+        let newNodeNum = referenceNode.num;
+
+        let newDotbracket = dotbracket;
+        let newSequence = sequence.slice(0,newNodeNum-1) +  nodeName + sequence.slice(newNodeNum);
+
+        console.log('newSequence:', newSequence);
+
+        console.log('uids:', uids);
+        uids.splice(newNodeNum-1, 1, slugid.nice());
+        let newPositions = positions;
+
+
+        delete self.rnas[rna.uid];
+        let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
+                                 'positions': newPositions,
+                                 'uids': uids,
+                                 'centerView': false});
+
+    }
 
     self.insertNodeBeforeOrAfter = function(nodeName, referenceNode, positionOffset) {
         //insert a new node before or after another one
@@ -400,7 +458,8 @@ export function FornaContainer(element, passedOptions) {
         delete self.rnas[rna.uid];
         let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
                                  'positions': newPositions,
-                                 'uids': newUids});
+                                 'uids': newUids,
+                                 'centerView': false});
 
     }
 
@@ -431,7 +490,8 @@ export function FornaContainer(element, passedOptions) {
         delete self.rnas[rna.uid];
         let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
                                  'positions': newPositions,
-                                 'uids': newUids});
+                                 'uids': newUids,
+                                  'centerView': false});
 
         console.log('new dotbracket:', newDotbracket);
         //self.recalculateGraph();
@@ -504,6 +564,7 @@ export function FornaContainer(element, passedOptions) {
         // when it is modified, it is replaced in the global list of RNAs
         //
         var maxX, minX;
+        console.log('centerView:', centerView);
 
         if (centerPos != null) {
             // center the newly created RNA at a given position
