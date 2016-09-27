@@ -14,6 +14,7 @@ import {NAView} from './naview/naview.js'
 //
 
 export {RNAGraph} from './rnagraph.js';
+export {rnaPlot} from './rnaplot.js';
 
 export function FornaContainer(element, passedOptions) {
     var self = this;
