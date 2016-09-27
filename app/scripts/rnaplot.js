@@ -1,6 +1,6 @@
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
-import {NAView} from './naview/naview.js';
+import {NAView} from './naview/naview.js'
 import {rnaUtilities,ColorScheme} from 'rnautils';
 
 import '../styles/rnaplot.css';
@@ -229,7 +229,7 @@ export function rnaPlot() {
             // the positions of the labels will be calculated in
             // the addLabels function
             //var positions = simpleXyCoordinates(rg.pairtable);
-            var NAView = new NAView();
+            var naview = new NAView();
 
             var positions = naview.naview_xy_coordinates(rg.pairtable);
             rg.addPositions('nucleotide', positions)
