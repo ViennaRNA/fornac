@@ -71,23 +71,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.FornaContainer = FornaContainer;
 
-	__webpack_require__(3);
+	__webpack_require__(4);
 
-	var _d = __webpack_require__(7);
+	var _d = __webpack_require__(8);
 
 	var _d2 = _interopRequireDefault(_d);
 
-	var _slugid = __webpack_require__(8);
+	var _slugid = __webpack_require__(9);
 
 	var _slugid2 = _interopRequireDefault(_slugid);
 
-	var _d3ContextMenu = __webpack_require__(16);
+	var _d3ContextMenu = __webpack_require__(17);
 
-	var _simplernaplot = __webpack_require__(19);
+	var _simplernaplot = __webpack_require__(20);
 
 	var _rnautils = __webpack_require__(2);
 
-	var _naview = __webpack_require__(20);
+	var _naview = __webpack_require__(21);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -108,6 +108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'layout': 'standard-polygonal',
 	        'allowPanningAndZooming': true,
 	        'transitionDuration': 500,
+	        'maxNodeRadius': 40, // the maximum radius of a node when the view is centered
 	        'resizeSvgOnResize': true //change the size of the svg when resizing the container
 	        //sometimes its beneficial to turn this off, especially when
 	        //performance is an issue
@@ -190,7 +191,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            action: function action(elm, d, i) {
 	                console.log('You have clicked the second item!');
 	                console.log('The data for this circle is: ' + d);
-	            }
+	            },
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('A', d);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('C', d);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('G', d);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('U', d);
+	                }
+	            }]
 	        }, {
 	            title: 'Insert Before',
 	            action: function action(elm, d, i) {},
@@ -297,7 +319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // if the other array is a falsy value, return
 	        if (!array) return false;
 
-	        // compare lengths - can save a lot of time 
+	        // compare lengths - can save a lot of time
 	        if (this.length != array.length) return false;
 
 	        for (var i = 0, l = this.length; i < l; i++) {
@@ -360,6 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    self.addRNA = function (structure, passedOptions) {
 	        var rnaJson = self.createInitialLayout(structure, passedOptions);
+	        var centerView = false;
 
 	        /*
 	         * Code to display the JSONs representing the structure
@@ -384,9 +407,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if ('centerPos' in passedOptions) self.addRNAJSON(rnaJson, { centerPos: passedOptions.centerPos,
-	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, true);
+	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, { centerView: passedOptions.centerView });
 
 	        return rnaJson;
+	    };
+
+	    self.changeNode = function (nodeName, referenceNode) {
+	        //insert a new node before or after another one
+	        //positionOffset specifies who far from the original to insert the new node
+	        var rna = referenceNode.rna;
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions('nucleotide');
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newNodeNum = referenceNode.num;
+
+	        var newDotbracket = dotbracket;
+	        var newSequence = sequence.slice(0, newNodeNum - 1) + nodeName + sequence.slice(newNodeNum);
+
+	        console.log('newSequence:', newSequence);
+
+	        console.log('uids:', uids);
+	        uids.splice(newNodeNum - 1, 1, _slugid2.default.nice());
+	        var newPositions = positions;
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': uids,
+	            'centerView': false });
 	    };
 
 	    self.insertNodeBeforeOrAfter = function (nodeName, referenceNode, positionOffset) {
@@ -395,7 +446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var rna = referenceNode.rna;
 
 	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
-	        var positions = rna.getPositions();
+	        var positions = rna.getPositions('nucleotide');
 	        var sequence = rna.seq;
 	        var uids = rna.getUids();
 
@@ -406,13 +457,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        console.log('newSequence:', newSequence);
 
-	        var newUids = uids.splice(newNodeNum, 0, _slugid2.default.nice());
-	        var newPositions = positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+	        uids.splice(newNodeNum, 0, _slugid2.default.nice());
+	        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+
+	        var newUids = uids;
+	        var newPositions = positions;
+
+	        console.log('positions:', positions);
+	        console.log('new node positions:', newPositions);
 
 	        delete self.rnas[rna.uid];
 	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
 	            'positions': newPositions,
-	            'uids': newUids });
+	            'uids': newUids,
+	            'centerView': false });
 	    };
 
 	    self.deleteNode = function (node) {
@@ -428,7 +486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
-	        var positions = rna.getPositions();
+	        var positions = rna.getPositions('nucleotide');
 	        var sequence = rna.seq;
 	        var uids = rna.getUids();
 
@@ -440,7 +498,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete self.rnas[rna.uid];
 	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
 	            'positions': newPositions,
-	            'uids': newUids });
+	            'uids': newUids,
+	            'centerView': false });
 
 	        console.log('new dotbracket:', newDotbracket);
 	        //self.recalculateGraph();
@@ -516,6 +575,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // when it is modified, it is replaced in the global list of RNAs
 	        //
 	        var maxX, minX;
+	        console.log('centerView:', centerView);
 
 	        if (centerPos != null) {
 	            (function () {
@@ -917,7 +977,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var val = parseFloat(moleculeColors[d.num]);
 
 	            if (isNaN(val)) {
-	                // passed in color is not a scalar, so 
+	                // passed in color is not a scalar, so
 	                // treat it as a color
 	                return moleculeColors[d.num];
 	            } else {
@@ -982,8 +1042,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var moleculeColors = self.customColors.colorValues[d.structName];
 	                    return changeColors(moleculeColors, d, scale);
 	                } else if (self.customColors.colorValues.hasOwnProperty('')) {
-	                    var _moleculeColors = self.customColors.colorValues[''];
-	                    return changeColors(_moleculeColors, d, scale);
+	                    var moleculeColors = self.customColors.colorValues[''];
+	                    return changeColors(moleculeColors, d, scale);
 	                }
 
 	                return 'white';
@@ -1104,6 +1164,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return d.y;
 	        }));
 
+	        var maxRadius = _d2.default.max(self.graph.nodes.map(function (d) {
+	            return d.radius;
+	        }));
+
 	        // The width and the height of the molecule
 	        var molWidth = maxX - minX;
 	        var molHeight = maxY - minY;
@@ -1114,7 +1178,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // we need to fit it in both directions, so we scale according to
 	        // the direction in which we need to shrink the most
-	        var minRatio = Math.min(widthRatio, heightRatio) * 0.8;
+	        var minRatio = Math.min(widthRatio, heightRatio, self.options.maxNodeRadius / maxRadius) * 0.8;
 
 	        // the new dimensions of the molecule
 	        var newMolWidth = molWidth * minRatio;
@@ -1179,11 +1243,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            //return d3.selectAll('[struct_name=' + mouseDownNode.struct_name + ']');
 	        } else {
-	            return gnodes.filter(function (d) {
-	                return d.selected;
-	            });
-	            //return d3.select(this);
-	        }
+	                return gnodes.filter(function (d) {
+	                    return d.selected;
+	                });
+	                //return d3.select(this);
+	            }
 	    }
 
 	    function dragstarted(d) {
@@ -1362,12 +1426,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // links
 	        console.log('toRemove:', toRemove);
 
-	        for (var _i = 0; _i < toRemove.length; _i++) {
-	            rna.pairtable[toRemove[_i].source.num] = 0;
-	            rna.pairtable[toRemove[_i].target.num] = 0;
+	        for (var i = 0; i < toRemove.length; i++) {
+	            rna.pairtable[toRemove[i].source.num] = 0;
+	            rna.pairtable[toRemove[i].target.num] = 0;
 
-	            toRemove[_i].from = toRemove[_i].source.num;
-	            toRemove[_i].to = toRemove[_i].target.num - d.source.num;
+	            toRemove[i].from = toRemove[i].source.num;
+	            toRemove[i].to = toRemove[i].target.num - d.source.num;
 	        }
 
 	        // extract the dotbracket string of the rna
@@ -1405,12 +1469,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var rna2 = self.addRNA(dotBracket2, { 'sequence': sequence2,
 	            'positions': positions2,
 	            'uids': uids2 });
-	        for (var _i2 = 0; _i2 < toRemove.length; _i2++) {
+	        for (var i = 0; i < toRemove.length; i++) {
 	            console.log('rna1:', rna1);
 	            console.log('rna2:', rna2);
-	            console.log('toRemove[i]', toRemove[_i2]);
-	            self.extraLinks.push({ 'source': rna1.nodes[toRemove[_i2].from - 1],
-	                'target': rna2.nodes[toRemove[_i2].to - 1],
+	            console.log('toRemove[i]', toRemove[i]);
+	            self.extraLinks.push({ 'source': rna1.nodes[toRemove[i].from - 1],
+	                'target': rna2.nodes[toRemove[i].to - 1],
 	                'value': 1,
 	                'uid': _slugid2.default.nice(),
 	                'linkType': 'intermolecule' });
@@ -1513,11 +1577,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        for (var i = 0; i < currIdx; i++) {
 	            pairtable.push(0);
 	        } // add the links
-	        for (var _uid in self.rnas) {
-	            var _rna = self.rnas[_uid];
+	        for (var uid in self.rnas) {
+	            var rna = self.rnas[uid];
 
-	            for (var _j = 0; _j < _rna.links.length; _j++) {
-	                var _link2 = _rna.links[_j];
+	            for (var j = 0; j < rna.links.length; j++) {
+	                var _link2 = rna.links[j];
 
 	                if (_link2.linkType != 'basepair') continue;
 
@@ -1528,22 +1592,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        for (var _i3 = 0; _i3 < self.extraLinks.length; _i3++) {
-	            var _link3 = self.extraLinks[_i3];
+	        for (var i = 0; i < self.extraLinks.length; i++) {
+	            var _link3 = self.extraLinks[i];
 
-	            var _idx = nodeIdxs[_link3.source.uid];
-	            var _idx2 = nodeIdxs[_link3.target.uid];
+	            var idx1 = nodeIdxs[_link3.source.uid];
+	            var idx2 = nodeIdxs[_link3.target.uid];
 
-	            pairtable[_idx] = _idx2;
-	            pairtable[_idx2] = _idx;
+	            pairtable[idx1] = idx2;
+	            pairtable[idx2] = idx1;
 	        }
 
 	        var structure = _rnautils.rnaUtilities.pairtableToDotbracket(pairtable).split('');
 
-	        for (var _i4 = 0; _i4 < breaks.length - 1; _i4++) {
-	            console.log('breaks[i]:', breaks[_i4]);
-	            sequence.splice(breaks[_i4] + _i4 - 1, 0, '&');
-	            structure.splice(breaks[_i4] + _i4 - 1, 0, '&');
+	        for (var i = 0; i < breaks.length - 1; i++) {
+	            console.log('breaks[i]:', breaks[i]);
+	            sequence.splice(breaks[i] + i - 1, 0, '&');
+	            structure.splice(breaks[i] + i - 1, 0, '&');
 	        }
 
 	        console.log('sequence:', sequence, sequence.join(''));
@@ -1647,22 +1711,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            var newLink = { source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: _slugid2.default.nice() };
 
-	            for (var _i5 = 0; _i5 < self.graph.links.length; _i5++) {
-	                if (self.graph.links[_i5].source == mousedownNode || self.graph.links[_i5].target == mousedownNode || self.graph.links[_i5].source == mouseupNode || self.graph.links[_i5].target == mouseupNode) {
+	            for (var _i = 0; _i < self.graph.links.length; _i++) {
+	                if (self.graph.links[_i].source == mousedownNode || self.graph.links[_i].target == mousedownNode || self.graph.links[_i].source == mouseupNode || self.graph.links[_i].target == mouseupNode) {
 
 	                    // if any of the nodes are already involved in a basepair or a pseudoknot
 	                    // then we can't make a link
-	                    if (self.graph.links[_i5].linkType == 'basepair' || self.graph.links[_i5].linkType == 'pseudoknot') {
+	                    if (self.graph.links[_i].linkType == 'basepair' || self.graph.links[_i].linkType == 'pseudoknot') {
 	                        // although should be able to make a backbone link
 	                        return;
 	                    }
 	                }
 
-	                if (self.graph.links[_i5].source == mouseupNode && self.graph.links[_i5].target == mousedownNode || self.graph.links[_i5].source == mousedownNode && self.graph.links[_i5].target == mouseupNode) {
+	                if (self.graph.links[_i].source == mouseupNode && self.graph.links[_i].target == mousedownNode || self.graph.links[_i].source == mousedownNode && self.graph.links[_i].target == mouseupNode) {
 
 	                    // if we're trying to make a link between two nodes which already have
 	                    // a backbone between them, then we can't make a link
-	                    if (self.graph.links[_i5].linkType == 'backbone') {
+	                    if (self.graph.links[_i].linkType == 'backbone') {
 	                        return;
 	                    }
 	                }
@@ -2200,7 +2264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    self.uid = generateUUID();
 
-	    self.elements = []; //store the elements and the 
+	    self.elements = []; //store the elements and the
 	    //nucleotides they contain
 	    self.pseudoknotPairs = [];
 	    self.nucsToNodes = {};
@@ -2986,19 +3050,186 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	!function(r,t){ true?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.rnautils=t():r.rnautils=t()}(this,function(){return function(r){function t(n){if(e[n])return e[n].exports;var o=e[n]={exports:{},id:n,loaded:!1};return r[n].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports}var e={};return t.m=r,t.c=e,t.p="",t(0)}([function(r,t,e){r.exports=e(1)},function(r,t){"use strict";function e(r,t){if(r===t)return!0;if(null===r||null===t)return!1;if(r.length!=t.length)return!1;for(var e=0;e<r.length;++e)if(r[e]!==t[e])return!1;return!0}function n(){var r=this;r.bracketLeft="([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),r.bracketRight=")]}>abcdefghijklmnopqrstuvwxyz".split(""),r.inverseBrackets=function(r){for(var t={},e=0;e<r.length;e++)t[r[e]]=e;return t},r.maximumMatching=function(r){for(var t=r[0],e=0,n=new Array(t+1),o=0;t>=o;o++){n[o]=new Array(t+1);for(var a=o;t>=a;a++)n[o][a]=0}for(var s=0,o=t-e-1;o>0;o--)for(var a=o+e+1;t>=a;a++){s=n[o][a-1];for(var i=a-e-1;i>=o;i--)r[i]===a&&(s=Math.max(s,(i>o?n[o][i-1]:0)+1+(a-i-1>0?n[i+1][a-1]:0)));n[o][a]=s}return s=n[1][t],n},r.backtrackMaximumMatching=function(t,e){var n=Array.apply(null,Array(t.length)).map(function(){return 0});return r.mmBt(t,n,e,1,t.length-1),n},r.mmBt=function(t,e,n,o,a){var s=t[o][a],i=0;if(!(i>a-o-1)){if(t[o][a-1]==s)return void r.mmBt(t,e,n,o,a-1);for(var l=a-i-1;l>=o;l--)if(n[a]===l){var u=l>o?t[o][l-1]:0,c=a-l-1>0?t[l+1][a-1]:0;if(u+c+1==s)return e[l]=a,e[a]=l,l>o&&r.mmBt(t,e,n,o,l-1),void r.mmBt(t,e,n,l+1,a-1)}console.log("FAILED!!!"+o+","+a+": backtracking failed!")}},r.dotbracketToPairtable=function(t){var e=Array.apply(null,new Array(t.length+1)).map(Number.prototype.valueOf,0);e[0]=t.length;for(var n={},o=0;o<r.bracketLeft.length;o++)n[o]=[];for(var a=r.inverseBrackets(r.bracketLeft),s=r.inverseBrackets(r.bracketRight),o=0;o<t.length;o++){var i=t[o],l=o+1;if("."==i||"o"==i)e[l]=0;else if(i in a)n[a[i]].push(l);else{if(!(i in s))throw"Unknown symbol in dotbracket string";var u=n[s[i]].pop();e[l]=u,e[u]=l}}for(var c in n)if(n[c].length>0)throw"Unmatched base at position "+n[c][0];return e},r.insertIntoStack=function(r,t,e){for(var n=0;r[n].length>0&&r[n][r[n].length-1]<e;)n+=1;return r[n].push(e),n},r.deleteFromStack=function(r,t){for(var e=0;0===r[e].length||r[e][r[e].length-1]!=t;)e+=1;return r[e].pop(),e},r.pairtableToDotbracket=function(t){for(var e={},n=0;n<t[0];n++)e[n]=[];for(var n,o={},a="",n=1;n<t[0]+1;n++){if(0!==t[n]&&t[n]in o)throw"Invalid pairtable contains duplicate entries";o[t[n]]=!0,a+=0===t[n]?".":t[n]>n?r.bracketLeft[r.insertIntoStack(e,n,t[n])]:r.bracketRight[r.deleteFromStack(e,n)]}return a},r.findUnmatched=function(t,e,n){for(var o,a=[],s=[],i=e,l=n,o=e;n>=o;o++)0!==t[o]&&(t[o]<e||t[o]>n)&&s.push([o,t[o]]);for(var o=i;l>=o;o++){for(;0===t[o]&&l>=o;)o++;for(n=t[o];t[o]===n;)o++,n--;a=a.concat(r.findUnmatched(t,o,n))}return s.length>0&&a.push(s),a},r.removePseudoknotsFromPairtable=function(t){for(var e=r.maximumMatching(t),n=r.backtrackMaximumMatching(e,t),o=[],a=1;a<t.length;a++)t[a]<a||n[a]!=t[a]&&(o.push([a,t[a]]),t[t[a]]=0,t[a]=0);return o},r.ptToElements=function(t,e,n,o,s){var i=[],l=[n-1],u=[o+1];if(arguments.length<5&&(s=[]),n>o)return[];for(;0===t[n];n++)l.push(n);for(;0===t[o];o--)u.push(o);if(n>o){if(l.push(n),0===e)return[["e",e,l.sort(a)]];for(var c=!1,f=[],p=[],h=0;h<l.length;h++)c?p.push(l[h]):f.push(l[h]),s.indexOf(l[h])>=0&&(c=!0);return c?[["h",e,l.sort(a)]]:[["h",e,l.sort(a)]]}if(t[n]!=o){var m=l,h=n;for(m.push(h);o>=h;){for(i=i.concat(r.ptToElements(t,e,h,t[h],s)),m.push(t[h]),h=t[h]+1;0===t[h]&&o>=h;h++)m.push(h);m.push(h)}return m.pop(),m=m.concat(u),m.length>0&&(0===e?i.push(["e",e,m.sort(a)]):i.push(["m",e,m.sort(a)])),i}if(t[n]===o){l.push(n),u.push(o);var v=l.concat(u);v.length>4&&(0===e?i.push(["e",e,l.concat(u).sort(a)]):i.push(["i",e,l.concat(u).sort(a)]))}for(var g=[];t[n]===o&&o>n;)g.push(n),g.push(o),n+=1,o-=1,e+=1;return l=[n-1],u=[o+1],i.push(["s",e,g.sort(a)]),i.concat(r.ptToElements(t,e,n,o,s))}}function o(r){var t=this;return t.colorsText=r,t.parseRange=function(r){for(var t=r.split(","),e=[],n=0;n<t.length;n++){var o=t[n].split("-");if(1==o.length)e.push(parseInt(o[0]));else if(2==o.length)for(var a=parseInt(o[0]),s=parseInt(o[1]),i=a;s>=i;i++)e.push(i);else console.log("Malformed range (too many dashes):",r)}return e},t.parseColorText=function(r){for(var e=r.split("\n"),n="",o=1,a={colorValues:{"":{}},range:["white","steelblue"]},s=[],i=0;i<e.length;i++)if(">"!=e[i][0])for(var l=e[i].trim().split(/[\s]+/),u=0;u<l.length;u++)if(isNaN(l[u])){if(0===l[u].search("range")){var c=l[u].split("="),f=c[1].split(":");a.range=[f[0],f[1]];continue}if(0==l[u].search("domain")){var p=l[u].split("="),f=p[1].split(":");a.domain=[f[0],f[1]];continue}for(var h=l[u].split(":"),m=t.parseRange(h[0]),v=h[1],g=0;g<m.length;g++)isNaN(v)?a.colorValues[n][m[g]]=v:(a.colorValues[n][m[g]]=+v,s.push(Number(v)))}else a.colorValues[n][o]=Number(l[u]),o+=1,s.push(Number(l[u]));else n=e[i].trim().slice(1),o=1,a.colorValues[n]={};return"domain"in a||(a.domain=[Math.min.apply(null,s),Math.max.apply(null,s)]),t.colorsJson=a,t},t.normalizeColors=function(){var r;for(var e in t.colorsJson){var n=Number.MAX_VALUE,o=Number.MIN_VALUE;for(var a in t.colorsJson.colorValues[e])r=t.colorsJson.colorValues[e][a],"number"==typeof r&&(n>r&&(n=r),r>o&&(o=r));for(a in t.colorsJson.colorValues[e])r=t.colorsJson.colorValues[e][a],"number"==typeof r&&(t.colorsJson.colorValues[e][a]=(r-n)/(o-n))}return t},t.parseColorText(t.colorsText),t}Object.defineProperty(t,"__esModule",{value:!0}),t.arraysEqual=e,t.RNAUtilities=n,t.ColorScheme=o;var a=function(r,t){return r-t};t.rnaUtilities=new n}])});
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	!function (r, t) {
+	  "object" == ( false ? "undefined" : _typeof(exports)) && "object" == ( false ? "undefined" : _typeof(module)) ? module.exports = t() :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (t), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : "object" == (typeof exports === "undefined" ? "undefined" : _typeof(exports)) ? exports.rnautils = t() : r.rnautils = t();
+	}(undefined, function () {
+	  return function (r) {
+	    function t(n) {
+	      if (e[n]) return e[n].exports;var o = e[n] = { exports: {}, id: n, loaded: !1 };return r[n].call(o.exports, o, o.exports, t), o.loaded = !0, o.exports;
+	    }var e = {};return t.m = r, t.c = e, t.p = "", t(0);
+	  }([function (r, t, e) {
+	    r.exports = e(1);
+	  }, function (r, t) {
+	    "use strict";
+	    function e(r, t) {
+	      if (r === t) return !0;if (null === r || null === t) return !1;if (r.length != t.length) return !1;for (var e = 0; e < r.length; ++e) {
+	        if (r[e] !== t[e]) return !1;
+	      }return !0;
+	    }function n() {
+	      var r = this;r.bracketLeft = "([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), r.bracketRight = ")]}>abcdefghijklmnopqrstuvwxyz".split(""), r.inverseBrackets = function (r) {
+	        for (var t = {}, e = 0; e < r.length; e++) {
+	          t[r[e]] = e;
+	        }return t;
+	      }, r.maximumMatching = function (r) {
+	        for (var t = r[0], e = 0, n = new Array(t + 1), o = 0; t >= o; o++) {
+	          n[o] = new Array(t + 1);for (var a = o; t >= a; a++) {
+	            n[o][a] = 0;
+	          }
+	        }for (var s = 0, o = t - e - 1; o > 0; o--) {
+	          for (var a = o + e + 1; t >= a; a++) {
+	            s = n[o][a - 1];for (var i = a - e - 1; i >= o; i--) {
+	              r[i] === a && (s = Math.max(s, (i > o ? n[o][i - 1] : 0) + 1 + (a - i - 1 > 0 ? n[i + 1][a - 1] : 0)));
+	            }n[o][a] = s;
+	          }
+	        }return s = n[1][t], n;
+	      }, r.backtrackMaximumMatching = function (t, e) {
+	        var n = Array.apply(null, Array(t.length)).map(function () {
+	          return 0;
+	        });return r.mmBt(t, n, e, 1, t.length - 1), n;
+	      }, r.mmBt = function (t, e, n, o, a) {
+	        var s = t[o][a],
+	            i = 0;if (!(i > a - o - 1)) {
+	          if (t[o][a - 1] == s) return void r.mmBt(t, e, n, o, a - 1);for (var l = a - i - 1; l >= o; l--) {
+	            if (n[a] === l) {
+	              var u = l > o ? t[o][l - 1] : 0,
+	                  c = a - l - 1 > 0 ? t[l + 1][a - 1] : 0;if (u + c + 1 == s) return e[l] = a, e[a] = l, l > o && r.mmBt(t, e, n, o, l - 1), void r.mmBt(t, e, n, l + 1, a - 1);
+	            }
+	          }console.log("FAILED!!!" + o + "," + a + ": backtracking failed!");
+	        }
+	      }, r.dotbracketToPairtable = function (t) {
+	        var e = Array.apply(null, new Array(t.length + 1)).map(Number.prototype.valueOf, 0);e[0] = t.length;for (var n = {}, o = 0; o < r.bracketLeft.length; o++) {
+	          n[o] = [];
+	        }for (var a = r.inverseBrackets(r.bracketLeft), s = r.inverseBrackets(r.bracketRight), o = 0; o < t.length; o++) {
+	          var i = t[o],
+	              l = o + 1;if ("." == i || "o" == i) e[l] = 0;else if (i in a) n[a[i]].push(l);else {
+	            if (!(i in s)) throw "Unknown symbol in dotbracket string";var u = n[s[i]].pop();e[l] = u, e[u] = l;
+	          }
+	        }for (var c in n) {
+	          if (n[c].length > 0) throw "Unmatched base at position " + n[c][0];
+	        }return e;
+	      }, r.insertIntoStack = function (r, t, e) {
+	        for (var n = 0; r[n].length > 0 && r[n][r[n].length - 1] < e;) {
+	          n += 1;
+	        }return r[n].push(e), n;
+	      }, r.deleteFromStack = function (r, t) {
+	        for (var e = 0; 0 === r[e].length || r[e][r[e].length - 1] != t;) {
+	          e += 1;
+	        }return r[e].pop(), e;
+	      }, r.pairtableToDotbracket = function (t) {
+	        for (var e = {}, n = 0; n < t[0]; n++) {
+	          e[n] = [];
+	        }for (var n, o = {}, a = "", n = 1; n < t[0] + 1; n++) {
+	          if (0 !== t[n] && t[n] in o) throw "Invalid pairtable contains duplicate entries";o[t[n]] = !0, a += 0 === t[n] ? "." : t[n] > n ? r.bracketLeft[r.insertIntoStack(e, n, t[n])] : r.bracketRight[r.deleteFromStack(e, n)];
+	        }return a;
+	      }, r.findUnmatched = function (t, e, n) {
+	        for (var o, a = [], s = [], i = e, l = n, o = e; n >= o; o++) {
+	          0 !== t[o] && (t[o] < e || t[o] > n) && s.push([o, t[o]]);
+	        }for (var o = i; l >= o; o++) {
+	          for (; 0 === t[o] && l >= o;) {
+	            o++;
+	          }for (n = t[o]; t[o] === n;) {
+	            o++, n--;
+	          }a = a.concat(r.findUnmatched(t, o, n));
+	        }return s.length > 0 && a.push(s), a;
+	      }, r.removePseudoknotsFromPairtable = function (t) {
+	        for (var e = r.maximumMatching(t), n = r.backtrackMaximumMatching(e, t), o = [], a = 1; a < t.length; a++) {
+	          t[a] < a || n[a] != t[a] && (o.push([a, t[a]]), t[t[a]] = 0, t[a] = 0);
+	        }return o;
+	      }, r.ptToElements = function (t, e, n, o, s) {
+	        var i = [],
+	            l = [n - 1],
+	            u = [o + 1];if (arguments.length < 5 && (s = []), n > o) return [];for (; 0 === t[n]; n++) {
+	          l.push(n);
+	        }for (; 0 === t[o]; o--) {
+	          u.push(o);
+	        }if (n > o) {
+	          if (l.push(n), 0 === e) return [["e", e, l.sort(a)]];for (var c = !1, f = [], p = [], h = 0; h < l.length; h++) {
+	            c ? p.push(l[h]) : f.push(l[h]), s.indexOf(l[h]) >= 0 && (c = !0);
+	          }return c ? [["h", e, l.sort(a)]] : [["h", e, l.sort(a)]];
+	        }if (t[n] != o) {
+	          var m = l,
+	              h = n;for (m.push(h); o >= h;) {
+	            for (i = i.concat(r.ptToElements(t, e, h, t[h], s)), m.push(t[h]), h = t[h] + 1; 0 === t[h] && o >= h; h++) {
+	              m.push(h);
+	            }m.push(h);
+	          }return m.pop(), m = m.concat(u), m.length > 0 && (0 === e ? i.push(["e", e, m.sort(a)]) : i.push(["m", e, m.sort(a)])), i;
+	        }if (t[n] === o) {
+	          l.push(n), u.push(o);var v = l.concat(u);v.length > 4 && (0 === e ? i.push(["e", e, l.concat(u).sort(a)]) : i.push(["i", e, l.concat(u).sort(a)]));
+	        }for (var g = []; t[n] === o && o > n;) {
+	          g.push(n), g.push(o), n += 1, o -= 1, e += 1;
+	        }return l = [n - 1], u = [o + 1], i.push(["s", e, g.sort(a)]), i.concat(r.ptToElements(t, e, n, o, s));
+	      };
+	    }function o(r) {
+	      var t = this;return t.colorsText = r, t.parseRange = function (r) {
+	        for (var t = r.split(","), e = [], n = 0; n < t.length; n++) {
+	          var o = t[n].split("-");if (1 == o.length) e.push(parseInt(o[0]));else if (2 == o.length) for (var a = parseInt(o[0]), s = parseInt(o[1]), i = a; s >= i; i++) {
+	            e.push(i);
+	          } else console.log("Malformed range (too many dashes):", r);
+	        }return e;
+	      }, t.parseColorText = function (r) {
+	        for (var e = r.split("\n"), n = "", o = 1, a = { colorValues: { "": {} }, range: ["white", "steelblue"] }, s = [], i = 0; i < e.length; i++) {
+	          if (">" != e[i][0]) for (var l = e[i].trim().split(/[\s]+/), u = 0; u < l.length; u++) {
+	            if (isNaN(l[u])) {
+	              if (0 === l[u].search("range")) {
+	                var c = l[u].split("="),
+	                    f = c[1].split(":");a.range = [f[0], f[1]];continue;
+	              }if (0 == l[u].search("domain")) {
+	                var p = l[u].split("="),
+	                    f = p[1].split(":");a.domain = [f[0], f[1]];continue;
+	              }for (var h = l[u].split(":"), m = t.parseRange(h[0]), v = h[1], g = 0; g < m.length; g++) {
+	                isNaN(v) ? a.colorValues[n][m[g]] = v : (a.colorValues[n][m[g]] = +v, s.push(Number(v)));
+	              }
+	            } else a.colorValues[n][o] = Number(l[u]), o += 1, s.push(Number(l[u]));
+	          } else n = e[i].trim().slice(1), o = 1, a.colorValues[n] = {};
+	        }return "domain" in a || (a.domain = [Math.min.apply(null, s), Math.max.apply(null, s)]), t.colorsJson = a, t;
+	      }, t.normalizeColors = function () {
+	        var r;for (var e in t.colorsJson) {
+	          var n = Number.MAX_VALUE,
+	              o = Number.MIN_VALUE;for (var a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (n > r && (n = r), r > o && (o = r));
+	          }for (a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (t.colorsJson.colorValues[e][a] = (r - n) / (o - n));
+	          }
+	        }return t;
+	      }, t.parseColorText(t.colorsText), t;
+	    }Object.defineProperty(t, "__esModule", { value: !0 }), t.arraysEqual = e, t.RNAUtilities = n, t.ColorScheme = o;var a = function a(r, t) {
+	      return r - t;
+	    };t.rnaUtilities = new n();
+	  }]);
+	});
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ },
 /* 3 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(4);
+	var content = __webpack_require__(5);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(7)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -3015,10 +3246,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(6)();
 	// imports
 
 
@@ -3029,7 +3260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	/*
@@ -3085,7 +3316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -3301,6 +3532,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
+		var sourceMap = obj.sourceMap;
 
 		if(media) {
 			styleElement.setAttribute("media", media)
@@ -3318,6 +3550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
+		var media = obj.media;
 		var sourceMap = obj.sourceMap;
 
 		if(sourceMap) {
@@ -3337,12 +3570,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
 	  var d3 = {
-	    version: "3.5.17"
+	    version: "3.5.15"
 	  };
 	  var d3_arraySlice = [].slice, d3_array = function(list) {
 	    return d3_arraySlice.call(list);
@@ -3962,10 +4195,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return d3_selectAll(selector, this);
 	    };
 	  }
-	  var d3_nsXhtml = "http://www.w3.org/1999/xhtml";
 	  var d3_nsPrefix = {
 	    svg: "http://www.w3.org/2000/svg",
-	    xhtml: d3_nsXhtml,
+	    xhtml: "http://www.w3.org/1999/xhtml",
 	    xlink: "http://www.w3.org/1999/xlink",
 	    xml: "http://www.w3.org/XML/1998/namespace",
 	    xmlns: "http://www.w3.org/2000/xmlns/"
@@ -4148,7 +4380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function d3_selection_creator(name) {
 	    function create() {
 	      var document = this.ownerDocument, namespace = this.namespaceURI;
-	      return namespace === d3_nsXhtml && document.documentElement.namespaceURI === d3_nsXhtml ? document.createElement(name) : document.createElementNS(namespace, name);
+	      return namespace && namespace !== document.documentElement.namespaceURI ? document.createElementNS(namespace, name) : document.createElement(name);
 	    }
 	    function createNS() {
 	      return this.ownerDocument.createElementNS(name.space, name.local);
@@ -6867,7 +7099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        λ0 = λ, sinφ0 = sinφ, cosφ0 = cosφ, point0 = point;
 	      }
 	    }
-	    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < -ε) ^ winding & 1;
+	    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < 0) ^ winding & 1;
 	  }
 	  function d3_geo_clipCircle(radius) {
 	    var cr = Math.cos(radius), smallRadius = cr > 0, notHemisphere = abs(cr) > ε, interpolate = d3_geo_circleInterpolate(radius, 6 * d3_radians);
@@ -12896,7 +13128,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// The MIT License (MIT)
@@ -12921,11 +13153,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	// THE SOFTWARE.
 
-	module.exports = __webpack_require__(9);
+	module.exports = __webpack_require__(10);
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {// The MIT License (MIT)
@@ -12950,7 +13182,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	// THE SOFTWARE.
 
-	var uuid = __webpack_require__(14);
+	var uuid = __webpack_require__(15);
 
 	/**
 	 * Returns the given uuid as a 22 character slug. This can be a regular v4
@@ -13012,10 +13244,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return slug;
 	};
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer))
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
@@ -13028,9 +13260,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var base64 = __webpack_require__(11)
-	var ieee754 = __webpack_require__(12)
-	var isArray = __webpack_require__(13)
+	var base64 = __webpack_require__(12)
+	var ieee754 = __webpack_require__(13)
+	var isArray = __webpack_require__(14)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -14567,10 +14799,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return i
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10).Buffer, (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer, (function() { return this; }())))
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -14700,7 +14932,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -14790,7 +15022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -14801,7 +15033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//     uuid.js
@@ -14812,7 +15044,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Unique ID creation requires a high quality random # generator.  We feature
 	// detect to determine the best RNG source, normalizing to a function that
 	// returns 128-bits of randomness, since that's what's usually required
-	var _rng = __webpack_require__(15);
+	var _rng = __webpack_require__(16);
 
 	// Maps for number <-> hex string conversion
 	var _byteToHex = [];
@@ -14990,7 +15222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -15028,7 +15260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15038,13 +15270,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.contextMenu = contextMenu;
 
-	__webpack_require__(17);
+	__webpack_require__(18);
 
-	var _d = __webpack_require__(7);
+	var _d = __webpack_require__(8);
 
 	var _d2 = _interopRequireDefault(_d);
 
-	var _slugid = __webpack_require__(8);
+	var _slugid = __webpack_require__(9);
 
 	var _slugid2 = _interopRequireDefault(_slugid);
 
@@ -15054,8 +15286,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var previouslyMouseUp = false;
 	    var clickAway = {};
 	    var uid = _slugid2.default.nice();
-
+	    var rootElement = null;
+	    var orientation = 'right'; // display the menu to the right of the mouse click
+	    // or parent elemement
 	    var initialPos = null;
+	    var parentStart = null;
 
 	    var openCallback, closeCallback;
 
@@ -15067,16 +15302,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        closeCallback = opts.onClose;
 	    }
 
+	    if ('rootElement' in opts) rootElement = opts['rootElement'];
+
 	    if ('pos' in opts) {
 	        // do we want to place this menu somewhere specific?
 	        initialPos = opts.pos;
+	    }
+
+	    if ('orientation' in opts) {
+	        orientation = opts.orientation;
+	    }
+
+	    if ('parentStart' in opts) {
+	        parentStart = opts.parentStart;
 	    }
 
 	    // create the div element that will hold the context menu
 	    _d2.default.selectAll('.d3-context-menu-' + uid).data([1]).enter().append('div').classed('d3-context-menu', true).classed('d3-context-menu-' + uid, true);
 
 	    // close menu
-	    console.log('uid:', uid);
 	    _d2.default.select('body').on('click.d3-context-menu-' + uid, function () {
 	        /*
 	        if (previouslyMouseUp) {
@@ -15086,6 +15330,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        */
 
 	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	        orientation = 'right';
+
 	        if (closeCallback) {
 	            closeCallback();
 	        }
@@ -15098,7 +15344,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var elm = this;
 	        var contextMenuPos = null;
-	        var mousePos = _d2.default.mouse(this);
+	        var mousePos = null;
+	        var currentThis = this;
+
+	        if (rootElement == null) mousePos = _d2.default.mouse(this);else mousePos = _d2.default.mouse(rootElement); // for recursive menus, we need the mouse
+	        // position relative to another element
 
 	        clickAway = clickAwayFunc;
 	        var openChildMenuUid = null;
@@ -15107,8 +15357,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _d2.default.selectAll('.d3-context-menu-' + uid).html('');
 	        var list = _d2.default.selectAll('.d3-context-menu-' + uid).on('contextmenu', function (d) {
-	            console.log('hiding');
 	            _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	            orientation = 'right';
 
 	            _d2.default.event.preventDefault();
 	            _d2.default.event.stopPropagation();
@@ -15135,13 +15385,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return typeof d.title === 'string' ? d.title : d.title(data);
 	        }).on('click', function (d, i) {
-	            console.log('click');
 	            if (d.disabled) return; // do nothing if disabled
 	            if (!d.action) return; // headers have no "action"
 	            d.action(elm, data, index, mousePos);
 
 	            // close all context menus
 	            _d2.default.selectAll('.d3-context-menu').style('display', 'none');
+	            orientation = 'right';
 
 	            if (closeCallback) {
 	                closeCallback();
@@ -15178,14 +15428,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // there should be no menu open right now
 	            if (typeof d.children != 'undefined') {
+	                var _boundingRect = this.getBoundingClientRect();
 
-	                var boundingRect = this.getBoundingClientRect();
+	                var childrenContextMenu = null;
+	                if (orientation == 'left') {
+	                    childrenContextMenu = contextMenu(d.children, { 'rootElement': currentThis,
+	                        'pos': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'orientation': 'left' });
+	                } else {
+	                    childrenContextMenu = contextMenu(d.children, {
+	                        'pos': [_boundingRect.left + _boundingRect.width + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'rootElement': currentThis,
+	                        'parentStart': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset] });
+	                }
 
-	                // need to open a new menu
-	                var childrenContextMenu = contextMenu(d.children, { 'pos': [boundingRect.left + boundingRect.width, boundingRect.top - 2] });
-	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {
-	                    console.log('applying');
-	                }]);
+	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {}]);
 	                openChildMenuUid = d.childUid;
 	            }
 
@@ -15205,7 +15462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
+	        var contextMenuSelection = _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
 
 	        if (initialPos == null) {
 	            _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
@@ -15213,11 +15470,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] + 'px').style('top', initialPos[1] + 'px');
 	        }
 
-	        console.log('initalPos:', initialPos);
+	        // check if the menu disappears off the side of the window
+	        var boundingRect = contextMenuSelection.node().getBoundingClientRect();
+
+	        if (boundingRect.left + boundingRect.width > window.innerWidth || orientation == 'left') {
+	            orientation = 'left';
+
+	            // menu goes of the end of the window, position it the other way
+	            if (initialPos == null) {
+	                // place the menu where the user clicked
+	                _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 - boundingRect.width + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
+	            } else {
+	                if (parentStart != null) {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', parentStart[0] - boundingRect.width + 'px').style('top', parentStart[1] + 'px');
+	                } else {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] - boundingRect.width + 'px').style('top', initialPos[1] + 'px');
+	                }
+	            }
+	        }
 
 	        // display context menu
-
-	        console.log('preventing');
 
 	        if (previouslyMouseUp) return uid;
 
@@ -15230,16 +15502,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(18);
+	var content = __webpack_require__(19);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(7)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -15256,10 +15528,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(6)();
 	// imports
 
 
@@ -15270,7 +15542,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -15389,7 +15661,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15399,15 +15671,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.NAView = NAView;
 
-	var _radloop = __webpack_require__(21);
+	var _radloop = __webpack_require__(22);
 
-	var _connection = __webpack_require__(22);
+	var _connection = __webpack_require__(23);
 
-	var _region = __webpack_require__(24);
+	var _region = __webpack_require__(25);
 
-	var _base = __webpack_require__(25);
+	var _base = __webpack_require__(26);
 
-	var _loop = __webpack_require__(23);
+	var _loop = __webpack_require__(24);
 
 	function NAView() {
 	    this.ANUM = 9999.0;
@@ -16418,7 +16690,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -16467,7 +16739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16477,9 +16749,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Connection = Connection;
 
-	var _loop = __webpack_require__(23);
+	var _loop = __webpack_require__(24);
 
-	var _region = __webpack_require__(24);
+	var _region = __webpack_require__(25);
 
 	function Connection() {
 		this.loop = new _loop.Loop();
@@ -16580,7 +16852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -16590,7 +16862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Loop = Loop;
 
-	var _connection = __webpack_require__(22);
+	var _connection = __webpack_require__(23);
 
 	function Loop() {
 		this.nconnection = null;
@@ -16624,7 +16896,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	Loop.prototype.getConnection = function (i) {
-		var Connection = __webpack_require__(22);
+		var Connection = __webpack_require__(23);
 		if (!this._connections[i]) {
 			this._connections[i] = new Connection();
 		}
@@ -16689,7 +16961,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -16738,7 +17010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16748,7 +17020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Base = Base;
 
-	var _region = __webpack_require__(24);
+	var _region = __webpack_require__(25);
 
 	function Base() {
 		this.mate = null;
