@@ -54,7 +54,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(26);
+	module.exports = __webpack_require__(27);
 
 
 /***/ },
@@ -167,7 +167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    self.uid = generateUUID();
 
-	    self.elements = []; //store the elements and the 
+	    self.elements = []; //store the elements and the
 	    //nucleotides they contain
 	    self.pseudoknotPairs = [];
 	    self.nucsToNodes = {};
@@ -953,12 +953,179 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	!function(r,t){ true?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.rnautils=t():r.rnautils=t()}(this,function(){return function(r){function t(n){if(e[n])return e[n].exports;var o=e[n]={exports:{},id:n,loaded:!1};return r[n].call(o.exports,o,o.exports,t),o.loaded=!0,o.exports}var e={};return t.m=r,t.c=e,t.p="",t(0)}([function(r,t,e){r.exports=e(1)},function(r,t){"use strict";function e(r,t){if(r===t)return!0;if(null===r||null===t)return!1;if(r.length!=t.length)return!1;for(var e=0;e<r.length;++e)if(r[e]!==t[e])return!1;return!0}function n(){var r=this;r.bracketLeft="([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),r.bracketRight=")]}>abcdefghijklmnopqrstuvwxyz".split(""),r.inverseBrackets=function(r){for(var t={},e=0;e<r.length;e++)t[r[e]]=e;return t},r.maximumMatching=function(r){for(var t=r[0],e=0,n=new Array(t+1),o=0;t>=o;o++){n[o]=new Array(t+1);for(var a=o;t>=a;a++)n[o][a]=0}for(var s=0,o=t-e-1;o>0;o--)for(var a=o+e+1;t>=a;a++){s=n[o][a-1];for(var i=a-e-1;i>=o;i--)r[i]===a&&(s=Math.max(s,(i>o?n[o][i-1]:0)+1+(a-i-1>0?n[i+1][a-1]:0)));n[o][a]=s}return s=n[1][t],n},r.backtrackMaximumMatching=function(t,e){var n=Array.apply(null,Array(t.length)).map(function(){return 0});return r.mmBt(t,n,e,1,t.length-1),n},r.mmBt=function(t,e,n,o,a){var s=t[o][a],i=0;if(!(i>a-o-1)){if(t[o][a-1]==s)return void r.mmBt(t,e,n,o,a-1);for(var l=a-i-1;l>=o;l--)if(n[a]===l){var u=l>o?t[o][l-1]:0,c=a-l-1>0?t[l+1][a-1]:0;if(u+c+1==s)return e[l]=a,e[a]=l,l>o&&r.mmBt(t,e,n,o,l-1),void r.mmBt(t,e,n,l+1,a-1)}console.log("FAILED!!!"+o+","+a+": backtracking failed!")}},r.dotbracketToPairtable=function(t){var e=Array.apply(null,new Array(t.length+1)).map(Number.prototype.valueOf,0);e[0]=t.length;for(var n={},o=0;o<r.bracketLeft.length;o++)n[o]=[];for(var a=r.inverseBrackets(r.bracketLeft),s=r.inverseBrackets(r.bracketRight),o=0;o<t.length;o++){var i=t[o],l=o+1;if("."==i||"o"==i)e[l]=0;else if(i in a)n[a[i]].push(l);else{if(!(i in s))throw"Unknown symbol in dotbracket string";var u=n[s[i]].pop();e[l]=u,e[u]=l}}for(var c in n)if(n[c].length>0)throw"Unmatched base at position "+n[c][0];return e},r.insertIntoStack=function(r,t,e){for(var n=0;r[n].length>0&&r[n][r[n].length-1]<e;)n+=1;return r[n].push(e),n},r.deleteFromStack=function(r,t){for(var e=0;0===r[e].length||r[e][r[e].length-1]!=t;)e+=1;return r[e].pop(),e},r.pairtableToDotbracket=function(t){for(var e={},n=0;n<t[0];n++)e[n]=[];for(var n,o={},a="",n=1;n<t[0]+1;n++){if(0!==t[n]&&t[n]in o)throw"Invalid pairtable contains duplicate entries";o[t[n]]=!0,a+=0===t[n]?".":t[n]>n?r.bracketLeft[r.insertIntoStack(e,n,t[n])]:r.bracketRight[r.deleteFromStack(e,n)]}return a},r.findUnmatched=function(t,e,n){for(var o,a=[],s=[],i=e,l=n,o=e;n>=o;o++)0!==t[o]&&(t[o]<e||t[o]>n)&&s.push([o,t[o]]);for(var o=i;l>=o;o++){for(;0===t[o]&&l>=o;)o++;for(n=t[o];t[o]===n;)o++,n--;a=a.concat(r.findUnmatched(t,o,n))}return s.length>0&&a.push(s),a},r.removePseudoknotsFromPairtable=function(t){for(var e=r.maximumMatching(t),n=r.backtrackMaximumMatching(e,t),o=[],a=1;a<t.length;a++)t[a]<a||n[a]!=t[a]&&(o.push([a,t[a]]),t[t[a]]=0,t[a]=0);return o},r.ptToElements=function(t,e,n,o,s){var i=[],l=[n-1],u=[o+1];if(arguments.length<5&&(s=[]),n>o)return[];for(;0===t[n];n++)l.push(n);for(;0===t[o];o--)u.push(o);if(n>o){if(l.push(n),0===e)return[["e",e,l.sort(a)]];for(var c=!1,f=[],p=[],h=0;h<l.length;h++)c?p.push(l[h]):f.push(l[h]),s.indexOf(l[h])>=0&&(c=!0);return c?[["h",e,l.sort(a)]]:[["h",e,l.sort(a)]]}if(t[n]!=o){var m=l,h=n;for(m.push(h);o>=h;){for(i=i.concat(r.ptToElements(t,e,h,t[h],s)),m.push(t[h]),h=t[h]+1;0===t[h]&&o>=h;h++)m.push(h);m.push(h)}return m.pop(),m=m.concat(u),m.length>0&&(0===e?i.push(["e",e,m.sort(a)]):i.push(["m",e,m.sort(a)])),i}if(t[n]===o){l.push(n),u.push(o);var v=l.concat(u);v.length>4&&(0===e?i.push(["e",e,l.concat(u).sort(a)]):i.push(["i",e,l.concat(u).sort(a)]))}for(var g=[];t[n]===o&&o>n;)g.push(n),g.push(o),n+=1,o-=1,e+=1;return l=[n-1],u=[o+1],i.push(["s",e,g.sort(a)]),i.concat(r.ptToElements(t,e,n,o,s))}}function o(r){var t=this;return t.colorsText=r,t.parseRange=function(r){for(var t=r.split(","),e=[],n=0;n<t.length;n++){var o=t[n].split("-");if(1==o.length)e.push(parseInt(o[0]));else if(2==o.length)for(var a=parseInt(o[0]),s=parseInt(o[1]),i=a;s>=i;i++)e.push(i);else console.log("Malformed range (too many dashes):",r)}return e},t.parseColorText=function(r){for(var e=r.split("\n"),n="",o=1,a={colorValues:{"":{}},range:["white","steelblue"]},s=[],i=0;i<e.length;i++)if(">"!=e[i][0])for(var l=e[i].trim().split(/[\s]+/),u=0;u<l.length;u++)if(isNaN(l[u])){if(0===l[u].search("range")){var c=l[u].split("="),f=c[1].split(":");a.range=[f[0],f[1]];continue}if(0==l[u].search("domain")){var p=l[u].split("="),f=p[1].split(":");a.domain=[f[0],f[1]];continue}for(var h=l[u].split(":"),m=t.parseRange(h[0]),v=h[1],g=0;g<m.length;g++)isNaN(v)?a.colorValues[n][m[g]]=v:(a.colorValues[n][m[g]]=+v,s.push(Number(v)))}else a.colorValues[n][o]=Number(l[u]),o+=1,s.push(Number(l[u]));else n=e[i].trim().slice(1),o=1,a.colorValues[n]={};return"domain"in a||(a.domain=[Math.min.apply(null,s),Math.max.apply(null,s)]),t.colorsJson=a,t},t.normalizeColors=function(){var r;for(var e in t.colorsJson){var n=Number.MAX_VALUE,o=Number.MIN_VALUE;for(var a in t.colorsJson.colorValues[e])r=t.colorsJson.colorValues[e][a],"number"==typeof r&&(n>r&&(n=r),r>o&&(o=r));for(a in t.colorsJson.colorValues[e])r=t.colorsJson.colorValues[e][a],"number"==typeof r&&(t.colorsJson.colorValues[e][a]=(r-n)/(o-n))}return t},t.parseColorText(t.colorsText),t}Object.defineProperty(t,"__esModule",{value:!0}),t.arraysEqual=e,t.RNAUtilities=n,t.ColorScheme=o;var a=function(r,t){return r-t};t.rnaUtilities=new n}])});
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	!function (r, t) {
+	  "object" == ( false ? "undefined" : _typeof(exports)) && "object" == ( false ? "undefined" : _typeof(module)) ? module.exports = t() :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (t), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : "object" == (typeof exports === "undefined" ? "undefined" : _typeof(exports)) ? exports.rnautils = t() : r.rnautils = t();
+	}(undefined, function () {
+	  return function (r) {
+	    function t(n) {
+	      if (e[n]) return e[n].exports;var o = e[n] = { exports: {}, id: n, loaded: !1 };return r[n].call(o.exports, o, o.exports, t), o.loaded = !0, o.exports;
+	    }var e = {};return t.m = r, t.c = e, t.p = "", t(0);
+	  }([function (r, t, e) {
+	    r.exports = e(1);
+	  }, function (r, t) {
+	    "use strict";
+	    function e(r, t) {
+	      if (r === t) return !0;if (null === r || null === t) return !1;if (r.length != t.length) return !1;for (var e = 0; e < r.length; ++e) {
+	        if (r[e] !== t[e]) return !1;
+	      }return !0;
+	    }function n() {
+	      var r = this;r.bracketLeft = "([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), r.bracketRight = ")]}>abcdefghijklmnopqrstuvwxyz".split(""), r.inverseBrackets = function (r) {
+	        for (var t = {}, e = 0; e < r.length; e++) {
+	          t[r[e]] = e;
+	        }return t;
+	      }, r.maximumMatching = function (r) {
+	        for (var t = r[0], e = 0, n = new Array(t + 1), o = 0; t >= o; o++) {
+	          n[o] = new Array(t + 1);for (var a = o; t >= a; a++) {
+	            n[o][a] = 0;
+	          }
+	        }for (var s = 0, o = t - e - 1; o > 0; o--) {
+	          for (var a = o + e + 1; t >= a; a++) {
+	            s = n[o][a - 1];for (var i = a - e - 1; i >= o; i--) {
+	              r[i] === a && (s = Math.max(s, (i > o ? n[o][i - 1] : 0) + 1 + (a - i - 1 > 0 ? n[i + 1][a - 1] : 0)));
+	            }n[o][a] = s;
+	          }
+	        }return s = n[1][t], n;
+	      }, r.backtrackMaximumMatching = function (t, e) {
+	        var n = Array.apply(null, Array(t.length)).map(function () {
+	          return 0;
+	        });return r.mmBt(t, n, e, 1, t.length - 1), n;
+	      }, r.mmBt = function (t, e, n, o, a) {
+	        var s = t[o][a],
+	            i = 0;if (!(i > a - o - 1)) {
+	          if (t[o][a - 1] == s) return void r.mmBt(t, e, n, o, a - 1);for (var l = a - i - 1; l >= o; l--) {
+	            if (n[a] === l) {
+	              var u = l > o ? t[o][l - 1] : 0,
+	                  c = a - l - 1 > 0 ? t[l + 1][a - 1] : 0;if (u + c + 1 == s) return e[l] = a, e[a] = l, l > o && r.mmBt(t, e, n, o, l - 1), void r.mmBt(t, e, n, l + 1, a - 1);
+	            }
+	          }console.log("FAILED!!!" + o + "," + a + ": backtracking failed!");
+	        }
+	      }, r.dotbracketToPairtable = function (t) {
+	        var e = Array.apply(null, new Array(t.length + 1)).map(Number.prototype.valueOf, 0);e[0] = t.length;for (var n = {}, o = 0; o < r.bracketLeft.length; o++) {
+	          n[o] = [];
+	        }for (var a = r.inverseBrackets(r.bracketLeft), s = r.inverseBrackets(r.bracketRight), o = 0; o < t.length; o++) {
+	          var i = t[o],
+	              l = o + 1;if ("." == i || "o" == i) e[l] = 0;else if (i in a) n[a[i]].push(l);else {
+	            if (!(i in s)) throw "Unknown symbol in dotbracket string";var u = n[s[i]].pop();e[l] = u, e[u] = l;
+	          }
+	        }for (var c in n) {
+	          if (n[c].length > 0) throw "Unmatched base at position " + n[c][0];
+	        }return e;
+	      }, r.insertIntoStack = function (r, t, e) {
+	        for (var n = 0; r[n].length > 0 && r[n][r[n].length - 1] < e;) {
+	          n += 1;
+	        }return r[n].push(e), n;
+	      }, r.deleteFromStack = function (r, t) {
+	        for (var e = 0; 0 === r[e].length || r[e][r[e].length - 1] != t;) {
+	          e += 1;
+	        }return r[e].pop(), e;
+	      }, r.pairtableToDotbracket = function (t) {
+	        for (var e = {}, n = 0; n < t[0]; n++) {
+	          e[n] = [];
+	        }for (var n, o = {}, a = "", n = 1; n < t[0] + 1; n++) {
+	          if (0 !== t[n] && t[n] in o) throw "Invalid pairtable contains duplicate entries";o[t[n]] = !0, a += 0 === t[n] ? "." : t[n] > n ? r.bracketLeft[r.insertIntoStack(e, n, t[n])] : r.bracketRight[r.deleteFromStack(e, n)];
+	        }return a;
+	      }, r.findUnmatched = function (t, e, n) {
+	        for (var o, a = [], s = [], i = e, l = n, o = e; n >= o; o++) {
+	          0 !== t[o] && (t[o] < e || t[o] > n) && s.push([o, t[o]]);
+	        }for (var o = i; l >= o; o++) {
+	          for (; 0 === t[o] && l >= o;) {
+	            o++;
+	          }for (n = t[o]; t[o] === n;) {
+	            o++, n--;
+	          }a = a.concat(r.findUnmatched(t, o, n));
+	        }return s.length > 0 && a.push(s), a;
+	      }, r.removePseudoknotsFromPairtable = function (t) {
+	        for (var e = r.maximumMatching(t), n = r.backtrackMaximumMatching(e, t), o = [], a = 1; a < t.length; a++) {
+	          t[a] < a || n[a] != t[a] && (o.push([a, t[a]]), t[t[a]] = 0, t[a] = 0);
+	        }return o;
+	      }, r.ptToElements = function (t, e, n, o, s) {
+	        var i = [],
+	            l = [n - 1],
+	            u = [o + 1];if (arguments.length < 5 && (s = []), n > o) return [];for (; 0 === t[n]; n++) {
+	          l.push(n);
+	        }for (; 0 === t[o]; o--) {
+	          u.push(o);
+	        }if (n > o) {
+	          if (l.push(n), 0 === e) return [["e", e, l.sort(a)]];for (var c = !1, f = [], p = [], h = 0; h < l.length; h++) {
+	            c ? p.push(l[h]) : f.push(l[h]), s.indexOf(l[h]) >= 0 && (c = !0);
+	          }return c ? [["h", e, l.sort(a)]] : [["h", e, l.sort(a)]];
+	        }if (t[n] != o) {
+	          var m = l,
+	              h = n;for (m.push(h); o >= h;) {
+	            for (i = i.concat(r.ptToElements(t, e, h, t[h], s)), m.push(t[h]), h = t[h] + 1; 0 === t[h] && o >= h; h++) {
+	              m.push(h);
+	            }m.push(h);
+	          }return m.pop(), m = m.concat(u), m.length > 0 && (0 === e ? i.push(["e", e, m.sort(a)]) : i.push(["m", e, m.sort(a)])), i;
+	        }if (t[n] === o) {
+	          l.push(n), u.push(o);var v = l.concat(u);v.length > 4 && (0 === e ? i.push(["e", e, l.concat(u).sort(a)]) : i.push(["i", e, l.concat(u).sort(a)]));
+	        }for (var g = []; t[n] === o && o > n;) {
+	          g.push(n), g.push(o), n += 1, o -= 1, e += 1;
+	        }return l = [n - 1], u = [o + 1], i.push(["s", e, g.sort(a)]), i.concat(r.ptToElements(t, e, n, o, s));
+	      };
+	    }function o(r) {
+	      var t = this;return t.colorsText = r, t.parseRange = function (r) {
+	        for (var t = r.split(","), e = [], n = 0; n < t.length; n++) {
+	          var o = t[n].split("-");if (1 == o.length) e.push(parseInt(o[0]));else if (2 == o.length) for (var a = parseInt(o[0]), s = parseInt(o[1]), i = a; s >= i; i++) {
+	            e.push(i);
+	          } else console.log("Malformed range (too many dashes):", r);
+	        }return e;
+	      }, t.parseColorText = function (r) {
+	        for (var e = r.split("\n"), n = "", o = 1, a = { colorValues: { "": {} }, range: ["white", "steelblue"] }, s = [], i = 0; i < e.length; i++) {
+	          if (">" != e[i][0]) for (var l = e[i].trim().split(/[\s]+/), u = 0; u < l.length; u++) {
+	            if (isNaN(l[u])) {
+	              if (0 === l[u].search("range")) {
+	                var c = l[u].split("="),
+	                    f = c[1].split(":");a.range = [f[0], f[1]];continue;
+	              }if (0 == l[u].search("domain")) {
+	                var p = l[u].split("="),
+	                    f = p[1].split(":");a.domain = [f[0], f[1]];continue;
+	              }for (var h = l[u].split(":"), m = t.parseRange(h[0]), v = h[1], g = 0; g < m.length; g++) {
+	                isNaN(v) ? a.colorValues[n][m[g]] = v : (a.colorValues[n][m[g]] = +v, s.push(Number(v)));
+	              }
+	            } else a.colorValues[n][o] = Number(l[u]), o += 1, s.push(Number(l[u]));
+	          } else n = e[i].trim().slice(1), o = 1, a.colorValues[n] = {};
+	        }return "domain" in a || (a.domain = [Math.min.apply(null, s), Math.max.apply(null, s)]), t.colorsJson = a, t;
+	      }, t.normalizeColors = function () {
+	        var r;for (var e in t.colorsJson) {
+	          var n = Number.MAX_VALUE,
+	              o = Number.MIN_VALUE;for (var a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (n > r && (n = r), r > o && (o = r));
+	          }for (a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (t.colorsJson.colorValues[e][a] = (r - n) / (o - n));
+	          }
+	        }return t;
+	      }, t.parseColorText(t.colorsText), t;
+	    }Object.defineProperty(t, "__esModule", { value: !0 }), t.arraysEqual = e, t.RNAUtilities = n, t.ColorScheme = o;var a = function a(r, t) {
+	      return r - t;
+	    };t.rnaUtilities = new n();
+	  }]);
+	});
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ },
-/* 3 */,
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
 /* 4 */,
-/* 5 */
+/* 5 */,
+/* 6 */
 /***/ function(module, exports) {
 
 	/*
@@ -1014,7 +1181,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1230,6 +1397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
+		var sourceMap = obj.sourceMap;
 
 		if(media) {
 			styleElement.setAttribute("media", media)
@@ -1247,6 +1415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
+		var media = obj.media;
 		var sourceMap = obj.sourceMap;
 
 		if(sourceMap) {
@@ -1266,7 +1435,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */,
 /* 8 */,
 /* 9 */,
 /* 10 */,
@@ -1278,7 +1446,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */,
 /* 17 */,
 /* 18 */,
-/* 19 */
+/* 19 */,
+/* 20 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1397,13 +1566,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 20 */,
 /* 21 */,
 /* 22 */,
 /* 23 */,
 /* 24 */,
 /* 25 */,
-/* 26 */
+/* 26 */,
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1413,13 +1582,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.rnaPlot = rnaPlot;
 
-	var _simplernaplot = __webpack_require__(19);
+	var _simplernaplot = __webpack_require__(20);
 
 	var _rnagraph = __webpack_require__(1);
 
 	var _rnautils = __webpack_require__(2);
 
-	__webpack_require__(27);
+	__webpack_require__(28);
 
 	function isNormalInteger(str) {
 	    //http://stackoverflow.com/a/10834843/899470
@@ -1572,7 +1741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        for (var i = 0; i < results.length; i++) {
 	            var edge_subpoint_data = results[i];
-	            // for each of the arrays in the results 
+	            // for each of the arrays in the results
 	            // draw a line between the subdivions points for that edge
 
 	            selection.append('path').attr('d', d3line(edge_subpoint_data)).style('fill', 'none').attr('link-type', function (d) {
@@ -1962,16 +2131,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(28);
+	var content = __webpack_require__(29);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(7)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1988,10 +2157,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(6)();
 	// imports
 
 
