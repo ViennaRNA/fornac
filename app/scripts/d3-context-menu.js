@@ -7,8 +7,10 @@ export function contextMenu(menu, opts) {
     let clickAway = {};
     let uid = slugid.nice();
     let rootElement = null;
-
+    let orientation = 'right';   // display the menu to the right of the mouse click
+                                 // or parent elemement
     let initialPos = null;
+    let parentStart = null;
 
     var openCallback,
         closeCallback;
@@ -29,6 +31,14 @@ export function contextMenu(menu, opts) {
         initialPos = opts.pos;
     }
 
+    if ('orientation' in opts) {
+        orientation = opts.orientation;
+    }
+
+    if ('parentStart' in opts) {
+        parentStart = opts.parentStart;
+    }
+
     // create the div element that will hold the context menu
     d3.selectAll('.d3-context-menu-' + uid).data([1])
         .enter()
@@ -46,6 +56,8 @@ export function contextMenu(menu, opts) {
         */
 
         d3.select('.d3-context-menu-' + uid).style('display', 'none');
+       orientation = 'right';
+
         if (closeCallback) {
             closeCallback();
         }
@@ -74,6 +86,7 @@ export function contextMenu(menu, opts) {
         var list = d3.selectAll('.d3-context-menu-' + uid)
             .on('contextmenu', function(d) {
                 d3.select('.d3-context-menu-' + uid).style('display', 'none'); 
+                orientation = 'right';
 
                 d3.event.preventDefault();
                 d3.event.stopPropagation();
@@ -111,6 +124,7 @@ export function contextMenu(menu, opts) {
 
                 // close all context menus
                 d3.selectAll('.d3-context-menu').style('display', 'none');
+                orientation = 'right';
 
                 if (closeCallback) {
                     closeCallback();
@@ -133,7 +147,6 @@ export function contextMenu(menu, opts) {
                         d3.select('.d3-context-menu-' + openChildMenuUid)
                         .style('display', 'none');
 
-
                         openChildMenuUid = null;
                         return;
                     }
@@ -152,21 +165,28 @@ export function contextMenu(menu, opts) {
                         openChildMenuUid = null;
 
                     }
-
                 }             
 
                 // there should be no menu open right now
                 if (typeof d.children != 'undefined') {
-
                     let boundingRect = this.getBoundingClientRect();
 
-                    //this should be a <li>
-                    // so parent should be a <ul>
-                    // need to open a new menu
-                    let childrenContextMenu = contextMenu(d.children, 
-                                      {'pos': [ boundingRect.left + boundingRect.width + window.pageXOffset,
+                    let childrenContextMenu = null
+                    if (orientation == 'left') {
+                        childrenContextMenu = contextMenu(d.children, {'rootElement': currentThis,
+                              'pos': [ boundingRect.left + window.pageXOffset,
+                                    boundingRect.top - 2 + window.pageYOffset],
+                        'orientation': 'left'});
+                    } else {
+                        childrenContextMenu = contextMenu(d.children, 
+                                      {
+                                          'pos': [ boundingRect.left + boundingRect.width + window.pageXOffset,
                                                 boundingRect.top - 2 + window.pageYOffset],
-                                       'rootElement': currentThis });
+                                       'rootElement': currentThis,
+                                    'parentStart': [boundingRect.left + window.pageXOffset,
+                                      boundingRect.top - 2 + window.pageYOffset]});
+                    }
+
                     d.childUid = childrenContextMenu.apply(this, [data,i,true,
                                                            function() { }]);
                     openChildMenuUid = d.childUid;
@@ -193,7 +213,7 @@ export function contextMenu(menu, opts) {
             }
         }
 
-        d3.select('.d3-context-menu-' + uid)
+        let contextMenuSelection = d3.select('.d3-context-menu-' + uid)
             .style('display', 'block');
 
         if (initialPos == null) {
@@ -204,6 +224,31 @@ export function contextMenu(menu, opts) {
             d3.select('.d3-context-menu-' + uid)
             .style('left', initialPos[0] + 'px')
             .style('top', initialPos[1] + 'px')
+        }
+
+        // check if the menu disappears off the side of the window
+        let boundingRect = contextMenuSelection.node().getBoundingClientRect();
+
+        if (boundingRect.left + boundingRect.width > window.innerWidth || orientation == 'left') {
+            orientation = 'left';
+
+            // menu goes of the end of the window, position it the other way
+            if (initialPos == null) {
+                // place the menu where the user clicked
+                d3.select('.d3-context-menu-' + uid)
+                .style('left', (d3.event.pageX - 2 - boundingRect.width) + 'px')
+                .style('top', (d3.event.pageY - 2) + 'px')
+            } else {
+                if (parentStart != null) {
+                    d3.select('.d3-context-menu-' + uid)
+                    .style('left', (parentStart[0] - boundingRect.width) + 'px')
+                    .style('top', parentStart[1] + 'px')
+                } else {
+                    d3.select('.d3-context-menu-' + uid)
+                    .style('left', (initialPos[0] - boundingRect.width) + 'px')
+                    .style('top', initialPos[1] + 'px')
+                }
+            }
             
         }
 
