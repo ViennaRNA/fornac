@@ -411,7 +411,7 @@ export function FornaContainer(element, passedOptions) {
         let rna = referenceNode.rna;
 
         let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
-        let positions = rna.getPositions();
+        let positions = rna.getPositions('nucleotide');
         let sequence = rna.seq
         let uids = rna.getUids();
 
@@ -441,7 +441,7 @@ export function FornaContainer(element, passedOptions) {
         let rna = referenceNode.rna;
 
         let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
-        let positions = rna.getPositions();
+        let positions = rna.getPositions('nucleotide');
         let sequence = rna.seq
         let uids = rna.getUids();
 
@@ -452,9 +452,14 @@ export function FornaContainer(element, passedOptions) {
 
         console.log('newSequence:', newSequence);
 
-        let newUids = uids.splice(newNodeNum, 0, slugid.nice());
-        let newPositions = positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+        uids.splice(newNodeNum, 0, slugid.nice());
+        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
 
+        let newUids = uids;
+        let newPositions = positions;
+
+        console.log('positions:', positions);
+        console.log('new node positions:', newPositions);
 
         delete self.rnas[rna.uid];
         let newRNA = self.addRNA(newDotbracket, {'sequence': newSequence,
@@ -477,7 +482,7 @@ export function FornaContainer(element, passedOptions) {
         }
 
         let dotbracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
-        let positions = rna.getPositions();
+        let positions = rna.getPositions('nucleotide');
         let sequence = rna.seq
         let uids = rna.getUids();
 
