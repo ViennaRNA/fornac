@@ -1,4 +1,27 @@
-<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><title>Fornac Example</title></head><body>This is an RNA container:<div id="rna_ss"></div>This is an RNA container using the NAView layout:<div id="naview_ss"></div>This is an output of an RNA folded using RNAcofold:<div id="cofold_ss"></div>This is a custom-colored RNA:<div id="custom_colors"></div><script src="scripts/fornac.js"></script><script type="text/javascript">"use strict"
+<!DOCTYPE html>
+<html lang="">
+<head>
+<meta charset="utf-8">
+<title>Fornac Example</title>
+</head>
+<body>
+
+This is an RNA container:
+<div id='rna_ss'> </div>
+
+This is an RNA container using the NAView layout:
+<div id="naview_ss"></div>
+
+This is an output of an RNA folded using RNAcofold:
+<div id='cofold_ss'></div>
+
+This is a custom-colored RNA:
+<div id="custom_colors"></div>
+
+<script src="scripts/fornac.js"></script>
+
+<script type='text/javascript'>
+"use strict"
 
 function customColorsContainer() {
     let container = new fornac.FornaContainer("#custom_colors",
@@ -70,4 +93,8 @@ var options1 = {'structure': '..............',
 */
 
 //container.changeColorScheme('custom')
-//container.transitionRNA(options1.structure);</script></body></html>
+//container.transitionRNA(options1.structure);
+
+</script>
+</body>
+</html>
