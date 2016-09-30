@@ -3,21 +3,41 @@
 <head>
 <meta charset="utf-8">
 <title>Fornac Example</title>
+<link href="https://fonts.googleapis.com/css?family=Pavanam" rel="stylesheet">
 </head>
+<style>
+
+body {
+    color: #333333;
+    font-family: 'Pavanam', sans-serif;
+    line-height: 1.3;
+            
+}
+
+</style>
 <body>
 
-This is an RNA container. Try this:
+<div style="width: 600px; margin: auto;">
+
+    <h3>Forna RNA Editor</h3>
+
+    The RNA below is editable:
+    <br>
+    <br>
+
+
+<div id='rna_ss'> </div>
 
 <ul>
-    <li> Right click on the canvas and click on 'Add Node' to add a node. </li>
-    <li> Shift click on any link to remove the link </li>
-    <li> Shift click and drag to create new links </li>
+    <li> <b>Right click</b> on the canvas and click on 'Add Node' to add a node. </li>
+    <li> <b>Shift click</b> on any link to remove the link </li>
+    <li> <b>Shift click</b> on a node and drag to create new links </li>
     <ul> Linking unpaired nucleotides creates base pair bonds
         <li> Linking nodes in different molecules creates a inter-molecule pair </li>
         <li> Linking the ends of two molecules prompts you whether you want to create 
             a base pair or a backbone link. </li>
     </ul>
-    <li> Right click on a node and click: </li>
+    <li> <b>Right click</b> on a node and click: </li>
     <ul>
         <li> Delete node to delete that node </li>
         <li> Change node to change it to another type </li>
@@ -25,9 +45,6 @@ This is an RNA container. Try this:
         <li> Insert after to insert a different node after this one </li>
     </ul>
 </ul>
-
-<div id='rna_ss'> </div>
-
 
 <!-- build:js scripts/fornac.js -->
 <script src='scripts/fornac.js'></script>
@@ -38,7 +55,7 @@ This is an RNA container. Try this:
 
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[1000,300], 
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[600,300], 
              'editable': true});
 
     /*
@@ -65,5 +82,6 @@ normalContainer();
 <script src="bower_components/d3-context-menu/js/d3-context-menu.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
+</div>
 </body>
 </html>
