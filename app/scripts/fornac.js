@@ -31,6 +31,7 @@ export function FornaContainer(element, passedOptions) {
         'layout': 'standard-polygonal',
         'allowPanningAndZooming': true,
         'transitionDuration': 500,
+        'maxNodeRadius': 40,    // the maximum radius of a node when the view is centered
         'resizeSvgOnResize': true   //change the size of the svg when resizing the container
                                     //sometimes its beneficial to turn this off, especially when
                                     //performance is an issue
@@ -894,6 +895,7 @@ export function FornaContainer(element, passedOptions) {
         var maxX = d3.max(self.graph.nodes.map(function(d) {return d.x;}));
         var maxY = d3.max(self.graph.nodes.map(function(d) {return d.y;}));
 
+        var maxRadius = d3.max(self.graph.nodes.map(function(d) { return d.radius; }));
 
         // The width and the height of the molecule
         var molWidth = maxX - minX;
@@ -905,7 +907,8 @@ export function FornaContainer(element, passedOptions) {
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most
-        var minRatio = Math.min(widthRatio, heightRatio) * 0.8;
+        var minRatio = Math.min(widthRatio, heightRatio, 
+                                self.options.maxNodeRadius / maxRadius) * 0.8;
 
         // the new dimensions of the molecule
         var newMolWidth = molWidth * minRatio;

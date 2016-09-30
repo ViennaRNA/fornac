@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+<meta charset="utf-8">
+<title>Fornac Example</title>
+</head>
+<body>
+
+This is an RNA container. Try this:
+
+<ul>
+    <li> Right click on the canvas and click on 'Add Node' to add a node. </li>
+    <li> Shift click on any link to remove the link </li>
+    <li> Shift click and drag to create new links </li>
+    <ul> Linking unpaired nucleotides creates base pair bonds
+        <li> Linking nodes in different molecules creates a inter-molecule pair </li>
+        <li> Linking the ends of two molecules prompts you whether you want to create 
+            a base pair or a backbone link. </li>
+    </ul>
+    <li> Right click on a node and click: </li>
+    <ul>
+        <li> Delete node to delete that node </li>
+        <li> Change node to change it to another type </li>
+        <li> Insert before to insert a different node before this one </li>
+        <li> Insert after to insert a different node after this one </li>
+    </ul>
+</ul>
+
+<div id='rna_ss'> </div>
+
+
+<!-- build:js scripts/fornac.js -->
+<script src='scripts/fornac.js'></script>
+<!-- endbuild -->
+
+<script type='text/javascript'>
+"use strict"
+
+function normalContainer() {
+    let container = new fornac.FornaContainer("#rna_ss",
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[1000,300], 
+             'editable': true});
+
+    /*
+    let options = {'structure': '..((..((...[)).(((..].))).))..',
+        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    };
+    */
+    let options = {'structure': '.((..)).',
+        'sequence': '12345678',
+        avoidOthers: true
+    };
+    container.addRNA(options.structure, options);
+    //container.addRNA(options.structure, options);
+    container.setSize();
+}
+
+normalContainer();
+
+</script>
+
+<!-- d3-context-menu -->
+<!-- build:js scripts/d3-context-menu.js -->
+<!-- bower:js -->
+<script src="bower_components/d3-context-menu/js/d3-context-menu.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+</body>
+</html>
