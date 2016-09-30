@@ -160,10 +160,12 @@ export function contextMenu(menu, opts) {
 
                     let boundingRect = this.getBoundingClientRect();
 
+                    //this should be a <li>
+                    // so parent should be a <ul>
                     // need to open a new menu
                     let childrenContextMenu = contextMenu(d.children, 
-                                      {'pos': [ boundingRect.left + boundingRect.width,
-                                                boundingRect.top - 2],
+                                      {'pos': [ boundingRect.left + boundingRect.width + window.pageXOffset,
+                                                boundingRect.top - 2 + window.pageYOffset],
                                        'rootElement': currentThis });
                     d.childUid = childrenContextMenu.apply(this, [data,i,true,
                                                            function() { }]);
