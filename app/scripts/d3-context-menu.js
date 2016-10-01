@@ -96,6 +96,7 @@ export function contextMenu(menu, opts) {
         list.selectAll('li').data(typeof menu === 'function' ? menu(data) : menu).enter()
             .append('li')
             .attr('class', function(d) {
+                console.log('d:', d);
                 var ret = '';
                 if (d.divider) {
                     ret += ' is-divider';
@@ -105,6 +106,9 @@ export function contextMenu(menu, opts) {
                 }
                 if (!d.action) {
                     ret += ' is-header';
+                }
+                if ('children' in d) {
+                    ret += ' d3-context-menu-recursive';
                 }
                 return ret;
             })
@@ -204,6 +208,15 @@ export function contextMenu(menu, opts) {
                         .classed('d3-context-menu-selected', false);
                 }
             });
+
+            list.selectAll('.d3-context-menu-recursive')
+            .append('img')
+            .attr('src', 'images/play.svg')
+            .attr('width', '14px')
+            .attr('height', '14px')
+            .style('position', 'absolute')
+            .style('right', '5px')
+            ;
 
         // the openCallback allows an action to fire before the menu is displayed
         // an example usage would be closing a tooltip
