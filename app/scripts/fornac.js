@@ -34,7 +34,7 @@ export function FornaContainer(element, passedOptions) {
         'layout': 'standard-polygonal',
         'allowPanningAndZooming': true,
         'transitionDuration': 500,
-        'maxNodeRadius': 40,    // the maximum radius of a node when the view is centered
+        'maxNodeRadius': 80,    // the maximum radius of a node when the view is centered
         'resizeSvgOnResize': true   //change the size of the svg when resizing the container
                                     //sometimes its beneficial to turn this off, especially when
                                     //performance is an issue
@@ -453,7 +453,7 @@ export function FornaContainer(element, passedOptions) {
         console.log('newSequence:', newSequence);
 
         uids.splice(newNodeNum, 0, slugid.nice());
-        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset-1]);
 
         let newUids = uids;
         let newPositions = positions;
@@ -644,6 +644,10 @@ export function FornaContainer(element, passedOptions) {
 
         // point back toward the previous node
         var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+
+        if (u[0] == 0 && u[1] == 0)
+            return;     // will lead to a NaN error
+
         u = [u[0] / magnitude(u), u[1] / magnitude(u)];
         var v = [-u[1], u[0]];
 
