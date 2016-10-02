@@ -108,6 +108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'layout': 'standard-polygonal',
 	        'allowPanningAndZooming': true,
 	        'transitionDuration': 500,
+	        'maxNodeRadius': 80, // the maximum radius of a node when the view is centered
 	        'resizeSvgOnResize': true //change the size of the svg when resizing the container
 	        //sometimes its beneficial to turn this off, especially when
 	        //performance is an issue
@@ -190,7 +191,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            action: function action(elm, d, i) {
 	                console.log('You have clicked the second item!');
 	                console.log('The data for this circle is: ' + d);
-	            }
+	            },
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('A', d);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('C', d);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('G', d);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('U', d);
+	                }
+	            }]
 	        }, {
 	            title: 'Insert Before',
 	            action: function action(elm, d, i) {},
@@ -360,6 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    self.addRNA = function (structure, passedOptions) {
 	        var rnaJson = self.createInitialLayout(structure, passedOptions);
+	        var centerView = false;
 
 	        /*
 	         * Code to display the JSONs representing the structure
@@ -384,9 +407,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if ('centerPos' in passedOptions) self.addRNAJSON(rnaJson, { centerPos: passedOptions.centerPos,
-	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, true);
+	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, { centerView: passedOptions.centerView });
 
 	        return rnaJson;
+	    };
+
+	    self.changeNode = function (nodeName, referenceNode) {
+	        //insert a new node before or after another one
+	        //positionOffset specifies who far from the original to insert the new node
+	        var rna = referenceNode.rna;
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions('nucleotide');
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newNodeNum = referenceNode.num;
+
+	        var newDotbracket = dotbracket;
+	        var newSequence = sequence.slice(0, newNodeNum - 1) + nodeName + sequence.slice(newNodeNum);
+
+	        console.log('newSequence:', newSequence);
+
+	        console.log('uids:', uids);
+	        uids.splice(newNodeNum - 1, 1, _slugid2.default.nice());
+	        var newPositions = positions;
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': uids,
+	            'centerView': false });
 	    };
 
 	    self.insertNodeBeforeOrAfter = function (nodeName, referenceNode, positionOffset) {
@@ -395,7 +446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var rna = referenceNode.rna;
 
 	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
-	        var positions = rna.getPositions();
+	        var positions = rna.getPositions('nucleotide');
 	        var sequence = rna.seq;
 	        var uids = rna.getUids();
 
@@ -406,13 +457,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        console.log('newSequence:', newSequence);
 
-	        var newUids = uids.splice(newNodeNum, 0, _slugid2.default.nice());
-	        var newPositions = positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset]);
+	        uids.splice(newNodeNum, 0, _slugid2.default.nice());
+	        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset - 1]);
+
+	        var newUids = uids;
+	        var newPositions = positions;
+
+	        console.log('positions:', positions);
+	        console.log('new node positions:', newPositions);
 
 	        delete self.rnas[rna.uid];
 	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
 	            'positions': newPositions,
-	            'uids': newUids });
+	            'uids': newUids,
+	            'centerView': false });
 	    };
 
 	    self.deleteNode = function (node) {
@@ -428,7 +486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
-	        var positions = rna.getPositions();
+	        var positions = rna.getPositions('nucleotide');
 	        var sequence = rna.seq;
 	        var uids = rna.getUids();
 
@@ -440,7 +498,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete self.rnas[rna.uid];
 	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
 	            'positions': newPositions,
-	            'uids': newUids });
+	            'uids': newUids,
+	            'centerView': false });
 
 	        console.log('new dotbracket:', newDotbracket);
 	        //self.recalculateGraph();
@@ -516,6 +575,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // when it is modified, it is replaced in the global list of RNAs
 	        //
 	        var maxX, minX;
+	        console.log('centerView:', centerView);
 
 	        if (centerPos != null) {
 	            (function () {
@@ -589,6 +649,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // point back toward the previous node
 	        var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+
+	        if (u[0] == 0 && u[1] == 0) return; // will lead to a NaN error
+
 	        u = [u[0] / magnitude(u), u[1] / magnitude(u)];
 	        var v = [-u[1], u[0]];
 
@@ -1104,6 +1167,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return d.y;
 	        }));
 
+	        var maxRadius = _d2.default.max(self.graph.nodes.map(function (d) {
+	            return d.radius;
+	        }));
+
 	        // The width and the height of the molecule
 	        var molWidth = maxX - minX;
 	        var molHeight = maxY - minY;
@@ -1114,7 +1181,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // we need to fit it in both directions, so we scale according to
 	        // the direction in which we need to shrink the most
-	        var minRatio = Math.min(widthRatio, heightRatio) * 0.8;
+	        var minRatio = Math.min(widthRatio, heightRatio, self.options.maxNodeRadius / maxRadius) * 0.8;
 
 	        // the new dimensions of the molecule
 	        var newMolWidth = molWidth * minRatio;
@@ -15054,8 +15121,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var previouslyMouseUp = false;
 	    var clickAway = {};
 	    var uid = _slugid2.default.nice();
-
+	    var rootElement = null;
+	    var orientation = 'right'; // display the menu to the right of the mouse click
+	    // or parent elemement
 	    var initialPos = null;
+	    var parentStart = null;
 
 	    var openCallback, closeCallback;
 
@@ -15067,16 +15137,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        closeCallback = opts.onClose;
 	    }
 
+	    if ('rootElement' in opts) rootElement = opts['rootElement'];
+
 	    if ('pos' in opts) {
 	        // do we want to place this menu somewhere specific?
 	        initialPos = opts.pos;
+	    }
+
+	    if ('orientation' in opts) {
+	        orientation = opts.orientation;
+	    }
+
+	    if ('parentStart' in opts) {
+	        parentStart = opts.parentStart;
 	    }
 
 	    // create the div element that will hold the context menu
 	    _d2.default.selectAll('.d3-context-menu-' + uid).data([1]).enter().append('div').classed('d3-context-menu', true).classed('d3-context-menu-' + uid, true);
 
 	    // close menu
-	    console.log('uid:', uid);
 	    _d2.default.select('body').on('click.d3-context-menu-' + uid, function () {
 	        /*
 	        if (previouslyMouseUp) {
@@ -15086,6 +15165,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        */
 
 	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	        orientation = 'right';
+
 	        if (closeCallback) {
 	            closeCallback();
 	        }
@@ -15098,7 +15179,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var elm = this;
 	        var contextMenuPos = null;
-	        var mousePos = _d2.default.mouse(this);
+	        var mousePos = null;
+	        var currentThis = this;
+
+	        if (rootElement == null) mousePos = _d2.default.mouse(this);else mousePos = _d2.default.mouse(rootElement); // for recursive menus, we need the mouse
+	        // position relative to another element
 
 	        clickAway = clickAwayFunc;
 	        var openChildMenuUid = null;
@@ -15107,14 +15192,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _d2.default.selectAll('.d3-context-menu-' + uid).html('');
 	        var list = _d2.default.selectAll('.d3-context-menu-' + uid).on('contextmenu', function (d) {
-	            console.log('hiding');
 	            _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	            orientation = 'right';
 
 	            _d2.default.event.preventDefault();
 	            _d2.default.event.stopPropagation();
 	        }).append('ul');
 
 	        list.selectAll('li').data(typeof menu === 'function' ? menu(data) : menu).enter().append('li').attr('class', function (d) {
+	            console.log('d:', d);
 	            var ret = '';
 	            if (d.divider) {
 	                ret += ' is-divider';
@@ -15124,6 +15210,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            if (!d.action) {
 	                ret += ' is-header';
+	            }
+	            if ('children' in d) {
+	                ret += ' d3-context-menu-recursive';
 	            }
 	            return ret;
 	        }).html(function (d) {
@@ -15135,13 +15224,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return typeof d.title === 'string' ? d.title : d.title(data);
 	        }).on('click', function (d, i) {
-	            console.log('click');
 	            if (d.disabled) return; // do nothing if disabled
 	            if (!d.action) return; // headers have no "action"
 	            d.action(elm, data, index, mousePos);
 
 	            // close all context menus
 	            _d2.default.selectAll('.d3-context-menu').style('display', 'none');
+	            orientation = 'right';
 
 	            if (closeCallback) {
 	                closeCallback();
@@ -15178,14 +15267,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // there should be no menu open right now
 	            if (typeof d.children != 'undefined') {
+	                var _boundingRect = this.getBoundingClientRect();
 
-	                var boundingRect = this.getBoundingClientRect();
+	                var childrenContextMenu = null;
+	                if (orientation == 'left') {
+	                    childrenContextMenu = contextMenu(d.children, { 'rootElement': currentThis,
+	                        'pos': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'orientation': 'left' });
+	                } else {
+	                    childrenContextMenu = contextMenu(d.children, {
+	                        'pos': [_boundingRect.left + _boundingRect.width + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'rootElement': currentThis,
+	                        'parentStart': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset] });
+	                }
 
-	                // need to open a new menu
-	                var childrenContextMenu = contextMenu(d.children, { 'pos': [boundingRect.left + boundingRect.width, boundingRect.top - 2] });
-	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {
-	                    console.log('applying');
-	                }]);
+	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {}]);
 	                openChildMenuUid = d.childUid;
 	            }
 
@@ -15197,6 +15293,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        });
 
+	        list.selectAll('.d3-context-menu-recursive').append('img').attr('src', 'images/play.svg').attr('width', '14px').attr('height', '14px').style('position', 'absolute').style('right', '5px');
+
 	        // the openCallback allows an action to fire before the menu is displayed
 	        // an example usage would be closing a tooltip
 	        if (openCallback) {
@@ -15205,7 +15303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
+	        var contextMenuSelection = _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
 
 	        if (initialPos == null) {
 	            _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
@@ -15213,11 +15311,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] + 'px').style('top', initialPos[1] + 'px');
 	        }
 
-	        console.log('initalPos:', initialPos);
+	        // check if the menu disappears off the side of the window
+	        var boundingRect = contextMenuSelection.node().getBoundingClientRect();
+
+	        if (boundingRect.left + boundingRect.width > window.innerWidth || orientation == 'left') {
+	            orientation = 'left';
+
+	            // menu goes of the end of the window, position it the other way
+	            if (initialPos == null) {
+	                // place the menu where the user clicked
+	                _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 - boundingRect.width + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
+	            } else {
+	                if (parentStart != null) {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', parentStart[0] - boundingRect.width + 'px').style('top', parentStart[1] + 'px');
+	                } else {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] - boundingRect.width + 'px').style('top', initialPos[1] + 'px');
+	                }
+	            }
+	        }
 
 	        // display context menu
-
-	        console.log('preventing');
 
 	        if (previouslyMouseUp) return uid;
 
