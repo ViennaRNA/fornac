@@ -111,13 +111,6 @@ export function FornaContainer(element, passedOptions) {
                 }
                 ],
                 disabled: false // optional, defaults to false
-            },
-            {
-                title: 'Item #2',
-                action: function(elm, d, i) {
-                    console.log('You have clicked the second item!');
-                    console.log('The data for this circle is: ' + d);
-                }
             }
         ]
 
@@ -1747,34 +1740,106 @@ export function FornaContainer(element, passedOptions) {
         let newSeq = seq1 + seq2;
         let newPositions = positions1.concat(positions2);
 
-        let toAdd = [];
+        let toAddInternal = [];
+        let toAddExternal = [];
+        let toDelete = {};
 
-        for (let i = 0; i < self.extraLinks; i++) {
-            if (self.extraLinks[i].source == rna1 && self.extraLinks[i].target == rna2) {
-                self.extraLinks[i].from = self.extraLinks[i].source.num;
-                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].target.num;
-                toAdd.push(self.extraLinks[i]);
-            } else if (self.extraLinks[i].target == rna1 && self.extraLinks[i].source == rna1) {
-                self.extraLinks[i].from = self.extraLinks[i].target.num;
-                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].source.num;
+        for (let i = 0; i < self.extraLinks.length; i++) {
+            console.log('self.extraLinks[i]', self.extraLinks[i]);
+            console.log('rna1:', rna1);
+            console.log('rna2:', rna2);
+            if (self.extraLinks[i].source.rna == rna1) {
+                if ( self.extraLinks[i].target.rna == rna2) {
+                    // both ends of the extra link are within what will become the new molecule
+                    // need to be added as base pairs afterwards
+                    //self.extraLinks[i].from = self.extraLinks[i].source.num;
+                    //self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].target.num;
+                    //toAddInternal.push(self.extraLinks[i]);
+                } else {
+                    // only one end of the extra link is within what will become the newly
+                    // created molecule, needs to remain an extra link
+                    // source will always be the unchanged molecule, whereas target will be 
+                    // the newly created one
+                    toAddExternal.push({
+                        'source': self.extraLinks[i].target,
+                        'target': self.extraLinks[i].source.num
+                    });
 
-                toAdd.push(self.extraLinks[i]);
+                    toDelete[self.extraLinks[i].uid] = true;
+                }
+            } else if (self.extraLinks[i].source.rna == rna2) {
+                if ( self.extraLinks[i].target.rna == rna1) {
+                    // add internal link
+                    // both ends of the extra link are within what will become the new molecule
+                    // need to be added as base pairs afterwards
+                    //self.extraLinks[i].from = self.extraLinks[i].target.num;
+                    //self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].source.num;
+
+                    //toAddInternal.push(self.extraLinks[i]);
+                } else {
+                    toAddExternal.push({
+                        'source': self.extraLinks[i].target,
+                        'target': self.extraLinks[i].source.num + dotbracket1.length
+                    });
+                    toDelete[self.extraLinks[i].uid] = true;
+                }
+            }
+            
+            if (self.extraLinks[i].target.rna == rna1) {
+                if (self.extraLinks[i].source.rna == rna2) {
+                    // covered in previous if statement
+                } else {
+                    // only one end of the extra link is within what will become the newly
+                    // created molecule, needs to remain an extra link
+                    toAddExternal.push({
+                        'source': self.extraLinks[i].source,
+                        'target': self.extraLinks[i].target.num
+                    });
+
+                    toDelete[self.extraLinks[i].uid] = true;
+                }
+            } else if (self.extraLinks[i].target.rna == rna2) {
+                if (self.extraLinks[i].source.rna == rna1) {
+                    toAddExternal.push({
+                        'source': self.extraLinks[i].source,
+                        'target': self.extraLinks[i].target.num + dotbracket1.length
+                    });
+
+                    toDelete[self.extraLinks[i].uid] = true;
+                }
             }
         }
+    
+
+        self.extraLinks = self.extraLinks.filter((e) => { return !(e.uid in toDelete) });
 
         delete self.rnas[rna1.uid];
         delete self.rnas[rna2.uid];
 
+        let newRna = null;
         // create a new RNA
         if (self.options.applyForce)
-            self.addRNA(newDotbracket, { 'sequence': newSeq,
-                                                      'positions': newPositions });
+            newRna = self.addRNA(newDotbracket, { 'sequence': newSeq,
+                                'positions': newPositions,
+                                'centerView': false});
         else
-            self.addRNA(newDotbracket, { 'sequence': newSeq });
+            newRna = self.addRNA(newDotbracket, { 'sequence': newSeq, 
+                        'centerView': false });
 
 
-        // add the extra links between them as base pairs
-        // remove the old ones
+
+        // add new external links
+        for (let i = 0; i < toAddExternal.length; i++) {
+            self.extraLinks.push({
+                'source': toAddExternal[i].source,
+                'target': newRna.nodes[toAddExternal[i].target-1],
+                'value': 1,
+                'uid': slugid.nice(),
+                'linkType': 'intermolecule'
+            });
+        }
+
+        console.log('self.extraLinks:', self.extraLinks);
     };
 
     self.addLink =  function(newLink) {

@@ -125,7 +125,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
         while ((breakIndex = targetString.indexOf('&')) >= 0) {
             breaks.push(breakIndex);
-            targetString = targetString.substring(0, breakIndex) + 'oo' + targetString.substring(breakIndex+1, targetString.length);
+            targetString = targetString.substring(0, breakIndex) + targetString.substring(breakIndex+1, targetString.length);
 
         }
 
