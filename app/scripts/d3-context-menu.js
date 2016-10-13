@@ -48,12 +48,11 @@ export function contextMenu(menu, opts) {
 
     // close menu
     d3.select('body').on('click.d3-context-menu-' + uid, function() {
-        /*
         if (previouslyMouseUp) {
             previouslyMouseUp = false;
             return;
         }
-        */
+       console.log('body click close');
 
         d3.select('.d3-context-menu-' + uid).style('display', 'none');
        orientation = 'right';
@@ -85,6 +84,7 @@ export function contextMenu(menu, opts) {
         d3.selectAll('.d3-context-menu-' + uid).html('');
         var list = d3.selectAll('.d3-context-menu-' + uid)
             .on('contextmenu', function(d) {
+                console.log('context-menu close');
                 d3.select('.d3-context-menu-' + uid).style('display', 'none'); 
                 orientation = 'right';
 
@@ -125,6 +125,7 @@ export function contextMenu(menu, opts) {
                 if (d.disabled) return; // do nothing if disabled
                 if (!d.action) return; // headers have no "action"
                 d.action(elm, data, index, mousePos);
+                console.log('click close');
 
                 // close all context menus
                 d3.selectAll('.d3-context-menu').style('display', 'none');
@@ -147,6 +148,7 @@ export function contextMenu(menu, opts) {
                         .classed('d3-context-menu-selected', false);
 
                     if (typeof d.children == 'undefined') {
+                        console.log("no children close");
                         // no children, so hide any open child menus
                         d3.select('.d3-context-menu-' + openChildMenuUid)
                         .style('display', 'none');
@@ -161,6 +163,7 @@ export function contextMenu(menu, opts) {
 
                     } else {
                         // need to open a different child menu
+                        console.log('open different child menu close');
                         
                         // close the already open one
                         d3.select('.d3-context-menu-' + openChildMenuUid)
