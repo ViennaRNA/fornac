@@ -1884,9 +1884,14 @@ export function FornaContainer(element, passedOptions) {
     };
 
     var nodeMouseup = function(d,i) {
+        let backbonePossible = true, basepairPossible = true;
 
         if (mousedownNode) {
             mouseupNode = d;
+
+            // if the node isn't a nucleotide, we can't create a link
+            if (mouseupNode.nodeType == 'middle' || mousedownNode.nodeType == 'middle' || mouseupNode.nodeType == 'label' || mousedownNode.nodeType == 'label')
+                return;
 
             if (mouseupNode == mousedownNode) { resetMouseVars(); return; }
             var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: slugid.nice()};
@@ -1894,14 +1899,18 @@ export function FornaContainer(element, passedOptions) {
             for (let i = 0; i < self.graph.links.length; i++) {
                 if ((self.graph.links[i].source == mousedownNode)  || 
                     (self.graph.links[i].target == mousedownNode) ||
-                        (self.graph.links[i].source == mouseupNode) ||
-                            (self.graph.links[i].target == mouseupNode)) {
+                    (self.graph.links[i].source == mouseupNode) ||
+                    (self.graph.links[i].target == mouseupNode)) {
+                    // either one of the nodes is already in a link
 
                     // if any of the nodes are already involved in a basepair or a pseudoknot
-                    // then we can't make a link
-                    if (self.graph.links[i].linkType == 'basepair' || self.graph.links[i].linkType == 'pseudoknot') {
+                    // then we can't make a basepair link
+                    if (self.graph.links[i].linkType == 'basepair' || 
+                        self.graph.links[i].linkType == 'pseudoknot' ||
+                        self.graph.links[i].linkType == 'intermolecule') {
                         // although should be able to make a backbone link
-                        return;
+                        console.log('no basepair possible');
+                        basepairPossible = false;
                     }
                 }
 
@@ -1918,48 +1927,51 @@ export function FornaContainer(element, passedOptions) {
                 }
             }
 
-            if (mouseupNode.nodeType == 'middle' || mousedownNode.nodeType == 'middle' || mouseupNode.nodeType == 'label' || mousedownNode.nodeType == 'label')
-                return;
 
             if (newLink.source.rna != newLink.target.rna) {
                     // could be either a backbone link or an intermolecule link
 
-                if ((newLink.source.num == 1 && newLink.target.num == newLink.target.rna.rnaLength) ||
-                    (newLink.target.num == 1 && newLink.source.num == newLink.source.rna.rnaLength)) {
-                let linkMenu = [
-                    {
-                        title: 'Backbone Link',
-                        action: function(elm, d, i) {
-                            linkContextMenuShown = false;
-                            console.log('Item #1 clicked!');
-                            console.log('The data for this circle is: ' + d);
-                            dragLine.attr('class', 'drag_line_hidden');
-                            self.addBackBoneLink(newLink);
-                        },
-                        disabled: false // optional, defaults to false
-                    },
-                    {
-                        title: 'Basepair Link',
-                        action: function(elm, d, i) {
-                            linkContextMenuShown = false;
-                            console.log('You have clicked the second item!');
-                            console.log('The data for this circle is: ' + d);
-                            dragLine.attr('class', 'drag_line_hidden');
+                if ((newLink.source.num == 1 && 
+                     newLink.target.num == newLink.target.rna.rnaLength) ||
+                     (newLink.target.num == 1 &&
+                      newLink.source.num == newLink.source.rna.rnaLength)) {
+                          //
+                          let linkMenu = [
+                              {
+                                  title: 'Backbone Link',
+                                  action: function(elm, d, i) {
+                                      linkContextMenuShown = false;
+                                      console.log('Item #1 clicked!');
+                                      console.log('The data for this circle is: ' + d);
+                                      dragLine.attr('class', 'drag_line_hidden');
+                                      self.addBackBoneLink(newLink);
+                                  },
+                                  disabled: false // optional, defaults to false
+                              },
+                              {
+                                  title: 'Basepair Link',
+                                  action: function(elm, d, i) {
+                                      linkContextMenuShown = false;
+                                      console.log('You have clicked the second item!');
+                                      console.log('The data for this circle is: ' + d);
+                                      dragLine.attr('class', 'drag_line_hidden');
+                                      self.addLink(newLink);
+                                  }
+                              }
+                          ]
+                          linkContextMenuShown = true;
+                          let linkContextMenu = contextMenu(linkMenu);
+                          console.log('newLinkMenu');
+                          linkContextMenu.apply(this, [d,i,true, 
+                                                function() { dragLine.attr('class', 'drag_line_hidden') }]);
+                      } else {
+                          // between end points but can't make a backbone
+                          if (basepairPossible)
                             self.addLink(newLink);
-                        }
-                    }
-                ]
-                linkContextMenuShown = true;
-                let linkContextMenu = contextMenu(linkMenu);
-                console.log('newLinkMenu');
-                linkContextMenu.apply(this, [d,i,true, 
-                                      function() { dragLine.attr('class', 'drag_line_hidden') }]);
-                    } else {
-                        self.addLink(newLink);
-                    }
-
+                      }
             } else {
-                self.addLink(newLink);
+                if (basepairPossible)
+                    self.addLink(newLink);
             }
 
         }
