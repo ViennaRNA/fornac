@@ -1839,6 +1839,8 @@ export function FornaContainer(element, passedOptions) {
             });
         }
 
+        self.recalculateGraph();
+        self.update();
         console.log('self.extraLinks:', self.extraLinks);
     };
 
