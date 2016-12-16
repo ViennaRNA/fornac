@@ -1536,13 +1536,9 @@ export function FornaContainer(element, passedOptions) {
         let sequence2 = rna.seq.slice(d.source.num);
 
         let rnaDotBracket = rnaUtilities.pairtableToDotbracket(rna.pairtable);
-        console.log('rnaDotBracket:', rnaDotBracket);
         let dotBracket1 = rnaDotBracket.slice(0, d.source.num);
         let dotBracket2 = rnaDotBracket.slice(d.source.num)
 
-        console.log('dotBracket1:', dotBracket1);
-        console.log('dotBracket2:', dotBracket2);
-        
         // get the nucleotide positions
         // cut them at the positions of the backbone bond
         let positions = rna.getPositions('nucleotide')
