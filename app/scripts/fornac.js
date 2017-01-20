@@ -891,34 +891,34 @@ export function FornaContainer(element, passedOptions) {
             return {'translate': [0,0], 'scale': 1};
 
         // Get the bounding box
-        var minX = d3.min(self.graph.nodes.map(function(d) {return d.x;}));
-        var minY = d3.min(self.graph.nodes.map(function(d) {return d.y;}));
+        let minX = d3.min(self.graph.nodes.map((d) => d.x-d.radius ));
+        let minY = d3.min(self.graph.nodes.map((d) => d.y-d.radius ));
 
-        var maxX = d3.max(self.graph.nodes.map(function(d) {return d.x;}));
-        var maxY = d3.max(self.graph.nodes.map(function(d) {return d.y;}));
+        let maxX = d3.max(self.graph.nodes.map((d) => d.x+d.radius ));
+        let maxY = d3.max(self.graph.nodes.map((d) => d.y+d.radius ));
 
-        var maxRadius = d3.max(self.graph.nodes.map(function(d) { return d.radius; }));
+        let maxRadius = d3.max(self.graph.nodes.map((d) => d.radius ));
 
         // The width and the height of the molecule
-        var molWidth = maxX - minX;
-        var molHeight = maxY - minY;
+        let molWidth = maxX - minX;
+        let molHeight = maxY - minY;
 
         // how much larger the drawing area is than the width and the height
-        var widthRatio = self.options.svgW / (molWidth + 1);
-        var heightRatio = self.options.svgH / (molHeight + 1);
+        let widthRatio = self.options.svgW / (molWidth + 1);
+        let heightRatio = self.options.svgH / (molHeight + 1);
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most
-        var minRatio = Math.min(widthRatio, heightRatio, 
-                                self.options.maxNodeRadius / maxRadius) * 0.8;
+        let minRatio = Math.min(widthRatio, heightRatio,
+                                self.options.maxNodeRadius / maxRadius) * 0.9;
 
         // the new dimensions of the molecule
-        var newMolWidth = molWidth * minRatio;
-        var newMolHeight = molHeight * minRatio;
+        let newMolWidth = molWidth * minRatio;
+        let newMolHeight = molHeight * minRatio;
 
         // translate so that it's in the center of the window
-        var xTrans = -(minX) * minRatio + (self.options.svgW - newMolWidth) / 2;
-        var yTrans = -(minY) * minRatio + (self.options.svgH - newMolHeight) / 2;
+        let xTrans = -(minX) * minRatio + (self.options.svgW - newMolWidth) / 2;
+        let yTrans = -(minY) * minRatio + (self.options.svgH - newMolHeight) /2;
 
         return {'translate': [xTrans, yTrans], 'scale': minRatio};
     };
