@@ -818,56 +818,69 @@ export function FornaContainer(element, passedOptions) {
             'width': '100%',
             'min-height': '100%'
         });
+
         svg.selectAll('circle.node').style({
             'stroke': '#ccc',
             'stroke-width': '1px',
             'opacity': 1,
             'fill': 'white'
         });
+
         svg.selectAll('polygon.node').style({
             'stroke': '#ccc',
             'stroke-width': '1px',
             'opacity': 1,
             'fill': 'white'
         });
+
         svg.selectAll('circle.node.label').style({
             'stroke': 'transparent',
             'stroke-width': 0,
             'fill': 'white',
             'display': 'inline'
         });
+
         svg.selectAll('circle.outline_node').style({
             'stroke-width': '1px',
             'fill': 'red'
         });
+
         svg.selectAll('circle.protein').style({
             'fill': 'gray',
             'fill-opacity': 0.5,
             'stroke-width': 4
         });
+
         svg.selectAll('circle.hidden_outline').style({
             'stroke-width': '0px'
         });
+
         svg.selectAll('line.link').style({
           'stroke': '#999',
           'stroke-opacity': 0.8,
           'stroke-width': 2
         });
+
         svg.selectAll('line.pseudoknot').style({
             'stroke': 'red'
         });
+
         svg.selectAll('line.basepair').style({
             'stroke': 'red'
         });
+
         svg.selectAll('line.intermolecule').style({
             'stroke': 'blue'
         });
+
         svg.selectAll('line.chain_chain').style({
             'stroke-dasharray': '3,3'
         });
+
         svg.selectAll('line.fake').style({
           'stroke': 'green'
         });
+
         svg.selectAll('.transparent').style({
             'fill': 'transparent',
             'stroke-width': 0,
@@ -875,16 +888,19 @@ export function FornaContainer(element, passedOptions) {
             'opacity': 0,
             'visibility': 'hidden'
         });
+
         svg.selectAll('.drag_line').style({
             'stroke': '#999',
             'stroke-width': 2,
             'pointer-events': 'none'
         });
+
         svg.selectAll('.drag_line_hidden').style({
           'stroke': '#999',
           'stroke-width': 0,
           'pointer-events': 'none'
         });
+
         svg.selectAll('.d3-tip').style({
             'line-height': 1,
             'font-weight': 'bold',
@@ -894,29 +910,36 @@ export function FornaContainer(element, passedOptions) {
             'border-radius': '4px',
             'pointer-events': 'none'
         });
+
         svg.selectAll('text.node-label').style({
             'font-weight': 'bold',
             'font-family': 'Tahoma, Geneva, sans-serif',
             'color': 'rgb(100,100,100)',
             'pointer-events': 'none'
         });
+
         svg.selectAll('text').style({
             'pointer-events': 'none'
         });
+
         svg.selectAll('g.gnode').style({
 
         });  // it's not just me - it was empty originally
+
         svg.selectAll('circle.outline_node.selected').style({
             'visibility': 'visible'
         });
+
         svg.selectAll('circle.outline_node').style({
             'visibility': 'hidden'
         });
+
         svg.selectAll('.brush .extent').style({
             'fill-opacity': .1,
             'stroke': '#fff',
             'shape-rendering': 'crispEdges'
         });
+
         svg.selectAll('.noselect').style({
             '-webkit-touch-callout': 'none',
             '-webkit-user-select': 'none',
@@ -925,8 +948,7 @@ export function FornaContainer(element, passedOptions) {
             '-ms-user-select': 'none',
             'user-select': 'none'
         });
-    }
-
+    };
 
     self.options.svg = svg;
 

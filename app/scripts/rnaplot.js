@@ -2,8 +2,6 @@ import {simpleXyCoordinates} from './simplernaplot.js';
 import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
 import {rnaUtilities,ColorScheme} from 'rnautils';
 
-import '../styles/rnaplot.css';
-
 function isNormalInteger(str) {
     //http://stackoverflow.com/a/10834843/899470
     return /^\+?(0|[1-9]\d*)$/.test(str);
@@ -214,6 +212,159 @@ export function rnaPlot() {
         .classed('rna-link', true);
     }
 
+    function applyStyles(selection) {
+        selection.selectAll('.structure-background-rect').style({
+            'stroke': 'black',
+            'stroke-width': 5,
+            'fill': 'transparent'
+        });
+
+        selection.selectAll('circle.rna-base').style({
+          'stroke': '#ccc',
+          'stroke-width': '1px',
+          'opacity': 1,
+          'fill': 'white'
+        });
+
+        selection.selectAll('circle.rna-base.label').style({
+            'stroke': 'transparent',
+            'stroke-width': 0,
+            'fill': 'white'
+        });
+
+        selection.selectAll('line.link').style({
+          'stroke': '#999',
+          'stroke-opacity': 0.8,
+          'stroke-width': 2
+        });
+
+        selection.selectAll('line.rna-link').style({
+          'stroke': '#999',
+          'stroke-opacity': 0.8,
+          'stroke-width': 2
+        });
+
+        selection.selectAll('.overlay').style({
+            'fill': 'transparent'
+        });
+
+        selection.selectAll('.rna-name').style({
+            'text-anchor': 'middle',
+            'dy': -10,
+            'font-family': 'Tahoma, Geneva, sans-serif',
+            'font-size': '8pt'
+        });
+
+        selection.selectAll('line.rna-link[link-type="backbone"]').style({
+            'stroke': 'transparent'
+        });
+
+        selection.selectAll('line.rna-link[link-type="basepair"]').style({
+            'stroke': 'transparent'
+        });
+
+        selection.selectAll('line.rna-link[link-type="fake"]').style({
+            'stroke': 'transparent'
+        });
+
+        selection.selectAll('line.rna-link[link-type="extra"]').style({
+            'stroke': 'grey'
+        });
+
+        selection.selectAll('line.rna-link[extra-link-type="correct"]').style({
+            'stroke': 'green'
+        });
+
+        selection.selectAll('line.rna-link[extra-link-type="incorrect"]').style({
+            'stroke': 'green'
+        });
+
+        selection.selectAll('path').style({
+            'stroke': 'grey',
+            'stroke-width': 2
+        });
+
+        selection.selectAll('path[extra-link-type="correct"]').style({
+            'stroke': 'green'
+        });
+
+        selection.selectAll('path[extra-link-type="incorrect"]').style({
+            'stroke': 'red'
+        });
+
+        selection.selectAll('line.basepair').style({
+            'stroke': 'red'
+        });
+
+        selection.selectAll('line.intermolecule').style({
+            'stroke': 'blue'
+        });
+
+        selection.selectAll('line.chain_chain').style({
+            'stroke-dasharray': '3,3'
+        });
+
+        selection.selectAll('line.fake').style({
+            'stroke': 'green'
+        });
+
+        selection.selectAll('.transparent').style({
+            'fill': 'transparent',
+            'stroke-width': 0,
+            'stroke-opacity': 0,
+            'opacity': 0
+        });
+
+        selection.selectAll('.d3-tip').style({
+            'line-height': 1,
+            'font-weight': 'bold',
+            'padding': '6px',
+            'background': 'rgba(0, 0, 0, 0.6)',
+            'color': '#fff',
+            'border-radius': '4px',
+            'pointer-events': 'none'
+        });
+
+        selection.selectAll('text.nucleotide-label').style({
+            'font-size': '5.5pt',
+            'font-weight': 'bold',
+            'font-family': 'Tahoma, Geneva, sans-serif',
+            'color': 'rgb(100,100,100)',
+            'pointer-events': 'none'
+        });
+
+        selection.selectAll('text.number-label').style({
+            'font-size': '5.5pt',
+            'font-weight': 'bold',
+            'font-family': 'Tahoma, Geneva, sans-serif',
+            'color': 'rgb(100,100,100)',
+            'pointer-events': 'none'
+        });
+
+        selection.selectAll('text').style({
+            'pointer-events': 'none'
+        });
+
+        selection.selectAll('g.gnode').style({
+
+        });  // it's not me - it was empty in rnaplot.css
+
+        selection.selectAll('.brush .extent').style({
+          'fill-opacity': .1,
+          'stroke': '#fff',
+          'shape-rendering': 'crispEdges'
+        });
+
+        selection.selectAll('.noselect').style({
+            '-webkit-touch-callout': 'none',
+            '-webkit-user-select': 'none',
+            '-khtml-user-select': 'none',
+            '-moz-user-select': 'none',
+            '-ms-user-select': 'none',
+            'user-select': 'none'
+        });
+    }
+
     function chart(selection) {
         selection.each(function(data) {
             // data should be a dictionary containing at least a structure
@@ -265,6 +416,8 @@ export function rnaPlot() {
             if (options.bundleExternalLinks) {
                 makeExternalLinksBundle(gTransform, links); 
             }
+
+            applyStyles(selection);
 
         });
     }
