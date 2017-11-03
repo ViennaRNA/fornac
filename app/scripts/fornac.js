@@ -812,143 +812,310 @@ export function FornaContainer(element, passedOptions) {
      * @uses svg - return value of d3.select(element).append('svg:svg')
      */
     self.applyStyles = function() {
-        svg.style({
-            'display': 'block',
-            'min-width': '100%',
-            'width': '100%',
-            'min-height': '100%'
-        });
+        // inline content of fornac.css
+        var fornacCss = '' +
+            '{{ element }} svg {' +
+            '  display: block;' +
+            '  min-width: 100%;' +
+            '  width: 100%;' +
+            '  min-height: 100%;' +
+            '}' +
 
-        svg.selectAll('circle.node').style({
-            'stroke': '#ccc',
-            'stroke-width': '1px',
-            'opacity': 1,
-            'fill': 'white'
-        });
+            '{{ element }} circle.node {' +
+            '  stroke: #ccc;' +
+            '  stroke-width: 1px;' +
+            '  opacity: 1;' +
+            '  fill: white;' +
+            '}' +
 
-        svg.selectAll('polygon.node').style({
-            'stroke': '#ccc',
-            'stroke-width': '1px',
-            'opacity': 1,
-            'fill': 'white'
-        });
+            '{{ element }} polygon.node {' +
+            '  stroke: #ccc;' +
+            '  stroke-width: 1px;' +
+            '  opacity: 1;' +
+            '  fill: white;' +
+            '}' +
 
-        svg.selectAll('circle.node.label').style({
-            'stroke': 'transparent',
-            'stroke-width': 0,
-            'fill': 'white',
-            'display': 'inline'
-        });
+            '{{ element }} circle.node.label {' +
+            '    stroke: transparent;' +
+            '    stroke-width: 0;' +
+            '    fill: white;' +
+            '    display: inline;' +
+            '}' +
 
-        svg.selectAll('circle.outline_node').style({
-            'stroke-width': '1px',
-            'fill': 'red'
-        });
+            '{{ element }} circle.outline_node {' +
+            '    stroke-width: 1px;' +
+            '    fill: red;' +
+            '}' +
 
-        svg.selectAll('circle.protein').style({
-            'fill': 'gray',
-            'fill-opacity': 0.5,
-            'stroke-width': 4
-        });
+            '{{ element }} circle.protein {' +
+            '    fill: gray;' +
+            '    fill-opacity: 0.5;' +
+            '    stroke-width: 4;' +
+            '}' +
 
-        svg.selectAll('circle.hidden_outline').style({
-            'stroke-width': '0px'
-        });
+            '{{ element }} circle.hidden_outline {' +
+            '    stroke-width: 0px;' +
+            '}' +
 
-        svg.selectAll('line.link').style({
-          'stroke': '#999',
-          'stroke-opacity': 0.8,
-          'stroke-width': 2
-        });
+            '{{ element }} line.link {' +
+            '  stroke: #999;' +
+            '  stroke-opacity: 0.8;' +
+            '  stroke-width: 2;' +
+            '}' +
 
-        svg.selectAll('line.pseudoknot').style({
-            'stroke': 'red'
-        });
+            '{{ element }} line.pseudoknot {' +
+            '    stroke: red;' +
+            '}' +
 
-        svg.selectAll('line.basepair').style({
-            'stroke': 'red'
-        });
+            '{{ element }} line.basepair {' +
+            '  stroke: red;' +
+            '}' +
 
-        svg.selectAll('line.intermolecule').style({
-            'stroke': 'blue'
-        });
+            '{{ element }} line.intermolecule {' +
+            '  stroke: blue;' +
+            '}' +
 
-        svg.selectAll('line.chain_chain').style({
-            'stroke-dasharray': '3,3'
-        });
+            '{{ element }} line.chain_chain {' +
+            '  stroke-dasharray: 3,3;' +
+            '}' +
 
-        svg.selectAll('line.fake').style({
-          'stroke': 'green'
-        });
+            '{{ element }} line.fake {' +
+            '  stroke: green;' +
+            '}' +
 
-        svg.selectAll('.transparent').style({
-            'fill': 'transparent',
-            'stroke-width': 0,
-            'stroke-opacity': 0,
-            'opacity': 0,
-            'visibility': 'hidden'
-        });
+            '{{ element }} .transparent {' +
+            '    fill: transparent;' +
+            '    stroke-width: 0;' +
+            '    stroke-opacity: 0;' +
+            '    opacity: 0;' +
+            '    visibility: hidden;' +
+            '}' +
 
-        svg.selectAll('.drag_line').style({
-            'stroke': '#999',
-            'stroke-width': 2,
-            'pointer-events': 'none'
-        });
+            '{{ element }} .drag_line {' +
+            '  stroke: #999;' +
+            '  stroke-width: 2;' +
+            '  pointer-events: none;' +
+            '}' +
 
-        svg.selectAll('.drag_line_hidden').style({
-          'stroke': '#999',
-          'stroke-width': 0,
-          'pointer-events': 'none'
-        });
+            '{{ element }} .drag_line_hidden {' +
+            '  stroke: #999;' +
+            '  stroke-width: 0;' +
+            '  pointer-events: none;' +
+            '}' +
 
-        svg.selectAll('.d3-tip').style({
-            'line-height': 1,
-            'font-weight': 'bold',
-            'padding': '6px',
-            'background': 'rgba(0, 0, 0, 0.6)',
-            'color': '#fff',
-            'border-radius': '4px',
-            'pointer-events': 'none'
-        });
+            '{{ element }} .d3-tip {' +
+            '    line-height: 1;' +
+            '    font-weight: bold;' +
+            '    padding: 6px;' +
+            '    background: rgba(0, 0, 0, 0.6);' +
+            '    color: #fff;' +
+            '    border-radius: 4px;' +
+            '    pointer-events: none;' +
+            '          }' +
 
-        svg.selectAll('text.node-label').style({
-            'font-weight': 'bold',
-            'font-family': 'Tahoma, Geneva, sans-serif',
-            'color': 'rgb(100,100,100)',
-            'pointer-events': 'none'
-        });
+            '{{ element }} text.node-label {' +
+            '    font-weight: bold;' +
+            '    font-family: Tahoma, Geneva, sans-serif;' +
+            '    color: rgb(100,100,100);' +
+            '    pointer-events: none;' +
+            '}' +
 
-        svg.selectAll('text').style({
-            'pointer-events': 'none'
-        });
+            '{{ element }} text {' +
+            '    pointer-events: none;' +
+            '}' +
 
-        svg.selectAll('g.gnode').style({
+            '{{ element }} g.gnode {' +
 
-        });  // it's not just me - it was empty originally
+            '}' +
 
-        svg.selectAll('circle.outline_node.selected').style({
-            'visibility': 'visible'
-        });
+            '{{ element }} circle.outline_node.selected {' +
+            '    visibility: visible;' +
+            '}' +
 
-        svg.selectAll('circle.outline_node').style({
-            'visibility': 'hidden'
-        });
+            '{{ element }} circle.outline_node {' +
+            '    visibility: hidden;' +
+            '}' +
 
-        svg.selectAll('.brush .extent').style({
-            'fill-opacity': .1,
-            'stroke': '#fff',
-            'shape-rendering': 'crispEdges'
-        });
+            '{{ element }} .brush .extent {' +
+            '  fill-opacity: .1;' +
+            '  stroke: #fff;' +
+            '  shape-rendering: crispEdges;' +
+            '}' +
 
-        svg.selectAll('.noselect').style({
-            '-webkit-touch-callout': 'none',
-            '-webkit-user-select': 'none',
-            '-khtml-user-select': 'none',
-            '-moz-user-select': 'none',
-            '-ms-user-select': 'none',
-            'user-select': 'none'
-        });
+            '{{ element }} .noselect {' +
+            '    -webkit-touch-callout: none;' +
+            '    -webkit-user-select: none;' +
+            '    -khtml-user-select: none;' +
+            '    -moz-user-select: none;' +
+            '    -ms-user-select: none;' +
+            '    user-select: none;' +
+            '}';
+
+        var rnaplotCss = '' +
+            '{{ element }} .structure-background-rect {' +
+            '    stroke: black;' +
+            '    stroke-width: 5;' +
+            '    fill: transparent;' +
+            '}' +
+
+            '{{ element }} circle.rna-base {' +
+            '  stroke: #ccc;' +
+            '  stroke-width: 1px;' +
+            '  opacity: 1;' +
+            '  fill: white;' +
+            '}' +
+
+            '{{ element }} circle.rna-base.label {' +
+            '    stroke: transparent;' +
+            '    stroke-width: 0;' +
+            '    fill: white;' +
+            '}' +
+
+            '{{ element }} line.link {' +
+            '  stroke: #999;' +
+            '  stroke-opacity: 0.8;' +
+            '  stroke-width: 2;' +
+            '}' +
+
+            '{{ element }} line.rna-link {' +
+            '  stroke: #999;' +
+            '  stroke-opacity: 0.8;' +
+            '  stroke-width: 2;' +
+            '}' +
+
+            '{{ element }} .overlay {' +
+            '    fill: transparent;' +
+            '}' +
+
+            '{{ element }} .rna-name {' +
+            '    text-anchor: middle;' +
+            '    dy: -10;' +
+            '    font-family: Tahoma, Geneva, sans-serif;' +
+            '    font-size: 8pt;' +
+            '}' +
+
+            '{{ element }} line.rna-link[link-type="backbone"] {' +
+            '    stroke: transparent;' +
+            '}' +
+
+            '{{ element }} line.rna-link[link-type="basepair"] {' +
+            '    stroke: transparent;' +
+            '}' +
+
+            '{{ element }} line.rna-link[link-type="fake"] {' +
+            '    stroke: transparent;' +
+            '}' +
+
+            '{{ element }} line.rna-link[link-type="extra"] {' +
+            '    stroke: grey;' +
+            '}' +
+
+            '{{ element }} line.rna-link[extra-link-type="correct"] {' +
+            '    stroke: green;' +
+            '}' +
+
+            '{{ element }} line.rna-link[extra-link-type="incorrect"] {' +
+            '    stroke: green;' +
+            '}' +
+
+            '{{ element }} path {' +
+            '    stroke: grey;' +
+            '  stroke-width: 2;' +
+            '}' +
+
+            '{{ element }} path[extra-link-type="correct"] {' +
+            '    stroke: green;' +
+            '}' +
+
+            '{{ element }} path[extra-link-type="incorrect"] {' +
+            '    stroke: red;' +
+            '}' +
+
+            '{{ element }} line.basepair {' +
+            '  stroke: red;' +
+            '}' +
+
+            '{{ element }} line.intermolecule {' +
+            '  stroke: blue;' +
+            '}' +
+
+            '{{ element }} line.chain_chain {' +
+            '  stroke-dasharray: 3,3;' +
+            '}' +
+
+            '{{ element }} line.fake {' +
+            '  stroke: green;' +
+            '}' +
+
+            '{{ element }} .transparent {' +
+            '    fill: transparent;' +
+            '    stroke-width: 0;' +
+            '    stroke-opacity: 0;' +
+            '    opacity: 0;' +
+            '}' +
+
+            '{{ element }} .d3-tip {' +
+            '    line-height: 1;' +
+            '    font-weight: bold;' +
+            '    padding: 6px;' +
+            '    background: rgba(0, 0, 0, 0.6);' +
+            '    color: #fff;' +
+            '    border-radius: 4px;' +
+            '    pointer-events: none;' +
+            '}' +
+
+            '{{ element }} text.nucleotide-label {' +
+            '    font-size: 5.5pt;' +
+            '    font-weight: bold;' +
+            '    font-family: Tahoma, Geneva, sans-serif;' +
+            '    color: rgb(100,100,100);' +
+            '    pointer-events: none;' +
+            '}' +
+
+            '{{ element }} text.number-label {' +
+            '    font-size: 5.5pt;' +
+            '    font-weight: bold;' +
+            '    font-family: Tahoma, Geneva, sans-serif;' +
+            '    color: rgb(100,100,100);' +
+            '    pointer-events: none;' +
+            '}' +
+
+            '{{ element }} text {' +
+            '    pointer-events: none;' +
+            '}' +
+
+            '{{ element }} g.gnode {' +
+            '' +
+            '}' +
+
+            '{{ element }} .brush .extent {' +
+            '  fill-opacity: .1;' +
+            '  stroke: #fff;' +
+            '  shape-rendering: crispEdges;' +
+            '}' +
+
+            '{{ element }} .noselect {' +
+            '    -webkit-touch-callout: none;' +
+            '    -webkit-user-select: none;' +
+            '    -khtml-user-select: none;' +
+            '    -moz-user-select: none;' +
+            '    -ms-user-select: none;' +
+            '    user-select: none;' +
+            '}';
+
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = fornacCss.replace(/\{\{ element \}\}/g, element) + '\n' + rnaplotCss.replace(/\{\{ element \}\}/g, element);
+
+        try {
+            document.getElementsByTagName('head')[0].appendChild(style);
+        } catch (err) {
+            console.log("Couldn't attach css to \<head\> as there appears to be no head in this document");
+        }
+
     };
+
+    self.applyStyles();
 
     self.options.svg = svg;
 
@@ -1807,8 +1974,6 @@ export function FornaContainer(element, passedOptions) {
         }
         
         self.updateStyle();
-
-        self.applyStyles();
     };
     
     self.setSize();
