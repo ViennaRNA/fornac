@@ -6,9 +6,9 @@ import '../styles/fornac.css';
 
 import d3 from 'd3';
 
-import {RNAGraph,moleculesToJson} from './rnagraph.js';
+import {RNAGraph,moleculesToJson,generateUUID} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
-import {ColorScheme} from 'rnautils';
+import {ColorScheme} from './rnautils.js';
 import {NAView} from './naview/naview.js'
 import {rnaPlot} from './rnaplot.js';
 //import 'jquery' from jquery;
@@ -220,7 +220,7 @@ export function FornaContainer(element, passedOptions) {
                 source: null, target: null};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][0])) {
                             newLink.source = rnaJson.nodes[j];
@@ -229,7 +229,7 @@ export function FornaContainer(element, passedOptions) {
                     }
                 }
             } else {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][0]) {
                         newLink.source = rnaJson.nodes[j];
                     }
@@ -238,7 +238,7 @@ export function FornaContainer(element, passedOptions) {
 
             // check if the target node is an array
             if (Object.prototype.toString.call(externalLinks[i][1]) === '[object Array]') {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][1])) {
                             newLink.target = rnaJson.nodes[j];
@@ -246,7 +246,7 @@ export function FornaContainer(element, passedOptions) {
                     }
                 }
             } else {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][1]) {
                         newLink.target = rnaJson.nodes[j];
                     }
@@ -538,7 +538,7 @@ export function FornaContainer(element, passedOptions) {
             //entry.py += maxY;
         });
 
-        r = new RNAGraph('','');
+        let r = new RNAGraph('','');
         r.nodes = json.nodes;
         r.links = json.links;
 
@@ -596,7 +596,7 @@ export function FornaContainer(element, passedOptions) {
 
         for (var uid in rnas) {
             if (rnas[uid].type == 'rna') {
-                r = new RNAGraph();
+                let r = new RNAGraph();
 
                 r.seq = rnas[uid].seq;
                 r.dotbracket = rnas[uid].dotbracket;
@@ -611,7 +611,7 @@ export function FornaContainer(element, passedOptions) {
                 r.nucsToNodes = rnas[uid].nucsToNodes;
                 r.pseudoknotPairs = rnas[uid].pseudoknotPairs;
             } else {
-                r = new ProteinGraph();
+                let r = new ProteinGraph();
                 r.size = rnas[uid].size;
                 r.nodes = rnas[uid].nodes;
                 r.uid = rnas[uid].uid;
@@ -768,7 +768,7 @@ export function FornaContainer(element, passedOptions) {
     function mousemove() {
         if (!mousedownNode) return;
 
-        mpos = d3.mouse(vis.node());
+        let mpos = d3.mouse(vis.node());
         // update drag line
         dragLine
         .attr('x1', mousedownNode.x)
@@ -1163,7 +1163,7 @@ export function FornaContainer(element, passedOptions) {
 
     var removeLink = function(d) {
         // remove a link between two nodes
-        index = self.graph.links.indexOf(d);
+        var index = self.graph.links.indexOf(d);
 
         if (index > -1) {
             //remove a link
@@ -1217,7 +1217,7 @@ export function FornaContainer(element, passedOptions) {
         // appropriately
         //
         if (newLink.source.rna == newLink.target.rna) {
-            r = newLink.source.rna;
+            let r = newLink.source.rna;
 
             r.pairtable[newLink.source.num] = newLink.target.num;
             r.pairtable[newLink.target.num] = newLink.source.num;
@@ -1253,7 +1253,7 @@ export function FornaContainer(element, passedOptions) {
             if (mouseupNode == mousedownNode) { resetMouseVars(); return; }
             var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid:generateUUID()};
 
-            for (i = 0; i < self.graph.links.length; i++) {
+            for (let i = 0; i < self.graph.links.length; i++) {
                 if ((self.graph.links[i].source == mousedownNode)  ||
                     (self.graph.links[i].target == mousedownNode) ||
                         (self.graph.links[i].source == mouseupNode) ||

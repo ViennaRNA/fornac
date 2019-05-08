@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+<meta charset="utf-8">
+<title>RNAtreemap Example</title>
+
+<style>
+.structure-background-rect {
+    stroke: black;
+    stroke-width: 0.2;
+    fill: transparent;
+}
+</style>
+
+</head>
+<body>
+
+RNA Treemap:
+<div id='rna_tm'> </div>
+
+RNA Treemap Grid:
+<div id='rna_tmg'> </div>
+
+RNA Grid Extra Links:
+<div id='rna_rgl'> </div>
+<!-- d3 -->
+<!-- build:js scripts/d3.js -->
+<!-- bower:js -->
+<script src="bower_components/d3/d3.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+
+<!-- build:js scripts/fornac.js -->
+<script type='text/javascript' src='scripts/fornac.js'></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/rnatreemap.js -->
+<script type='text/javascript' src='scripts/rnatreemap.js'></script>
+<!-- endbuild -->
+
+<!-- d3-context-menu -->
+<!-- build:js scripts/d3-grid.js -->
+<!-- bower:js -->
+<script src="bower_components/d3-grid/d3-grid.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+
+
+<script type='text/javascript'>
+
+var svgWidth = 300;
+var svgHeight = 300;
+
+var root = {'name': 'graph', 
+             'children': [{'structure': '((..((....)).(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 50},
+             {'structure': '((...........(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 40},
+             {'structure': '..........................',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 20}
+             ]
+};
+
+
+    var svg = d3.select('#rna_tm')
+    .append('svg')
+    .attr('width', svgWidth)
+    .attr('height', svgHeight)
+
+
+    var treemap = d3.layout.treemap()
+    .size([svgWidth, svgHeight])
+    .sticky(false)
+    .value(function(d) { return d.size; });
+
+    function rnaTreemapNode(selection) {
+            // create a background rectangle for each RNA structure
+        selection.each(function(d) {
+            d3.select(this)
+            .attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ')' })
+                    .append('rect')
+                    .classed('structure-background-rect', true)
+                    .attr("width", function(d) { return Math.max(0, d.dx); })
+                    .attr("height", function(d) { return Math.max(0, d.dy); })
+
+                    var chart = fornac.rnaPlot()
+                    .width( Math.max(0, d.dx))
+                    .height( Math.max(0, d.dy))
+                    .labelInterval(0)
+                    .rnaEdgePadding(10)
+                    .showNucleotideLabels(false);
+
+                    if ('structure' in d) d3.select(this).call(chart)
+                
+        });
+    }
+
+    var treemapGnodes = svg.datum(root).selectAll(".treemapNode")
+    .data(treemap.nodes)
+    .enter()
+    .append('g')
+    .attr('class', 'treemapNode')
+    .call(rnaTreemapNode);
+</script>
+
+<script type='text/javascript'>
+var root = [
+{'name': 'graph', 
+             'children': [{'structure': '((..((....)).(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 50},
+             {'structure': '((...........(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 40},
+             {'structure': '..........................',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 20}
+             ]
+},
+{'name': 'graph', 
+             'children': [{'structure': '...........(((((.....)))))..',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 50},
+             {'structure': '(((((((......)))).))).......',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 10}
+             ]
+},
+{'name': 'graph', 
+             'children': [{'structure': '(((.....)))(((((.....)))))..',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 50},
+             {'structure': '(((((((......)))).)))((...))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 10}
+             ]
+}]
+    // set all of the parameters
+    var padding = [10,10];   //the padding between the grid rectangles
+    var margin = {top: 4, left: 4, bottom: 4, right: 4};
+    var svgWidth = 418 - margin.left - margin.right;  //the width of the svg
+    var treemapWidth = 200; //the width of each treemap
+    var treemapHeight = 200;  //the height of each treemap
+    // calculate the number of columns and the height of the SVG,
+    // which is dependent on the on the number of data points
+    var numCols = Math.floor((svgWidth + padding[0]) / (treemapWidth + padding[0]));
+    var svgHeight = Math.ceil(root.length / numCols) * (treemapHeight + padding[1]) - padding[1] + margin.bottom;
+    // the rna treemap layout, which will be called for every grid point
+    var rnaTreemap = rnatreemap.rnaTreemapChart()
+        .width(treemapWidth)
+        .height(treemapHeight);
+    // the grid layout that will determine the position of each
+    // treemap
+     var rectGrid = d3.layout.grid()
+              .bands()
+              .size([svgWidth, svgHeight])
+              .cols(numCols)
+              .padding(padding)
+              .nodeSize([treemapWidth, treemapHeight]);
+    var rectData = rectGrid(root)
+    // create an svg as a child of the #rna_ss div
+    // and then a g for each grid cell
+    d3.select('#rna_tmg')
+    .append('svg')
+    .attr('width', svgWidth + margin.left + margin.right)
+    .attr('height', svgHeight + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + "," + margin.top + ")")
+    .selectAll('.rna-treemap')
+    .data(rectData)
+    .enter()
+    .append('g')
+    .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+    .classed('rna-treemap', true)
+    .call(rnaTreemap);
+</script>
+
+<script type='text/javascript'>
+var root = [
+{'structure': '((..((....)).(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 50,
+            'extraLinks': [[3,10],[1,17]],
+            'name': 'blah'},
+             {'structure': '((...........(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 40},
+             {'structure': '..........................',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 20}]
+    // set all of the parameters
+    var padding = [10,10];   //the padding between the grid rectangles
+    var margin = {top: 4, left: 4, bottom: 4, right: 4};
+    var svgWidth = 418 - margin.left - margin.right;  //the width of the svg
+    var cellWidth = 200; //the width of each cell
+    var cellHeight = 200;  //the height of each cell
+    // calculate the number of columns and the height of the SVG,
+    // which is dependent on the on the number of data points
+    var numCols = Math.floor((svgWidth + padding[0]) / (cellWidth + padding[0]));
+    var svgHeight = Math.ceil(root.length / numCols) * (cellHeight + padding[1]) - padding[1] + margin.bottom;
+    var chart = fornac.rnaPlot()
+    .width(cellWidth)
+    .height(cellHeight)
+     var rectGrid = d3.layout.grid()
+              .bands()
+              .size([svgWidth, svgHeight])
+              .cols(numCols)
+              .padding(padding)
+              .nodeSize([cellWidth, cellHeight]);
+    var rectData = rectGrid(root)
+    // create an svg as a child of the #rna_ss div
+    // and then a g for each grid cell
+    var svg = d3.select('#rna_rgl')
+    .append('svg')
+    .attr('width', svgWidth + margin.left + margin.right)
+    .attr('height', svgHeight + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + "," + margin.top + ")")
+    var gZoom = svg.append('g')
+    .call(d3.behavior.zoom().scaleExtent([1, root.length ]).on("zoom", zoom))
+    gZoom.append("rect")
+    .attr("class", "overlay")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
+    svg = svg.append('g')
+    function zoom() {
+        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+    svg.selectAll('.rna-cell')
+    .data(rectData)
+    .enter()
+    .append('g')
+    .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+    .classed('rna-cell', true)
+    .call(chart);
+</script>
+
+</body>
+</html>

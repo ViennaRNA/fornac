@@ -1,7 +1,7 @@
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ProteinGraph, RNAGraph,moleculesToJson} from './rnagraph.js';
 import {NAView} from './naview/naview.js'
-import {rnaUtilities,ColorScheme} from 'rnautils';
+import {rnaUtilities,ColorScheme} from './rnautils.js';
 
 import '../styles/rnaplot.css';
 

@@ -1,8 +1,8 @@
-import {arraysEqual,RNAUtilities,rnaUtilities} from 'rnautils';
+import {arraysEqual,RNAUtilities,rnaUtilities} from './rnautils.js';
 
 var numberSort = function(a,b) { return a - b; };
 
-function generateUUID(){                                                                                        
+export function generateUUID(){                                                                                        
     /* Stack Overflow:                                                                                          
      * http://stackoverflow.com/a/8809472/899470                                                                
      */
@@ -523,7 +523,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
             }
         }
 
-        for (var i = 1; i <= pt[0]; i++) {
+        for (let i = 1; i <= pt[0]; i++) {
 
             if (pt[i] !== 0) {
                 // base-pair links
@@ -552,7 +552,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         }
 
         //add the pseudoknot links
-        for (var i = 0; i < self.pseudoknotPairs.length; i++) {
+        for (let i = 0; i < self.pseudoknotPairs.length; i++) {
             self.links.push({'source': self.nodes[self.pseudoknotPairs[i][0]-1],
                             'target': self.nodes[self.pseudoknotPairs[i][1]-1],
                             'linkType': 'pseudoknot',
@@ -874,6 +874,29 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
     if (self.rnaLength > 0)
         self.recalculateElements();
+    
+    self.getNodeFromNucleotides = function(nucs) {
+        /* Get a node given a nucleotide number or an array of nucleotide
+         * numbers indicating an element node */
+        if (Object.prototype.toString.call(nucs) === '[object Array]') {
+            for (var j = 0; j < self.nodes.length; j++) {
+                if ('nucs' in self.nodes[j]) {
+                    if (self.nodes[j].nucs.equals(nucs)) {
+                        return self.nodes[j];
+                    }
+                }
+            }
+        } else {
+            for (var j = 0; j < self.nodes.length; j++) {
+                if (self.nodes[j].num == nucs) {
+                    return self.nodes[j];
+                }
+            }
+        }
+
+        console.log('ERROR: No node found for nucs:', nucs);
+        return null;
+    }
 }
 
 export function moleculesToJson(moleculesJson) {
