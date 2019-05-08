@@ -26,7 +26,6 @@
   ],
   "dependencies": {
     "d3": "~3.5.13",
-    "d3-context-menu": "*",
     "jquery": "~2.2.0",
     "d3-grid": "^0.1.1"
   },

@@ -6,13 +6,12 @@ import '../styles/fornac.css';
 
 import d3 from 'd3';
 
-import {RNAGraph,moleculesToJson,generateUUID} from './rnagraph.js';
+import {RNAGraph,moleculesToJson} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme} from './rnautils.js';
 import {NAView} from './naview/naview.js'
 import {rnaPlot} from './rnaplot.js';
-//import 'jquery' from jquery;
-//
+import slugid from 'slugid';
 
 export {RNAGraph} from './rnagraph.js';
 export {rnaPlot} from './rnaplot.js';
@@ -216,7 +215,7 @@ export function FornaContainer(element, passedOptions) {
         var newLinks = [];
 
         for (var i = 0; i < externalLinks.length; i++) {
-            var newLink = {linkType: 'external', value: 1, uid: generateUUID(),
+            var newLink = {linkType: 'external', value: 1, uid: slugid.nice(),
                 source: null, target: null};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
@@ -1251,7 +1250,7 @@ export function FornaContainer(element, passedOptions) {
             mouseupNode = d;
 
             if (mouseupNode == mousedownNode) { resetMouseVars(); return; }
-            var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid:generateUUID()};
+            var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid:slugid.nice()};
 
             for (let i = 0; i < self.graph.links.length; i++) {
                 if ((self.graph.links[i].source == mousedownNode)  ||
