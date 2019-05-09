@@ -1,2 +1,2252 @@
-!function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.rnatreemap=e():t.rnatreemap=e()}(this,function(){return function(t){function e(r){if(n[r])return n[r].exports;var s=n[r]={exports:{},id:r,loaded:!1};return t[r].call(s.exports,s,s.exports,e),s.loaded=!0,s.exports}var n={};return e.m=t,e.c=n,e.p="",e(0)}([function(t,e,n){"use strict";function r(){function t(t){t.each(function(t){d3.select(this).attr("transform",function(t){return"translate("+t.x+","+t.y+")"}).append("rect").classed("structure-background-rect",!0).attr("width",function(t){return Math.max(0,t.dx)}).attr("height",function(t){return Math.max(0,t.dy)});var e=(0,s.rnaPlot)().width(Math.max(0,t.dx)).height(Math.max(0,t.dy)).labelInterval(0).rnaEdgePadding(10).showNucleotideLabels(!1);"structure"in t&&d3.select(this).call(e)})}var e=550,n=400,r=function(r){r.each(function(r){console.log("data:",r);var s=d3.layout.treemap().size([e,n]).sticky(!1).value(function(t){return t.size}),o=d3.select(this).append("g");o.datum(r).selectAll(".treemapNode").data(s.nodes).enter().append("g").attr("class","treemapNode").call(t)})};return r.width=function(t){return arguments.length?(e=t,r):e},r.height=function(t){return arguments.length?(n=t,r):n},r}Object.defineProperty(e,"__esModule",{value:!0}),e.rnaTreemapChart=r;var s=n(4)},function(t,e,n){"use strict";function r(){var t=(new Date).getTime(),e="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(e){var n=(t+16*Math.random())%16|0;return t=Math.floor(t/16),("x"==e?n:3&n|8).toString(16)});return e}function s(t,e,n){var s=this;s.type="protein",s.size=e,s.nodes=[{name:"P",num:1,radius:3*Math.sqrt(e),rna:s,nodeType:"protein",structName:t,elemType:"p",size:e,uid:r()}],s.links=[],s.uid=r(),s.addUids=function(t){for(var e=0;e<t.length;e++)s.nodes[e].uid=t[e];return s},s.getUids=function(){uids=[];for(var t=0;t<s.dotbracket.length;t++)uids.push(s.nodes[t].uid);return uids}}function o(t,e,n,s){var o=this;o.type="rna",o.circularizeExternal=!1,0===arguments.length?(o.seq="",o.dotbracket="",o.structName=""):(o.seq=t,o.dotbracket=e,o.structName=n),arguments.length<4&&(s=1),o.circular=!1,o.dotbracket.length>0&&"*"==o.dotbracket[o.dotbracket.length-1]&&(o.dotbracket=o.dotbracket.slice(0,o.dotbracket.length-1),o.circular=!0),o.uid=r(),o.elements=[],o.pseudoknotPairs=[],o.nucsToNodes={},o.addUids=function(t){for(var e=o.nodes.filter(function(t){return"nucleotide"==t.nodeType}),n=0;n<t.length&&n<e.length;n++)e[n].uid=t[n];return o},o.computePairtable=function(){o.pairtable=a.rnaUtilities.dotbracketToPairtable(o.dotbracket)},o.removeBreaks=function(t){for(var e=[],n=-1;(n=t.indexOf("&"))>=0;)e.push(n),t=t.substring(0,n)+"oo"+t.substring(n+1,t.length);return{targetString:t,breaks:e}};var i=o.removeBreaks(o.dotbracket);o.dotbracket=i.targetString,o.dotBracketBreaks=i.breaks,i=o.removeBreaks(o.seq),o.seq=i.targetString,o.seqBreaks=i.breaks,o.calculateStartNumberArray=function(){o.startNumberArray=[];for(var t=0;t<o.dotbracket.length;t++)o.startNumberArray.push(s),"o"==o.dotbracket[t]&&(s=-t)},o.calculateStartNumberArray(),o.rnaLength=o.dotbracket.length,(0,a.arraysEqual)(o.dotBracketBreaks,o.seqBreaks)||(console.log("WARNING: Sequence and structure breaks not equal"),console.log("WARNING: Using the breaks in the structure")),o.computePairtable(),o.addPositions=function(t,e){for(var n=o.nodes.filter(function(e){return e.nodeType==t}),r=0;r<n.length;r++)n[r].x=e[r][0],n[r].px=e[r][0],n[r].y=e[r][1],n[r].py=e[r][1];return o},o.breakNodesToFakeNodes=function(){for(var t=o.nodes.filter(function(t){return"nucleotide"==t.nodeType}),e=0;e<t.length;e++)"o"==o.dotbracket[e]&&(t[e].nodeType="middle");for(var e=0;e<o.elements.length;e++){for(var n=!1,r=0;r<o.elements[e][2].length;r++)o.dotBracketBreaks.indexOf(o.elements[e][2][r])>=0&&(n=!0);n?o.elements[e][2].map(function(t){0!=t&&(o.nodes[t-1].elemType="e")}):o.elements[e][2].map(function(t){0!=t&&(o.nodes[t-1].elemType=o.elements[e][0])})}return o},o.getPositions=function(t){for(var e=[],n=o.nodes.filter(function(e){return e.nodeType==t}),r=0;r<n.length;r++)e.push([n[r].x,n[r].y]);return e},o.getUids=function(){for(var t=[],e=0;e<o.dotbracket.length;e++)t.push(o.nodes[e].uid);return t},o.reinforceStems=function(){for(var t=o.pairtable,e=o.elements.filter(function(t){return"s"==t[0]&&t[2].length>=4}),n=0;n<e.length;n++)for(var r=e[n][2],s=r.slice(0,r.length/2),i=0;i<s.length-1;i++)o.addFakeNode([s[i],s[i+1],t[s[i+1]],t[s[i]]]);return o},o.reinforceLoops=function(){for(var t=function(t){return 0!==t&&t<=o.dotbracket.length},e=0;e<o.elements.length;e++)if("s"!=o.elements[e][0]&&(o.circularizeExternal||"e"!=o.elements[e][0])){var n=o.elements[e][2].filter(t);if("e"==o.elements[e][0]){var s={name:"",num:-3,radius:0,rna:o,nodeType:"middle",elemType:"f",nucs:[],x:o.nodes[o.rnaLength-1].x,y:o.nodes[o.rnaLength-1].y,px:o.nodes[o.rnaLength-1].px,py:o.nodes[o.rnaLength-1].py,uid:r()},i={name:"",num:-2,radius:0,rna:o,nodeType:"middle",elemType:"f",nucs:[],x:o.nodes[0].x,y:o.nodes[0].y,px:o.nodes[0].px,py:o.nodes[0].py,uid:r()};n.push(o.nodes.length+1),n.push(o.nodes.length+2),o.nodes.push(s),o.nodes.push(i)}o.addFakeNode(n)}return o},o.updateLinkUids=function(){for(var t=0;t<o.links.length;t++)o.links[t].uid=o.links[t].source.uid+o.links[t].target.uid;return o},o.addFakeNode=function(t){for(var e=18,n=6.283/(2*t.length),s=e/(2*Math.tan(n)),i="",a=0;a<t.length;a++)i+=o.nodes[t[a]-1].uid;var u={name:"",num:-1,radius:s,rna:o,nodeType:"middle",elemType:"f",nucs:t,uid:i};o.nodes.push(u);var l=0,c=0,h=0;n=3.14159*(t.length-2)/(2*t.length),s=.5/Math.cos(n);for(var d=0;d<t.length;d++)if(!(0===t[d]||t[d]>o.dotbracket.length)){o.links.push({source:o.nodes[t[d]-1],target:o.nodes[o.nodes.length-1],linkType:"fake",value:s,uid:r()}),t.length>4&&o.links.push({source:o.nodes[t[d]-1],target:o.nodes[t[(d+Math.floor(t.length/2))%t.length]-1],linkType:"fake",value:2*s,uid:r()});var g=3.14159*(t.length-2)/t.length,p=2*Math.cos(1.570795-g/2);o.links.push({source:o.nodes[t[d]-1],target:o.nodes[t[(d+2)%t.length]-1],linkType:"fake",value:p});var f=o.nodes[t[d]-1];"x"in f&&(l+=f.x,c+=f.y,h+=1)}return h>0&&(u.x=l/h,u.y=c/h,u.px=u.x,u.py=u.y),o},o.connectFakeNodes=function(){for(var t=18,e=function(t){return"middle"==t.nodeType},n={},r=o.nodes.filter(e),s={},i=1;i<=o.nodes.length;i++)n[i]=[];for(var i=0;i<r.length;i++)for(var a=r[i],u=0;u<a.nucs.length;u++){for(var l=a.nucs[u],c=0;c<n[l].length;c++)if(!(JSON.stringify([n[l][c].uid,a.uid].sort())in s)){var h=n[l][c].radius+a.radius;o.links.push({source:n[l][c],target:a,value:h/t,linkType:"fake_fake"}),s[JSON.stringify([n[l][c].uid,a.uid].sort())]=!0}n[l].push(a)}return o},o.addExtraLinks=function(t){if("undefined"==typeof t)return o;for(var e=0;e<t.length;e++){var n=o.getNodeFromNucleotides(t[e].from),s=o.getNodeFromNucleotides(t[e].to),i={source:n,target:s,linkType:"extra",extraLinkType:t[e].linkType,uid:r()};o.links.push(i)}return o},o.elementsToJson=function(){var t=o.pairtable;o.elements;o.nodes=[],o.links=[];var e={};o.elements.sort();for(var n=0;n<o.elements.length;n++)for(var s=o.elements[n][2],i=0;i<s.length;i++)e[s[i]]=o.elements[n][0];for(var n=1;n<=t[0];n++){var a=o.seq[n-1];(o.dotBracketBreaks.indexOf(n-1)>=0||o.dotBracketBreaks.indexOf(n-2)>=0)&&(a=""),o.nodes.push({name:a,num:n+o.startNumberArray[n-1]-1,radius:5,rna:o,nodeType:"nucleotide",structName:o.structName,elemType:e[n],uid:r(),linked:!1})}for(var n=0;n<o.nodes.length;n++)0===n?o.nodes[n].prevNode=null:o.nodes[n].prevNode=o.nodes[n-1],n==o.nodes.length-1?o.nodes[n].nextNode=null:o.nodes[n].nextNode=o.nodes[n+1];for(var n=1;n<=t[0];n++)0!==t[n]&&o.links.push({source:o.nodes[n-1],target:o.nodes[t[n]-1],linkType:"basepair",value:1,uid:r()}),n>1&&-1===o.dotBracketBreaks.indexOf(n-1)&&-1==o.dotBracketBreaks.indexOf(n-2)&&-1==o.dotBracketBreaks.indexOf(n-3)&&(o.links.push({source:o.nodes[n-2],target:o.nodes[n-1],linkType:"backbone",value:1,uid:r()}),o.nodes[n-1].linked=!0);for(var n=0;n<o.pseudoknotPairs.length;n++)o.links.push({source:o.nodes[o.pseudoknotPairs[n][0]-1],target:o.nodes[o.pseudoknotPairs[n][1]-1],linkType:"pseudoknot",value:1,uid:r()});return o.circular&&o.links.push({source:o.nodes[0],target:o.nodes[o.rnaLength-1],linkType:"backbone",value:1,uid:r()}),o},o.ptToElements=function(t,e,n,r){var s=[],i=[n-1],a=[r+1];if(n>r)return[];for(;0===t[n];n++)i.push(n);for(;0===t[r];r--)a.push(r);if(n>r){if(i.push(n),0===e)return[["e",e,i.sort(u)]];for(var l=!1,c=[],h=[],d=0;d<i.length;d++)l?h.push(i[d]):c.push(i[d]),o.dotBracketBreaks.indexOf(i[d])>=0&&(l=!0);return l?[["h",e,i.sort(u)]]:[["h",e,i.sort(u)]]}if(t[n]!=r){var g=i,d=n;for(g.push(d);r>=d;){for(s=s.concat(o.ptToElements(t,e,d,t[d])),g.push(t[d]),d=t[d]+1;0===t[d]&&r>=d;d++)g.push(d);g.push(d)}return g.pop(),g=g.concat(a),g.length>0&&(0===e?s.push(["e",e,g.sort(u)]):s.push(["m",e,g.sort(u)])),s}if(t[n]===r){i.push(n),a.push(r);var p=i.concat(a);p.length>4&&(0===e?s.push(["e",e,i.concat(a).sort(u)]):s.push(["i",e,i.concat(a).sort(u)]))}for(var f=[];t[n]===r&&r>n;)f.push(n),f.push(r),n+=1,r-=1,e+=1;return i=[n-1],a=[r+1],s.push(["s",e,f.sort(u)]),s.concat(o.ptToElements(t,e,n,r))},o.addLabels=function(t,e){if(0===arguments.length&&(t=1,e=10),1===arguments.length&&(e=10),0===e)return o;0>=e&&console.log("The label interval entered in invalid:",e);for(var n=1;n<=o.pairtable[0];n++)if(n%e===0){var s,i,a,u,l,c,h=o.nodes[n-1];1==o.rnaLength?(c=[h.x-15,h.y],l=[h.x-15,h.y]):(a=1==n?o.nodes[o.rnaLength-1]:o.nodes[n-2],u=n==o.rnaLength?o.nodes[0]:o.nodes[n],0!==o.pairtable[u.num]&&0!==o.pairtable[a.num]&&0!==o.pairtable[h.num]&&(a=u=o.nodes[o.pairtable[h.num]-1]),0===o.pairtable[h.num]||0!==o.pairtable[u.num]&&0!==o.pairtable[a.num]?(c=[u.x-h.x,u.y-h.y],l=[a.x-h.x,a.y-h.y]):(c=[h.x-u.x,h.y-u.y],l=[h.x-a.x,h.y-a.y]));var d=[c[0]+l[0],c[1]+l[1]],g=Math.sqrt(d[0]*d[0]+d[1]*d[1]),p=[d[0]/g,d[1]/g],f=[-15*p[0],-15*p[1]],s=o.nodes[n-1].x+f[0],i=o.nodes[n-1].y+f[1],b={name:n+o.startNumberArray[n-1]-1,num:-1,radius:6,rna:o,nodeType:"label",structName:o.structName,elemType:"l",x:s,y:i,px:s,py:i,uid:r()},m={source:o.nodes[n-1],target:b,value:1,linkType:"label_link",uid:r()};o.nodes.push(b),o.links.push(m)}return o},o.recalculateElements=function(){if(o.removePseudoknots(),o.elements=o.ptToElements(o.pairtable,0,1,o.dotbracket.length),o.circular&&(externalLoop=o.elements.filter(function(t){return"e"==t[0]?!0:void 0}),externalLoop.length>0)){eloop=externalLoop[0],nucs=eloop[2].sort(u),prev=nucs[0],hloop=!0,numGreater=0;for(var t=1;t<nucs.length;t++)nucs[t]-prev>1&&(numGreater+=1),prev=nucs[t];1==numGreater?eloop[0]="h":2==numGreater?eloop[0]="i":eloop[0]="m"}return o},o.reassignLinkUids=function(){for(var t,t=0;t<o.links.length;t++)o.links[t].uid=o.links[t].source.uid+o.links[t].target.uid;return o},o.removePseudoknots=function(){return o.pairtable.length>1&&(o.pseudoknotPairs=o.pseudoknotPairs.concat(a.rnaUtilities.removePseudoknotsFromPairtable(o.pairtable))),o},o.addPseudoknots=function(){for(var t=o.pairtable,e=o.pseudoknotPairs,n=0;n<e.length;n++)t[e[n][0]]=e[n][1],t[e[n][1]]=e[n][0];return o.pseudoknotPairs=[],o},o.addName=function(t){return"undefined"==typeof t?(o.name="",o):(o.name=t,o)},o.rnaLength>0&&o.recalculateElements()}function i(t){for(var e={},n=[],i=[],a=0;a<t.molecules.length;a++){var u,l=t.molecules[a];"rna"==l.type?(u=new o(l.seq,l.ss,l.header),u.circularizeExternal=!0,u.elementsToJson().addPositions("nucleotide",l.positions).addLabels().reinforceStems().reinforceLoops()):"protein"==l.type&&(u=new s(l.header,l.size)),u.addUids(l.uids);for(var c=0;c<u.nodes.length;c++)e[u.nodes[c].uid]=u.nodes[c];n.push(u)}for(var a=0;a<t.extraLinks.length;a++)link=t.extraLinks[a],link.source=e[link.source],link.target=e[link.target],link.uid=r(),i.push(link);return{graphs:n,extraLinks:i}}Object.defineProperty(e,"__esModule",{value:!0}),e.ProteinGraph=s,e.RNAGraph=o,e.moleculesToJson=i;var a=n(2),u=function(t,e){return t-e};"undefined"==typeof String.prototype.trim&&(String.prototype.trim=function(){return String(this).replace(/^\s+|\s+$/g,"")})},function(t,e,n){var r,s,o;(function(t){"use strict";var n="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol?"symbol":typeof t};!function(i,a){"object"==n(e)&&"object"==n(t)?t.exports=a():(s=[],r=a,o="function"==typeof r?r.apply(e,s):r,!(void 0!==o&&(t.exports=o)))}(void 0,function(){return function(t){function e(r){if(n[r])return n[r].exports;var s=n[r]={exports:{},id:r,loaded:!1};return t[r].call(s.exports,s,s.exports,e),s.loaded=!0,s.exports}var n={};return e.m=t,e.c=n,e.p="",e(0)}([function(t,e,n){t.exports=n(1)},function(t,e){function n(t,e){if(t===e)return!0;if(null===t||null===e)return!1;if(t.length!=e.length)return!1;for(var n=0;n<t.length;++n)if(t[n]!==e[n])return!1;return!0}function r(){var t=this;t.bracketLeft="([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),t.bracketRight=")]}>abcdefghijklmnopqrstuvwxyz".split(""),t.inverseBrackets=function(t){for(var e={},n=0;n<t.length;n++)e[t[n]]=n;return e},t.maximumMatching=function(t){for(var e=t[0],n=0,r=new Array(e+1),s=0;e>=s;s++){r[s]=new Array(e+1);for(var o=s;e>=o;o++)r[s][o]=0}for(var i=0,s=e-n-1;s>0;s--)for(var o=s+n+1;e>=o;o++){i=r[s][o-1];for(var a=o-n-1;a>=s;a--)t[a]===o&&(i=Math.max(i,(a>s?r[s][a-1]:0)+1+(o-a-1>0?r[a+1][o-1]:0)));r[s][o]=i}return i=r[1][e],r},t.backtrackMaximumMatching=function(e,n){var r=Array.apply(null,Array(e.length)).map(function(){return 0});return t.mmBt(e,r,n,1,e.length-1),r},t.mmBt=function(e,n,r,s,o){var i=e[s][o],a=0;if(!(a>o-s-1)){if(e[s][o-1]==i)return void t.mmBt(e,n,r,s,o-1);for(var u=o-a-1;u>=s;u--)if(r[o]===u){var l=u>s?e[s][u-1]:0,c=o-u-1>0?e[u+1][o-1]:0;if(l+c+1==i)return n[u]=o,n[o]=u,u>s&&t.mmBt(e,n,r,s,u-1),void t.mmBt(e,n,r,u+1,o-1)}console.log("FAILED!!!"+s+","+o+": backtracking failed!")}},t.dotbracketToPairtable=function(e){var n=Array.apply(null,new Array(e.length+1)).map(Number.prototype.valueOf,0);n[0]=e.length;for(var r={},s=0;s<t.bracketLeft.length;s++)r[s]=[];for(var o=t.inverseBrackets(t.bracketLeft),i=t.inverseBrackets(t.bracketRight),s=0;s<e.length;s++){var a=e[s],u=s+1;if("."==a||"o"==a)n[u]=0;else if(a in o)r[o[a]].push(u);else{if(!(a in i))throw"Unknown symbol in dotbracket string";var l=r[i[a]].pop();n[u]=l,n[l]=u}}for(var c in r)if(r[c].length>0)throw"Unmatched base at position "+r[c][0];return n},t.insertIntoStack=function(t,e,n){for(var r=0;t[r].length>0&&t[r][t[r].length-1]<n;)r+=1;return t[r].push(n),r},t.deleteFromStack=function(t,e){for(var n=0;0===t[n].length||t[n][t[n].length-1]!=e;)n+=1;return t[n].pop(),n},t.pairtableToDotbracket=function(e){for(var n={},r=0;r<e[0];r++)n[r]=[];for(var r,s={},o="",r=1;r<e[0]+1;r++){if(0!==e[r]&&e[r]in s)throw"Invalid pairtable contains duplicate entries";s[e[r]]=!0,o+=0===e[r]?".":e[r]>r?t.bracketLeft[t.insertIntoStack(n,r,e[r])]:t.bracketRight[t.deleteFromStack(n,r)]}return o},t.findUnmatched=function(e,n,r){for(var s,o=[],i=[],a=n,u=r,s=n;r>=s;s++)0!==e[s]&&(e[s]<n||e[s]>r)&&i.push([s,e[s]]);for(var s=a;u>=s;s++){for(;0===e[s]&&u>=s;)s++;for(r=e[s];e[s]===r;)s++,r--;o=o.concat(t.findUnmatched(e,s,r))}return i.length>0&&o.push(i),o},t.removePseudoknotsFromPairtable=function(e){for(var n=t.maximumMatching(e),r=t.backtrackMaximumMatching(n,e),s=[],o=1;o<e.length;o++)e[o]<o||r[o]!=e[o]&&(s.push([o,e[o]]),e[e[o]]=0,e[o]=0);return s},t.ptToElements=function(e,n,r,s,i){var a=[],u=[r-1],l=[s+1];if(arguments.length<5&&(i=[]),r>s)return[];for(;0===e[r];r++)u.push(r);for(;0===e[s];s--)l.push(s);if(r>s){if(u.push(r),0===n)return[["e",n,u.sort(o)]];for(var c=!1,h=[],d=[],g=0;g<u.length;g++)c?d.push(u[g]):h.push(u[g]),i.indexOf(u[g])>=0&&(c=!0);return c?[["h",n,u.sort(o)]]:[["h",n,u.sort(o)]]}if(e[r]!=s){var p=u,g=r;for(p.push(g);s>=g;){for(a=a.concat(t.ptToElements(e,n,g,e[g],i)),p.push(e[g]),g=e[g]+1;0===e[g]&&s>=g;g++)p.push(g);p.push(g)}return p.pop(),p=p.concat(l),p.length>0&&(0===n?a.push(["e",n,p.sort(o)]):a.push(["m",n,p.sort(o)])),a}if(e[r]===s){u.push(r),l.push(s);var f=u.concat(l);f.length>4&&(0===n?a.push(["e",n,u.concat(l).sort(o)]):a.push(["i",n,u.concat(l).sort(o)]))}for(var b=[];e[r]===s&&s>r;)b.push(r),b.push(s),r+=1,s-=1,n+=1;return u=[r-1],l=[s+1],a.push(["s",n,b.sort(o)]),a.concat(t.ptToElements(e,n,r,s,i))}}function s(t){var e=this;return e.colorsText=t,e.parseRange=function(t){for(var e=t.split(","),n=[],r=0;r<e.length;r++){var s=e[r].split("-");if(1==s.length)n.push(parseInt(s[0]));else if(2==s.length)for(var o=parseInt(s[0]),i=parseInt(s[1]),a=o;i>=a;a++)n.push(a);else console.log("Malformed range (too many dashes):",t)}return n},e.parseColorText=function(t){for(var n=t.split("\n"),r="",s=1,o={colorValues:{"":{}},range:["white","steelblue"]},i=[],a=0;a<n.length;a++)if(">"!=n[a][0])for(var u=n[a].trim().split(/[\s]+/),l=0;l<u.length;l++)if(isNaN(u[l])){if(0===u[l].search("range")){var c=u[l].split("="),h=c[1].split(":");o.range=[h[0],h[1]];continue}if(0==u[l].search("domain")){var d=u[l].split("="),h=d[1].split(":");o.domain=[h[0],h[1]];continue}for(var g=u[l].split(":"),p=e.parseRange(g[0]),f=g[1],b=0;b<p.length;b++)isNaN(f)?o.colorValues[r][p[b]]=f:(o.colorValues[r][p[b]]=+f,i.push(Number(f)))}else o.colorValues[r][s]=Number(u[l]),s+=1,i.push(Number(u[l]));else r=n[a].trim().slice(1),s=1,o.colorValues[r]={};return"domain"in o||(o.domain=[Math.min.apply(null,i),Math.max.apply(null,i)]),e.colorsJson=o,e},e.normalizeColors=function(){var t;for(var n in e.colorsJson){var r=Number.MAX_VALUE,s=Number.MIN_VALUE;for(var o in e.colorsJson.colorValues[n])t=e.colorsJson.colorValues[n][o],"number"==typeof t&&(r>t&&(r=t),t>s&&(s=t));for(o in e.colorsJson.colorValues[n])t=e.colorsJson.colorValues[n][o],"number"==typeof t&&(e.colorsJson.colorValues[n][o]=(t-r)/(s-r))}return e},e.parseColorText(e.colorsText),e}Object.defineProperty(e,"__esModule",{value:!0}),e.arraysEqual=n,e.RNAUtilities=r,e.ColorScheme=s;var o=function(t,e){return t-e};e.rnaUtilities=new r}])})}).call(e,n(3)(t))},function(t,e){t.exports=function(t){return t.webpackPolyfill||(t.deprecate=function(){},t.paths=[],t.children=[],t.webpackPolyfill=1),t}},function(t,e,n){"use strict";function r(){function t(t,e){function n(t,e,n){var r=(t.range()[1]-t.range()[0])/(t.domain()[1]-t.domain()[0]),s=(e[1]-e[0])*r,o=(n[1]-n[0]-s)/2;return{scaleFactor:r,scale:d3.scale.linear().domain(e).range([n[0]+o,n[1]-o])}}var r=arguments.length<=2||void 0===arguments[2]?"":arguments[2],s=d3.extent(t),o=d3.extent(e),i=30;""!=r&&(o[1]+=i),s[0]-=h.nucleotideRadius+h.rnaEdgePadding,o[0]-=h.nucleotideRadius+h.rnaEdgePadding,s[1]+=h.nucleotideRadius+h.rnaEdgePadding,o[1]+=h.nucleotideRadius+h.rnaEdgePadding;var a,u=s[1]-s[0],d=o[1]-o[0],g=u-h.width,p=d-h.height;g>p?(l=d3.scale.linear().domain(s).range([0,h.width]),a=n(l,o,[0,h.height]),c=a.scale):(c=d3.scale.linear().domain(o).range([0,h.height]),a=n(c,s,[0,h.width]),l=a.scale);l.range()[0]-l.domain()[0],c.range()[0]-c.domain()[0];return"translate("+-(l.domain()[0]*a.scaleFactor-l.range()[0])+","+-(c.domain()[0]*a.scaleFactor-c.range()[0])+")scale("+a.scaleFactor+")"}function e(t,e){var n=t.selectAll(".rna-base").data(e).enter().append("svg:g").attr("transform",function(t){return"translate("+t.x+","+t.y+")"});n.append("svg:circle").attr("r",h.nucleotideRadius).classed("rna-base",!0);if(h.showNucleotideLabels){n.append("svg:text").text(function(t){return t.name}).attr("text-anchor","middle").attr("dominant-baseline","central").classed("nucleotide-label",!0).append("svg:title").text(function(t){return t.struct_name+":"+t.num})}}function n(t,e){var n=t.selectAll(".rnaLabel").data(e).enter().append("svg:g").attr("transform",function(t){return"translate("+t.x+","+t.y+")"});n.append("svg:text").text(function(t){return t.name}).attr("text-anchor","middle").attr("font-weight","bold").attr("dominant-baseline","central").classed("number-label",!0)}function r(t,e){t.append("svg:text").attr("transform","translate("+l.invert(h.width/2)+","+c.invert(h.height)+")").attr("dy",-10).classed("rna-name",!0).text(e)}function i(t,e){var n={},r=[];e=e.filter(function(t){return"correct"==t.linkType||"incorrect"==t.linkType||"extra"==t.linkType}),t.selectAll("[link-type=extra]").remove();for(var s=0;s<e.length;s++)null!==e[s].source&&null!==e[s].target&&(n[e[s].source.uid]=e[s].source,n[e[s].target.uid]=e[s].target,r.push({source:e[s].source.uid,target:e[s].target.uid,linkType:e[s].linkType,extraLinkType:e[s].extraLinkType}));for(var o=d3.ForceEdgeBundling().nodes(n).edges(r).compatibility_threshold(.8).step_size(.2),i=o(),a=d3.svg.line().x(function(t){return t.x}).y(function(t){return t.y}).interpolate("linear"),s=0;s<i.length;s++){var u=i[s];t.append("path").attr("d",a(u)).style("fill","none").attr("link-type",function(t){return r[s].linkType}).attr("extra-link-type",function(t){return r[s].extraLinkType}).style("stroke-opacity",.4)}}function a(t,e){e=e.filter(function(t){return null!==t.source&&null!==t.target});t.selectAll(".rna-link").data(e).enter().append("svg:line").attr("x1",function(t){return t.source.x}).attr("x2",function(t){return t.target.x}).attr("y1",function(t){return t.source.y}).attr("y2",function(t){return t.target.y}).attr("link-type",function(t){return t.linkType}).attr("extra-link-type",function(t){return t.extraLinkType}).classed("rna-link",!0)}function u(u){u.each(function(u){var l=new s.RNAGraph(u.sequence,u.structure,u.name).recalculateElements().elementsToJson().addName(u.name);u.rnaGraph=l;for(var c=new o.NAView,d=c.naview_xy_coordinates(l.pairtable),g=[],p=0;p<d.nbase;p++)g.push([d.x[p],d.y[p]]);l.addPositions("nucleotide",g).reinforceStems().reinforceLoops().addExtraLinks(u.extraLinks).addLabels(h.startNucleotideNumber,h.labelInterval);var f=t(l.nodes.map(function(t){return t.x}),l.nodes.map(function(t){return t.y})),b=d3.select(this).append("g").attr("transform",f),m=l.nodes.filter(function(t){return"nucleotide"==t.nodeType}),y=l.nodes.filter(function(t){return"label"==t.nodeType}),v=l.links;a(b,v),e(b,m),n(b,y),r(b,u.name),h.bundleExternalLinks&&i(b,v)})}var l,c,h={width:400,height:400,nucleotideRadius:5,rnaEdgePadding:0,labelInterval:0,showNucleotideLabels:!0,startNucleotideNumber:1,bundleExternalLinks:!1};return u.width=function(t){return arguments.length?(h.width=t,u):h.width},u.height=function(t){return arguments.length?(h.height=t,u):h.height},u.showNucleotideLabels=function(t){return arguments.length?(h.showNucleotideLabels=t,u):h.showNucleotideLabels},u.rnaEdgePadding=function(t){return arguments.length?(h.rnaEdgePadding=t,u):h.rnaEdgePadding},u.nucleotideRadius=function(t){return arguments.length?(h.nucleotideRadius=t,u):h.nucleotideRadius},u.labelInterval=function(t){return arguments.length?(h.labelInterval=t,u):h.labelInterval},u.showNucleotideLabels=function(t){return arguments.length?(h.showNucleotideLabels=t,u):h.showNucleotideLabels},u.startNucleotideNumber=function(t){return arguments.length?(h.startNucleotideNumber=t,u):h.startNucleotideNumber},u.bundleExternalLinks=function(t){return arguments.length?(h.bundleExternalLinks=t,u):h.bundleExternalLinks},u}Object.defineProperty(e,"__esModule",{value:!0}),e.rnaPlot=r;var s=(n(5),n(1)),o=n(6);n(2);n(12),"undefined"==typeof String.prototype.trim&&(String.prototype.trim=function(){return String(this).replace(/^\s+|\s+$/g,"")})},function(t,e){"use strict";function n(t){var e,n,r,s=0,o=100,i=100,a=15,u=[],l=[];n=t[0];var c=Array.apply(null,new Array(n+5)).map(Number.prototype.valueOf,0),h=Array.apply(null,new Array(16+Math.floor(n/5))).map(Number.prototype.valueOf,0),d=Array.apply(null,new Array(16+Math.floor(n/5))).map(Number.prototype.valueOf,0),g=0,p=0,f=Math.PI/2,b=function y(t,e,n){var r,s,o,i,a,u,l,b,m,v,k,x,M=2,N=0,E=0,_=Array.apply(null,new Array(3+2*Math.floor((e-t)/5))).map(Number.prototype.valueOf,0);for(r=t-1,e++;t!=e;)if(s=n[t],s&&0!=t){M+=2,o=t,i=s,_[++N]=o,_[++N]=i,t=s+1,a=o,u=i,b=0;do o++,i--,b++;while(n[o]==i&&n[o]>o);if(l=b-2,b>=2&&(c[a+1+l]+=f,c[u-1-l]+=f,c[a]+=f,c[u]+=f,b>2))for(;l>=1;l--)c[a+l]=Math.PI,c[u-l]=Math.PI;d[++p]=b,i>=o&&y(o,i,n)}else t++,M++,E++;for(x=Math.PI*(M-2)/M,_[++N]=e,m=0>r?0:r,v=1;N>=v;v++){for(k=_[v]-m,l=0;k>=l;l++)c[m+l]+=x;if(v>N)break;m=_[++v]}h[++g]=E};b(0,n+1,t),h[g]-=2,r=s,u[0]=o,l[0]=i;var m=[];for(m.push([u[0],l[0]]),e=1;n>e;e++)u[e]=u[e-1]+a*Math.cos(r),l[e]=l[e-1]+a*Math.sin(r),m.push([u[e],l[e]]),r+=Math.PI-c[e+1];return m}Object.defineProperty(e,"__esModule",{value:!0}),e.simpleXyCoordinates=n},function(t,e,n){"use strict";function r(){this.ANUM=9999,this.MAXITER=500,this.bases=[],this.nbase=null,this.nregion=null,this.loop_count=null,this.root=new c.Loop,this.loops=[],this.regions=[],this.rlphead=new i.Radloop,this.lencut=.8,this.RADIUS_REDUCTION_FACTOR=1.4,this.angleinc=null,this._h=null,this.HELIX_FACTOR=.6,this.BACKBONE_DISTANCE=27}function s(){var t=new c.Loop,e=null,n=null;for(e=0;e<this.loop_count;e++){for(t=this.loops[e],n=0;n<this.loop_count;n++)this.loops[n].setMark(!1);t.setDepth(o(t))}}function o(t){var e=null,n=null,r=null;if(t.getNconnection()<=1)return 0;if(t.isMark())return-1;t.setMark(!0),e=0,n=0;for(var s=0;null!=t.getConnection(s);s++)r=o(t.getConnection(s).getLoop()),r>=0&&(1==++e?n=r:n>r&&(n=r));return t.setMark(!1),n+1}Object.defineProperty(e,"__esModule",{value:!0}),e.NAView=r;var i=n(7),a=n(8),u=n(10),l=n(11),c=n(9);r.prototype.naview_xy_coordinates=function(t){var e=[],n=[];if(0===t.length||0===t[0])return 0;var r;this.nbase=t[0],this.bases=[];for(var s=0;s<this.nbase+1;s++)this.bases.push(new l.Base);this.regions=[];for(var s=0;s<this.nbase+1;s++)this.regions.push(new u.Region);this.read_in_bases(t),this.rlphead=null,this.find_regions(),this.loop_count=0,this.loops=[];for(var s=0;s<this.nbase+1;s++)this.loops.push(new c.Loop);for(this.construct_loop(0),this.find_central_loop(),this.traverse_loop(this.root,null),r=0;r<this.nbase;r++)e.push(100+this.BACKBONE_DISTANCE*this.bases[r+1].getX()),n.push(100+this.BACKBONE_DISTANCE*this.bases[r+1].getY());return{nbase:this.nbase,x:e,y:n}},r.prototype.read_in_bases=function(t){var e=null,n=null;for(this.bases.push(new l.Base),this.bases[0].setMate(0),this.bases[0].setExtracted(!1),this.bases[0].setX(this.ANUM),this.bases[0].setY(this.ANUM),n=0,e=1;e<=this.nbase;e++)this.bases.push(new l.Base),this.bases[e].setExtracted(!1),this.bases[e].setX(this.ANUM),this.bases[e].setY(this.ANUM),this.bases[e].setMate(t[e]),t[e]>e&&n++;0==n&&(this.bases[1].setMate(this.nbase),this.bases[this.nbase].setMate(1))},r.prototype.find_regions=function(){var t=null,e=null,n=null;n=this.nbase+1;var r=[];for(t=0;n>t;t++)r.push(!1);for(this.nregion=0,t=0;t<=this.nbase;t++)if(0!=(e=this.bases[t].getMate())&&!r[t]){for(this.regions[this.nregion].setStart1(t),this.regions[this.nregion].setEnd2(e),r[t]=!0,r[e]=!0,this.bases[t].setRegion(this.regions[this.nregion]),this.bases[e].setRegion(this.regions[this.nregion]),t++,e--;e>t&&this.bases[t].getMate()==e;t++,e--)r[e]=!0,r[t]=!0,this.bases[t].setRegion(this.regions[this.nregion]),this.bases[e].setRegion(this.regions[this.nregion]);this.regions[this.nregion].setEnd1(--t),this.regions[this.nregion].setStart2(e+1),this.nregion++}},r.prototype.construct_loop=function(t){var e=null,n=null,r=new c.Loop,s=new c.Loop,o=new a.Connection,l=new u.Region,h=new i.Radloop;for(r=this.loops[this.loop_count++],r.setNconnection(0),r.setDepth(0),r.setNumber(this.loop_count),r.setRadius(0),h=this.rlphead;null!=h;h=h.getNext())h.getLoopnumber()==this.loop_count&&r.setRadius(h.getRadius());e=t;do 0!=(n=this.bases[e].getMate())&&(l=this.bases[e].getRegion(),this.bases[l.getStart1()].isExtracted()||(e==l.getStart1()?(this.bases[l.getStart1()].setExtracted(!0),this.bases[l.getEnd1()].setExtracted(!0),this.bases[l.getStart2()].setExtracted(!0),this.bases[l.getEnd2()].setExtracted(!0),s=this.construct_loop(l.getEnd1()<this.nbase?l.getEnd1()+1:0)):e==l.getStart2()?(this.bases[l.getStart2()].setExtracted(!0),this.bases[l.getEnd2()].setExtracted(!0),this.bases[l.getStart1()].setExtracted(!0),this.bases[l.getEnd1()].setExtracted(!0),s=this.construct_loop(l.getEnd2()<this.nbase?l.getEnd2()+1:0)):console.log("Something went terribly wrong ...."),r.setNconnection(r.getNconnection()+1),o=new a.Connection,r.setConnection(r.getNconnection()-1,o),r.setConnection(r.getNconnection(),null),o.setLoop(s),o.setRegion(l),e==l.getStart1()?(o.setStart(l.getStart1()),o.setEnd(l.getEnd2())):(o.setStart(l.getStart2()),o.setEnd(l.getEnd1())),o.setExtruded(!1),o.setBroken(!1),s.setNconnection(s.getNconnection()+1),o=new a.Connection,s.setConnection(s.getNconnection()-1,o),s.setConnection(s.getNconnection(),null),o.setLoop(r),o.setRegion(l),e==l.getStart1()?(o.setStart(l.getStart2()),o.setEnd(l.getEnd1())):(o.setStart(l.getStart1()),o.setEnd(l.getEnd2())),o.setExtruded(!1),o.setBroken(!1)),e=n),++e>this.nbase&&(e=0);while(e!=t);return r},r.prototype.find_central_loop=function(){var t=new c.Loop,e=null,n=null,r=null;for(s.bind(this)(),e=0,n=-1,r=0;r<this.loop_count;r++)t=this.loops[r],t.getNconnection()>e?(n=t.getDepth(),e=t.getNconnection(),this.root=t):t.getDepth()>n&&t.getNconnection()==e&&(n=t.getDepth(),this.root=t)},r.prototype.traverse_loop=function(t,e){var n,r,s,o,i,a,u,l,c,h,d,g,p,f,b,m,y,v,k,x,M,N,E,_,S,A,w,T,L,P,X,R,C,I,Y,B,O,U,F,q,j,D,z,J,V,G,H,K,W,$,Q,Z,tt,et,nt,rt,st,ot,it,at,ut,lt,ct,ht,dt,gt,pt,ft,bt,mt,yt,vt=0;u=2*Math.PI/(this.nbase+1),k=null,X=-1;var kt=0;for(_=0;null!=(y=t.getConnection(kt));kt++,_++)n=-Math.sin(u*y.getStart()),r=Math.cos(u*y.getStart()),s=-Math.sin(u*y.getEnd()),o=Math.cos(u*y.getEnd()),i=o-r,a=n-s,l=Math.sqrt(i*i+a*a),y.setXrad(i/l),y.setYrad(a/l),y.setAngle(Math.atan2(a,i)),y.getAngle()<0&&y.setAngle(y.getAngle()+2*Math.PI),null!=e&&e.getRegion()==y.getRegion()&&(k=y,X=_);t:for(;;){this.determine_radius(t,this.lencut),c=t.getRadius()/this.RADIUS_REDUCTION_FACTOR,null==e?h=d=0:(g=(this.bases[k.getStart()].getX()+this.bases[k.getEnd()].getX())/2,p=(this.bases[k.getStart()].getY()+this.bases[k.getEnd()].getY())/2,h=g-c*k.getXrad(),d=p-c*k.getYrad()),T=-1==X?0:X,y=t.getConnection(T),w=0,R=!1;do if(N=T-1,0>N&&(N=t.getNconnection()-1),x=t.getConnection(N),this.connected_connection(x,y)?(T=N,y=x):R=!0,++w>t.getNconnection()){for(A=-1,_=0;_<t.getNconnection();_++)N=_+1,N>=t.getNconnection()&&(N=0),y=t.getConnection(_),v=t.getConnection(N),pt=v.getAngle()-y.getAngle(),0>pt&&(pt+=2*Math.PI),pt>A&&(A=pt,vt=_);L=vt,T=vt+1,T>=t.getNconnection()&&(T=0),y=t.getConnection(L),y.setBroken(!0),R=!0}while(!R);for(C=!1,H=T;!C;){for(w=0,R=!1,L=T,I=!1;!R;)if(y=t.getConnection(L),L==X&&(I=!0),N=L+1,N>=t.getNconnection()&&(N=0),v=t.getConnection(N),this.connected_connection(y,v)){if(++w>=t.getNconnection())break;L=N}else R=!0;for(P=this.find_ic_middle(T,L,e,k,t),_=K=W=P,R=!1,Q=0;!R;)_=0>Q?K:0==Q?P:W,_>=0&&(y=t.getConnection(_),(null==e||k!=y)&&(0==Q?(f=y.getAngle()-Math.asin(.5/c),b=y.getAngle()+Math.asin(.5/c),this.bases[y.getStart()].setX(h+c*Math.cos(f)),this.bases[y.getStart()].setY(d+c*Math.sin(f)),this.bases[y.getEnd()].setX(h+c*Math.cos(b)),this.bases[y.getEnd()].setY(d+c*Math.sin(b))):0>Q?(N=_+1,N>=t.getNconnection()&&(N=0),y=t.getConnection(_),v=t.getConnection(N),rt=y.getXrad(),st=y.getYrad(),pt=(y.getAngle()+v.getAngle())/2,y.getAngle()>v.getAngle()&&(pt-=Math.PI),at=Math.cos(pt),ut=Math.sin(pt),ht=ut,dt=-at,S=v.getAngle()-y.getAngle(),0>S&&(S+=2*Math.PI),gt=y.isExtruded()?S<=Math.PI/2?2:1.5:1,this.bases[y.getEnd()].setX(this.bases[v.getStart()].getX()+gt*ht),this.bases[y.getEnd()].setY(this.bases[v.getStart()].getY()+gt*dt),this.bases[y.getStart()].setX(this.bases[y.getEnd()].getX()+st),this.bases[y.getStart()].setY(this.bases[y.getEnd()].getY()-rt)):(N=_-1,0>N&&(N=t.getNconnection()-1),y=t.getConnection(N),v=t.getConnection(_),ot=v.getXrad(),it=v.getYrad(),pt=(y.getAngle()+v.getAngle())/2,y.getAngle()>v.getAngle()&&(pt-=Math.PI),at=Math.cos(pt),ut=Math.sin(pt),ht=-ut,dt=at,S=v.getAngle()-y.getAngle(),0>S&&(S+=2*Math.PI),gt=y.isExtruded()?S<=Math.PI/2?2:1.5:1,
-this.bases[v.getStart()].setX(this.bases[y.getEnd()].getX()+gt*ht),this.bases[v.getStart()].setY(this.bases[y.getEnd()].getY()+gt*dt),this.bases[v.getEnd()].setX(this.bases[v.getStart()].getX()-it),this.bases[v.getEnd()].setY(this.bases[v.getStart()].getY()+ot)))),0>Q?(W==L?W=-1:W>=0&&++W>=t.getNconnection()&&(W=0),Q=1):(K==T?K=-1:K>=0&&--K<0&&(K=t.getNconnection()-1),Q=-1),R=-1==K&&-1==W;if($=L+1,$>=t.getNconnection()&&($=0),L!=T&&(T!=H||$!=H))if(y=t.getConnection(T),v=t.getConnection(L),tt=this.bases[v.getEnd()].getX()-this.bases[y.getStart()].getX(),et=this.bases[v.getEnd()].getY()-this.bases[y.getStart()].getY(),B=this.bases[y.getStart()].getX()+tt/2,O=this.bases[y.getStart()].getY()+et/2,nt=Math.sqrt(tt*tt+et*et),q=tt/nt,j=et/nt,D=h-B,z=d-O,nt=Math.sqrt(tt*tt+et*et),D/=nt,z/=nt,J=D*q+z*j,U=J*q-D,F=J*j-z,nt=Math.sqrt(U*U+F*F),U/=nt,F/=nt,tt=this.bases[y.getStart()].getX()-h,et=this.bases[y.getStart()].getY()-d,pt=Math.atan2(et,tt),0>pt&&(pt+=2*Math.PI),tt=this.bases[v.getEnd()].getX()-h,et=this.bases[v.getEnd()].getY()-d,ft=Math.atan2(et,tt),0>ft&&(ft+=2*Math.PI),pt>ft&&(ft+=2*Math.PI),Y=ft-pt>Math.PI?-1:1,V=h+Y*c*U,G=d+Y*c*F,I)h-=V-B,d-=G-O;else for(_=T;y=t.getConnection(_),M=y.getStart(),this.bases[M].setX(this.bases[M].getX()+V-B),this.bases[M].setY(this.bases[M].getY()+G-O),M=y.getEnd(),this.bases[M].setX(this.bases[M].getX()+V-B),this.bases[M].setY(this.bases[M].getY()+G-O),_!=L;)++_>=t.getNconnection()&&(_=0);T=$,C=T==H}for(_=0;_<t.getNconnection();_++){if(y=t.getConnection(_),N=_+1,N>=t.getNconnection()&&(N=0),v=t.getConnection(N),tt=this.bases[y.getEnd()].getX()-h,et=this.bases[y.getEnd()].getY()-d,ct=Math.sqrt(tt*tt+et*et),pt=Math.atan2(et,tt),0>pt&&(pt+=2*Math.PI),tt=this.bases[v.getStart()].getX()-h,et=this.bases[v.getStart()].getY()-d,lt=Math.sqrt(tt*tt+et*et),ft=Math.atan2(et,tt),0>ft&&(ft+=2*Math.PI),pt>ft&&(ft+=2*Math.PI),Z=ft-pt,yt=v.getAngle()-y.getAngle(),0>=yt&&(yt+=2*Math.PI),Math.abs(Z-yt)>Math.PI)if(y.isExtruded())console.log("Warning from traverse_loop. Loop "+t.getNumber()+" has crossed regions\n");else if(v.getStart()-y.getEnd()!=1){y.setExtruded(!0);continue t}if(y.isExtruded())this.construct_extruded_segment(y,v);else for(E=v.getStart()-y.getEnd(),0>E&&(E+=this.nbase+1),u=Z/E,N=1;E>N;N++)M=y.getEnd()+N,M>this.nbase&&(M-=this.nbase+1),m=pt+N*u,nt=ct+(lt-ct)*(m-pt)/Z,this.bases[M].setX(h+nt*Math.cos(m)),this.bases[M].setY(d+nt*Math.sin(m))}break}for(_=0;_<t.getNconnection();_++)X!=_&&(y=t.getConnection(_),this.generate_region(y),this.traverse_loop(y.getLoop(),y));for(E=0,bt=0,mt=0,_=0;_<t.getNconnection();_++)if(N=_+1,N>=t.getNconnection()&&(N=0),y=t.getConnection(_),v=t.getConnection(N),E+=2,bt+=this.bases[y.getStart()].getX()+this.bases[y.getEnd()].getX(),mt+=this.bases[y.getStart()].getY()+this.bases[y.getEnd()].getY(),!y.isExtruded())for(N=y.getEnd()+1;N!=v.getStart();N++)N>this.nbase&&(N-=this.nbase+1),E++,bt+=this.bases[N].getX(),mt+=this.bases[N].getY();t.setX(bt/E),t.setY(mt/E)},r.prototype.determine_radius=function(t,e){var n,r,s,o,i,u,l,c,h,d,g,p=0,f=new a.Connection,b=new a.Connection,m=.7071068;do{for(n=1e10,i=0,o=0,c=0;c<t.getNconnection();c++)f=t.getConnection(c),h=c+1,h>=t.getNconnection()&&(h=0),b=t.getConnection(h),d=f.getEnd(),g=b.getStart(),d>g&&(g+=this.nbase+1),s=b.getAngle()-f.getAngle(),0>=s&&(s+=2*Math.PI),r=f.isExtruded()?s<=Math.PI/2?2:1.5:g-d,o+=s*(1/r+1),i+=s*s/r,l=s/r,n>l&&!f.isExtruded()&&r>1&&(n=l,p=c);u=o/i,m>u&&(u=m),e>n*u&&t.getConnection(p).setExtruded(!0)}while(e>n*u);t.getRadius()>0?u=t.getRadius():t.setRadius(u)},r.prototype.find_ic_middle=function(t,e,n,r,s){var o,i,a,u,l;for(o=0,i=-1,a=t,l=!1;!l;)o++>2*s.getNconnection()&&console.log("Infinite loop in 'find_ic_middle'"),null!=n&&s.getConnection(a)==r&&(i=a),l=a==e,++a>=s.getNconnection()&&(a=0);if(-1==i){for(u=1,a=t;(o+1)/2>u;u++)++a>=s.getNconnection()&&(a=0);i=a}return i},r.prototype.construct_extruded_segment=function(t,e){var n,r,s,o,i,a,u,l,c,h,d,g,p,f,b,m,y,v;if(n=t.getAngle(),s=r=e.getAngle(),n>s&&(s+=2*Math.PI),o=(n+s)/2,p=t.getEnd(),f=e.getStart(),b=f-p,0>b&&(b+=this.nbase+1),d=e.getAngle()-t.getAngle(),0>d&&(d+=2*Math.PI),2==b)this.construct_circle_segment(p,f);else{i=this.bases[f].getX()-this.bases[p].getX(),a=this.bases[f].getY()-this.bases[p].getY(),h=Math.sqrt(i*i+a*a),i/=h,a/=h,h>=1.5&&d<=Math.PI/2&&(m=p+1,m>this.nbase&&(m-=this.nbase+1),y=f-1,0>y&&(y+=this.nbase+1),this.bases[m].setX(this.bases[p].getX()+.5*i),this.bases[m].setY(this.bases[p].getY()+.5*a),this.bases[y].setX(this.bases[f].getX()-.5*i),this.bases[y].setY(this.bases[f].getY()-.5*a),p=m,f=y);do v=!1,this.construct_circle_segment(p,f),m=p+1,m>this.nbase&&(m-=this.nbase+1),i=this.bases[m].getX()-this.bases[p].getX(),a=this.bases[m].getY()-this.bases[p].getY(),u=Math.atan2(a,i),0>u&&(u+=2*Math.PI),g=u-n,0>g&&(g+=2*Math.PI),g>Math.PI&&(v=!0),y=f-1,0>y&&(y+=this.nbase+1),i=this.bases[y].getX()-this.bases[f].getX(),a=this.bases[y].getY()-this.bases[f].getY(),l=Math.atan2(a,i),0>l&&(l+=2*Math.PI),g=r-l,0>g&&(g+=2*Math.PI),g>Math.PI&&(v=!0),v&&(c=this.minf2(o,n+.5),this.bases[m].setX(this.bases[p].getX()+Math.cos(c)),this.bases[m].setY(this.bases[p].getY()+Math.sin(c)),p=m,c=this.maxf2(o,s-.5),this.bases[y].setX(this.bases[f].getX()+Math.cos(c)),this.bases[y].setY(this.bases[f].getY()+Math.sin(c)),f=y,b-=2);while(v&&b>1)}},r.prototype.construct_circle_segment=function(t,e){var n,r,s,o,i,a,u,l,c,h,d,g,p,f,b;if(n=this.bases[e].getX()-this.bases[t].getX(),r=this.bases[e].getY()-this.bases[t].getY(),s=Math.sqrt(n*n+r*r),p=e-t,0>p&&(p+=this.nbase+1),s>=p)for(n/=s,r/=s,f=1;p>f;f++)b=t+f,b>this.nbase&&(b-=this.nbase+1),this.bases[b].setX(this.bases[t].getX()+n*f/p),this.bases[b].setY(this.bases[t].getY()+r*f/p);else for(this.find_center_for_arc(p-1,s),n/=s,r/=s,o=this.bases[t].getX()+n*s/2,i=this.bases[t].getY()+r*s/2,a=r,u=-n,l=o+this._h*a,c=i+this._h*u,h=this.bases[t].getX()-l,d=this.bases[t].getY()-c,s=Math.sqrt(h*h+d*d),g=Math.atan2(d,h),f=1;p>f;f++)b=t+f,b>this.nbase&&(b-=this.nbase+1),this.bases[b].setX(l+s*Math.cos(g+f*this.angleinc)),this.bases[b].setY(c+s*Math.sin(g+f*this.angleinc))},r.prototype.find_center_for_arc=function(t,e){var n,r,s,o,i,a,u,l,c;r=(t+1)/Math.PI,s=-r-e/(t+1.000001-e),1>e&&(s=0),c=0;do n=(r+s)/2,o=Math.sqrt(n*n+e*e/4),i=1-.5/(o*o),Math.abs(i)>1&&console.log("Unexpected large magnitude discriminant = "+i+" "+o),a=Math.acos(i),l=Math.acos(n/o),u=a*(t+1)+2*l-2*Math.PI,u>0?s=n:r=n;while(Math.abs(u)>1e-4&&++c<this.MAXITER);c>=this.MAXITER&&(noIterationFailureYet&&(console.log("Iteration failed in find_center_for_arc"),noIterationFailureYet=!1),n=0,a=0),this._h=n,this.angleinc=a},r.prototype.generate_region=function(t){var e,n,r,s,o,i;for(i=t.getRegion(),e=0,t.getStart()==i.getStart1()?(n=i.getStart1(),r=i.getEnd1()):(n=i.getStart2(),r=i.getEnd2()),(this.bases[t.getStart()].getX()>this.ANUM-100||this.bases[t.getEnd()].getX()>this.ANUM-100)&&console.log("Bad region passed to generate_region. Coordinates not defined."),s=n+1;r>=s;s++)e++,this.bases[s].setX(this.bases[t.getStart()].getX()+this.HELIX_FACTOR*e*t.getXrad()),this.bases[s].setY(this.bases[t.getStart()].getY()+this.HELIX_FACTOR*e*t.getYrad()),o=this.bases[s].getMate(),this.bases[o].setX(this.bases[t.getEnd()].getX()+this.HELIX_FACTOR*e*t.getXrad()),this.bases[o].setY(this.bases[t.getEnd()].getY()+this.HELIX_FACTOR*e*t.getYrad())},r.prototype.minf2=function(t,e){return e>t?t:e},r.prototype.maxf2=function(t,e){return t>e?t:e},r.prototype.connected_connection=function(t,e){return t.isExtruded()?!0:t.getEnd()+1==e.getStart()?!0:!1}},function(t,e){"use strict";function n(){this.radius=null,this.loopnumber=null,this.next=null,this.prev=null}Object.defineProperty(e,"__esModule",{value:!0}),e.Radloop=n,n.prototype.getRadius=function(){return this.radius},n.prototype.setRadius=function(t){this.radius=t},n.prototype.getLoopnumber=function(){return this.loopnumber},n.prototype.setLoopnumber=function(t){this.loopnumber=t},n.prototype.getNext=function(){return this.next},n.prototype.setNext=function(t){this.next=t},n.prototype.getPrev=function(){return this.prev},n.prototype.setPrev=function(t){this.prev=t}},function(t,e,n){"use strict";function r(){this.loop=new s.Loop,this.region=new o.Region,this.start=null,this.end=null,this.xrad=null,this.yrad=null,this.angle=null,this.extruded=null,this.broken=null,this._isNull=!1}Object.defineProperty(e,"__esModule",{value:!0}),e.Connection=r;var s=n(9),o=n(10);r.prototype.isNull=function(){return this._isNull},r.prototype.setNull=function(t){this._isNull=t},r.prototype.getLoop=function(){return this.loop},r.prototype.setLoop=function(t){this.loop=t},r.prototype.getRegion=function(){return this.region},r.prototype.setRegion=function(t){this.region=t},r.prototype.getStart=function(){return this.start},r.prototype.setStart=function(t){this.start=t},r.prototype.getEnd=function(){return this.end},r.prototype.setEnd=function(t){this.end=t},r.prototype.getXrad=function(){return this.xrad},r.prototype.setXrad=function(t){this.xrad=t},r.prototype.getYrad=function(){return this.yrad},r.prototype.setYrad=function(t){this.yrad=t},r.prototype.getAngle=function(){return this.angle},r.prototype.setAngle=function(t){this.angle=t},r.prototype.isExtruded=function(){return this.extruded},r.prototype.setExtruded=function(t){this.extruded=t},r.prototype.isBroken=function(){return this.broken},r.prototype.setBroken=function(t){this.broken=t}},function(t,e,n){"use strict";function r(){this.nconnection=null,this.connections=[],this._connections=[],this.number=null,this.depth=null,this.mark=null,this.x=null,this.y=null,this.radius=null}Object.defineProperty(e,"__esModule",{value:!0}),e.Loop=r;var s=n(8);r.prototype.getNconnection=function(){return this.nconnection},r.prototype.setNconnection=function(t){this.nconnection=t},r.prototype.setConnection=function(t,e){null!=e?this._connections[t]=e:(this._connections[t]||(this._connections[t]=new s.Connection),this._connections[t].setNull(!0))},r.prototype.getConnection=function(t){var e=n(8);this._connections[t]||(this._connections[t]=new e);var r=this._connections[t];return r.isNull()?null:r},r.prototype.addConnection=function(t,e){this._connections.push(e)},r.prototype.getNumber=function(){return this.number},r.prototype.setNumber=function(t){this.number=t},r.prototype.getDepth=function(){return this.depth},r.prototype.setDepth=function(t){this.depth=t},r.prototype.isMark=function(){return this.mark},r.prototype.setMark=function(t){this.mark=t},r.prototype.getX=function(){return this.x},r.prototype.setX=function(t){this.x=t},r.prototype.getY=function(){return this.y},r.prototype.setY=function(t){this.y=t},r.prototype.getRadius=function(){return this.radius},r.prototype.setRadius=function(t){this.radius=t}},function(t,e){"use strict";function n(){this._start1=null,this._end1=null,this._start2=null,this._end2=null}Object.defineProperty(e,"__esModule",{value:!0}),e.Region=n,n.prototype.getStart1=function(){return this._start1},n.prototype.setStart1=function(t){this._start1=t},n.prototype.getEnd1=function(){return this._end1},n.prototype.setEnd1=function(t){this._end1=t},n.prototype.getStart2=function(){return this._start2},n.prototype.setStart2=function(t){this._start2=t},n.prototype.getEnd2=function(){return this._end2},n.prototype.setEnd2=function(t){this._end2=t}},function(t,e,n){"use strict";function r(){this.mate=null,this.x=null,this.y=null,this.extracted=null,this.region=new s.Region}Object.defineProperty(e,"__esModule",{value:!0}),e.Base=r;var s=n(10);r.prototype.getMate=function(){return this.mate},r.prototype.setMate=function(t){this.mate=t},r.prototype.getX=function(){return this.x},r.prototype.setX=function(t){this.x=t},r.prototype.getY=function(){return this.y},r.prototype.setY=function(t){this.y=t},r.prototype.isExtracted=function(){return this.extracted},r.prototype.setExtracted=function(t){this.extracted=t},r.prototype.getRegion=function(){return this.region},r.prototype.setRegion=function(t){this.region=t}},function(t,e,n){var r=n(13);"string"==typeof r&&(r=[[t.id,r,""]]);n(15)(r,{});r.locals&&(t.exports=r.locals)},function(t,e,n){e=t.exports=n(14)(),e.push([t.id,'.structure-background-rect {\n    stroke: black;\n    stroke-width: 5;\n    fill: transparent;\n}\n\ncircle.rna-base {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\ncircle.rna-base.label {\n    stroke: transparent;\n    stroke-width: 0;\n    fill: white;\n}\n\nline.link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\nline.rna-link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\n.overlay {\n    fill: transparent;\n}\n\n.rna-name {\n    text-anchor: middle;\n    dy: -10;\n    font-family: Tahoma, Geneva, sans-serif;\n    font-size: 8pt;\n}\n\nline.rna-link[link-type="backbone"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type="basepair"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type="fake"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type="extra"] {\n    stroke: grey;\n}\n\nline.rna-link[extra-link-type="correct"] {\n    stroke: green;\n}\n\nline.rna-link[extra-link-type="incorrect"] {\n    stroke: green;\n}\n\n\npath {\n    stroke: grey;\n  stroke-width: 2;\n}\n\npath[extra-link-type="correct"] {\n    stroke: green;\n}\n\npath[extra-link-type="incorrect"] {\n    stroke: red;\n}\n\n\nline.basepair {\n  stroke: red;\n}\n\nline.intermolecule {\n  stroke: blue;\n}\n\nline.chain_chain {\n  stroke-dasharray: 3,3;\n}\n\nline.fake {\n  stroke: green;\n}\n\n.transparent {\n    fill: transparent;\n    stroke-width: 0;\n    stroke-opacity: 0;\n    opacity: 0;\n}\n\n.d3-tip {\n    line-height: 1;\n    font-weight: bold;\n    padding: 6px;\n    background: rgba(0, 0, 0, 0.6);\n    color: #fff;\n    border-radius: 4px;\n    pointer-events: none;\n          }\n\ntext.nucleotide-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext.number-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext {\n    pointer-events: none;\n}\n\ng.gnode {\n\n}\n\n.brush .extent {\n  fill-opacity: .1;\n  stroke: #fff;\n  shape-rendering: crispEdges;\n}\n\n.noselect {\n    -webkit-touch-callout: none;\n    -webkit-user-select: none;\n    -khtml-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n}\n',""])},function(t,e){t.exports=function(){var t=[];return t.toString=function(){for(var t=[],e=0;e<this.length;e++){var n=this[e];n[2]?t.push("@media "+n[2]+"{"+n[1]+"}"):t.push(n[1])}return t.join("")},t.i=function(e,n){"string"==typeof e&&(e=[[null,e,""]]);for(var r={},s=0;s<this.length;s++){var o=this[s][0];"number"==typeof o&&(r[o]=!0)}for(s=0;s<e.length;s++){var i=e[s];"number"==typeof i[0]&&r[i[0]]||(n&&!i[2]?i[2]=n:n&&(i[2]="("+i[2]+") and ("+n+")"),t.push(i))}},t}},function(t,e,n){function r(t,e){for(var n=0;n<t.length;n++){var r=t[n],s=g[r.id];if(s){s.refs++;for(var o=0;o<s.parts.length;o++)s.parts[o](r.parts[o]);for(;o<r.parts.length;o++)s.parts.push(l(r.parts[o],e))}else{for(var i=[],o=0;o<r.parts.length;o++)i.push(l(r.parts[o],e));g[r.id]={id:r.id,refs:1,parts:i}}}}function s(t){for(var e=[],n={},r=0;r<t.length;r++){var s=t[r],o=s[0],i=s[1],a=s[2],u=s[3],l={css:i,media:a,sourceMap:u};n[o]?n[o].parts.push(l):e.push(n[o]={id:o,parts:[l]})}return e}function o(t,e){var n=b(),r=v[v.length-1];if("top"===t.insertAt)r?r.nextSibling?n.insertBefore(e,r.nextSibling):n.appendChild(e):n.insertBefore(e,n.firstChild),v.push(e);else{if("bottom"!==t.insertAt)throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");n.appendChild(e)}}function i(t){t.parentNode.removeChild(t);var e=v.indexOf(t);e>=0&&v.splice(e,1)}function a(t){var e=document.createElement("style");return e.type="text/css",o(t,e),e}function u(t){var e=document.createElement("link");return e.rel="stylesheet",o(t,e),e}function l(t,e){var n,r,s;if(e.singleton){var o=y++;n=m||(m=a(e)),r=c.bind(null,n,o,!1),s=c.bind(null,n,o,!0)}else t.sourceMap&&"function"==typeof URL&&"function"==typeof URL.createObjectURL&&"function"==typeof URL.revokeObjectURL&&"function"==typeof Blob&&"function"==typeof btoa?(n=u(e),r=d.bind(null,n),s=function(){i(n),n.href&&URL.revokeObjectURL(n.href)}):(n=a(e),r=h.bind(null,n),s=function(){i(n)});return r(t),function(e){if(e){if(e.css===t.css&&e.media===t.media&&e.sourceMap===t.sourceMap)return;r(t=e)}else s()}}function c(t,e,n,r){var s=n?"":r.css;if(t.styleSheet)t.styleSheet.cssText=k(e,s);else{var o=document.createTextNode(s),i=t.childNodes;i[e]&&t.removeChild(i[e]),i.length?t.insertBefore(o,i[e]):t.appendChild(o)}}function h(t,e){var n=e.css,r=e.media;e.sourceMap;if(r&&t.setAttribute("media",r),t.styleSheet)t.styleSheet.cssText=n;else{for(;t.firstChild;)t.removeChild(t.firstChild);t.appendChild(document.createTextNode(n))}}function d(t,e){var n=e.css,r=(e.media,e.sourceMap);r&&(n+="\n/*# sourceMappingURL=data:application/json;base64,"+btoa(unescape(encodeURIComponent(JSON.stringify(r))))+" */");var s=new Blob([n],{type:"text/css"}),o=t.href;t.href=URL.createObjectURL(s),o&&URL.revokeObjectURL(o)}var g={},p=function(t){var e;return function(){return"undefined"==typeof e&&(e=t.apply(this,arguments)),e}},f=p(function(){return/msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase())}),b=p(function(){return document.head||document.getElementsByTagName("head")[0]}),m=null,y=0,v=[];t.exports=function(t,e){e=e||{},"undefined"==typeof e.singleton&&(e.singleton=f()),"undefined"==typeof e.insertAt&&(e.insertAt="bottom");var n=s(t);return r(n,e),function(t){for(var o=[],i=0;i<n.length;i++){var a=n[i],u=g[a.id];u.refs--,o.push(u)}if(t){var l=s(t);r(l,e)}for(var i=0;i<o.length;i++){var u=o[i];if(0===u.refs){for(var c=0;c<u.parts.length;c++)u.parts[c]();delete g[u.id]}}}};var k=function(){var t=[];return function(e,n){return t[e]=n,t.filter(Boolean).join("\n")}}()}])});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["rnatreemap"] = factory();
+	else
+		root["rnatreemap"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.rnaTreemapChart = rnaTreemapChart;
+
+	var _rnaplot = __webpack_require__(27);
+
+	function rnaTreemapChart() {
+	    var width = 550;
+	    var height = 400;
+
+	    function rnaTreemapNode(selection) {
+	        // create a background rectangle for each RNA structure
+	        selection.each(function (d) {
+	            d3.select(this).attr('transform', function (d) {
+	                return 'translate(' + d.x + ',' + d.y + ')';
+	            }).append('rect').classed('structure-background-rect', true).attr('width', function (d) {
+	                return Math.max(0, d.dx);
+	            }).attr('height', function (d) {
+	                return Math.max(0, d.dy);
+	            });
+
+	            // draw the actual RNA structure
+	            var chart = (0, _rnaplot.rnaPlot)().width(Math.max(0, d.dx)).height(Math.max(0, d.dy)).labelInterval(0).rnaEdgePadding(10).showNucleotideLabels(false);
+
+	            if ('structure' in d) d3.select(this).call(chart);
+	        });
+	    }
+
+	    var chart = function chart(selection) {
+	        selection.each(function (data) {
+	            console.log('data:', data);
+	            // initialize the treemap structure
+	            // sample input
+	            // { 'name': 'blah',
+	            // 'children: [{'structure': '..((..))',
+	            //               'sequence': 'ACCGGCC',
+	            //               'size': 50}]
+	            // }
+	            var treemap = d3.layout.treemap().size([width, height]).sticky(false).value(function (d) {
+	                return d.size;
+	            });
+
+	            // create a new <g> for each node in the treemap
+	            // this may be a little redundant, since we expect the calling
+	            // selection to contain their own g elements
+	            var gEnter = d3.select(this).append('g');
+	            var treemapGnodes = gEnter.datum(data).selectAll('.treemapNode').data(treemap.nodes).enter().append('g').attr('class', 'treemapNode').call(rnaTreemapNode);
+	        });
+	    };
+
+	    chart.width = function (_) {
+	        if (!arguments.length) return width;
+	        width = _;
+	        return chart;
+	    };
+
+	    chart.height = function (_) {
+	        if (!arguments.length) return height;
+	        height = _;
+	        return chart;
+	    };
+
+	    return chart;
+	}
+
+	function rnaTreemapGridChart() {
+	    var chart = function chart(selection) {
+	        console.log('selection:', selection);
+	        selection.each(function (data) {
+	            console.log('data:', data);
+	        });
+	    };
+
+	    return chart;
+	}
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.ProteinGraph = ProteinGraph;
+	exports.RNAGraph = RNAGraph;
+	exports.moleculesToJson = moleculesToJson;
+
+	var _rnautils = __webpack_require__(2);
+
+	var numberSort = function numberSort(a, b) {
+	    return a - b;
+	};
+
+	function generateUUID() {
+	    /* Stack Overflow:                                                                                          
+	     * http://stackoverflow.com/a/8809472/899470                                                                
+	     */
+	    var d = new Date().getTime();
+	    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+	        var r = (d + Math.random() * 16) % 16 | 0;
+	        d = Math.floor(d / 16);
+	        return (c == 'x' ? r : r & 0x3 | 0x8).toString(16);
+	    });
+
+	    return uuid;
+	}
+
+	function isNormalInteger(str) {
+	    //http://stackoverflow.com/a/10834843/899470
+	    return (/^\+?(0|[1-9]\d*)$/.test(str)
+	    );
+	}
+
+	if (typeof String.prototype.trim === 'undefined') {
+	    String.prototype.trim = function () {
+	        return String(this).replace(/^\s+|\s+$/g, '');
+	    };
+	}
+
+	function ProteinGraph(structName, size, uid) {
+	    var self = this;
+
+	    self.type = 'protein';
+	    self.size = size;
+	    self.nodes = [{ 'name': 'P',
+	        'num': 1,
+	        'radius': 3 * Math.sqrt(size),
+	        'rna': self,
+	        'nodeType': 'protein',
+	        'structName': structName,
+	        'elemType': 'p',
+	        'size': size,
+	        'uid': generateUUID() }];
+
+	    self.links = [];
+	    self.uid = generateUUID();
+
+	    self.addUids = function (uids) {
+	        for (var i = 0; i < uids.length; i++) {
+	            self.nodes[i].uid = uids[i];
+	        }return self;
+	    };
+
+	    self.getUids = function () {
+	        /* Get the positions of each node so that they
+	         * can be passed to elementsToJson later
+	         */
+	        uids = [];
+	        for (var i = 0; i < self.dotbracket.length; i++) {
+	            uids.push(self.nodes[i].uid);
+	        }return uids;
+	    };
+	}
+
+	function RNAGraph(seq, dotbracket, structName, startNumber) {
+	    var self = this;
+
+	    self.type = 'rna';
+	    self.circularizeExternal = false;
+
+	    if (arguments.length === 0) {
+	        self.seq = '';
+	        self.dotbracket = '';
+	        self.structName = '';
+	    } else {
+	        self.seq = seq;
+	        self.dotbracket = dotbracket; //i.e. ..((..))..
+	        self.structName = structName;
+	    }
+
+	    if (arguments.length < 4) {
+	        startNumber = 1;
+	    }
+
+	    self.circular = false;
+
+	    if (self.dotbracket.length > 0 && self.dotbracket[self.dotbracket.length - 1] == '*') {
+	        //circular RNA
+	        self.dotbracket = self.dotbracket.slice(0, self.dotbracket.length - 1);
+	        self.circular = true;
+	    }
+
+	    self.uid = generateUUID();
+
+	    self.elements = []; //store the elements and the
+	    //nucleotides they contain
+	    self.pseudoknotPairs = [];
+	    self.nucsToNodes = {};
+
+	    self.addUids = function (uids) {
+	        var nucleotideNodes = self.nodes.filter(function (d) {
+	            return d.nodeType == 'nucleotide';
+	        });
+
+	        for (var i = 0; i < uids.length && i < nucleotideNodes.length; i++) {
+	            nucleotideNodes[i].uid = uids[i];
+	        }
+
+	        return self;
+	    };
+
+	    self.computePairtable = function () {
+	        self.pairtable = _rnautils.rnaUtilities.dotbracketToPairtable(self.dotbracket);
+	    };
+
+	    self.removeBreaks = function (targetString) {
+	        // Remove all chain breaks (denoted with a '&', which indicate
+	        // that the input represents more than one strand)
+	        var breaks = [];
+	        var breakIndex = -1;
+
+	        while ((breakIndex = targetString.indexOf('&')) >= 0) {
+	            breaks.push(breakIndex);
+	            targetString = targetString.substring(0, breakIndex) + 'oo' + targetString.substring(breakIndex + 1, targetString.length);
+	        }
+
+	        return { targetString: targetString, breaks: breaks };
+	    };
+
+	    var ret = self.removeBreaks(self.dotbracket);
+	    self.dotbracket = ret.targetString;
+	    self.dotBracketBreaks = ret.breaks;
+
+	    ret = self.removeBreaks(self.seq);
+	    self.seq = ret.targetString;
+	    self.seqBreaks = ret.breaks;
+
+	    self.calculateStartNumberArray = function () {
+	        self.startNumberArray = [];
+	        var breaks = 0;
+
+	        for (var i = 0; i < self.dotbracket.length; i++) {
+	            self.startNumberArray.push(startNumber);
+
+	            if (self.dotbracket[i] == 'o') {
+	                startNumber = -i;
+	            }
+	        }
+	    };
+
+	    self.calculateStartNumberArray();
+
+	    self.rnaLength = self.dotbracket.length;
+
+	    if (!(0, _rnautils.arraysEqual)(self.dotBracketBreaks, self.seqBreaks)) {
+	        console.log('WARNING: Sequence and structure breaks not equal');
+	        console.log('WARNING: Using the breaks in the structure');
+	    }
+
+	    self.computePairtable();
+
+	    self.addPositions = function (nodeType, positions) {
+	        var labelNodes = self.nodes.filter(function (d) {
+	            return d.nodeType == nodeType;
+	        });
+
+	        for (var i = 0; i < labelNodes.length; i++) {
+	            labelNodes[i].x = positions[i][0];
+	            labelNodes[i].px = positions[i][0];
+	            labelNodes[i].y = positions[i][1];
+	            labelNodes[i].py = positions[i][1];
+	        }
+
+	        return self;
+	    };
+
+	    self.breakNodesToFakeNodes = function () {
+	        // convert all the nodes following breaks to fake nodes
+	        var labelNodes = self.nodes.filter(function (d) {
+	            return d.nodeType == 'nucleotide';
+	        });
+
+	        // if a node was an artifical break node, convert it to a middle
+	        for (var i = 0; i < labelNodes.length; i++) {
+	            if (self.dotbracket[i] == 'o') labelNodes[i].nodeType = 'middle';
+	        }
+
+	        for (var i = 0; i < self.elements.length; i++) {
+	            var broken = false;
+
+	            // change the elemType of the other nodes in the element containing
+	            // the break
+	            for (var j = 0; j < self.elements[i][2].length; j++) {
+	                if (self.dotBracketBreaks.indexOf(self.elements[i][2][j]) >= 0) broken = true;
+	            }
+
+	            if (broken) {
+	                self.elements[i][2].map(function (x) {
+	                    if (x == 0) return;
+	                    self.nodes[x - 1].elemType = 'e';
+	                });
+	            } else {
+	                self.elements[i][2].map(function (x) {
+	                    if (x == 0) return;
+	                    self.nodes[x - 1].elemType = self.elements[i][0];
+	                });
+	            }
+	        }
+	        return self;
+	    };
+
+	    self.getPositions = function (nodeType) {
+	        var positions = [];
+	        var nucleotideNodes = self.nodes.filter(function (d) {
+	            return d.nodeType == nodeType;
+	        });
+
+	        for (var i = 0; i < nucleotideNodes.length; i++) {
+	            positions.push([nucleotideNodes[i].x, nucleotideNodes[i].y]);
+	        }return positions;
+	    };
+
+	    self.getUids = function () {
+	        /* Get the positions of each node so that they
+	         * can be passed to elementsToJson later
+	         */
+	        var uids = [];
+	        for (var i = 0; i < self.dotbracket.length; i++) {
+	            uids.push(self.nodes[i].uid);
+	        }return uids;
+	    };
+
+	    self.reinforceStems = function () {
+	        var pt = self.pairtable;
+	        var relevantElements = self.elements.filter(function (d) {
+	            return d[0] == 's' && d[2].length >= 4;
+	        });
+
+	        for (var i = 0; i < relevantElements.length; i++) {
+	            var allNucs = relevantElements[i][2];
+	            var nucs = allNucs.slice(0, allNucs.length / 2);
+
+	            for (var j = 0; j < nucs.length - 1; j++) {
+	                self.addFakeNode([nucs[j], nucs[j + 1], pt[nucs[j + 1]], pt[nucs[j]]]);
+	            }
+	        }
+
+	        return self;
+	    };
+
+	    self.reinforceLoops = function () {
+	        /* 
+	         * Add a set of fake nodes to enforce the structure
+	         */
+	        var filterNucs = function filterNucs(d) {
+	            return d !== 0 && d <= self.dotbracket.length;
+	        };
+
+	        for (var i = 0; i < self.elements.length; i++) {
+	            if (self.elements[i][0] == 's' || !self.circularizeExternal && self.elements[i][0] == 'e') continue;
+
+	            var nucs = self.elements[i][2].filter(filterNucs);
+
+	            if (self.elements[i][0] == 'e') {
+	                var newNode1 = { 'name': '',
+	                    'num': -3,
+	                    //'radius': 18 * radius -6,
+	                    'radius': 0,
+	                    'rna': self,
+	                    'nodeType': 'middle',
+	                    'elemType': 'f',
+	                    'nucs': [],
+	                    'x': self.nodes[self.rnaLength - 1].x,
+	                    'y': self.nodes[self.rnaLength - 1].y,
+	                    'px': self.nodes[self.rnaLength - 1].px,
+	                    'py': self.nodes[self.rnaLength - 1].py,
+	                    'uid': generateUUID() };
+	                var newNode2 = { 'name': '',
+	                    'num': -2,
+	                    //'radius': 18 * radius -6,
+	                    'radius': 0,
+	                    'rna': self,
+	                    'nodeType': 'middle',
+	                    'elemType': 'f',
+	                    'nucs': [],
+	                    'x': self.nodes[0].x,
+	                    'y': self.nodes[0].y,
+	                    'px': self.nodes[0].px,
+	                    'py': self.nodes[0].py,
+	                    'uid': generateUUID() };
+
+	                nucs.push(self.nodes.length + 1);
+	                nucs.push(self.nodes.length + 2);
+	                self.nodes.push(newNode1);
+	                self.nodes.push(newNode2);
+	            }
+
+	            self.addFakeNode(nucs);
+	        }
+
+	        return self;
+	    };
+
+	    self.updateLinkUids = function () {
+	        for (var i = 0; i < self.links.length; i++) {
+	            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
+	        }
+
+	        return self;
+	    };
+
+	    self.addFakeNode = function (nucs) {
+	        var linkLength = 18; //make sure this is consistent with the value in force.js
+	        var nodeWidth = 6;
+	        var angle = 3.1415 * 2 / (2 * nucs.length);
+	        var radius = linkLength / (2 * Math.tan(angle));
+
+	        var fakeNodeUid = '';
+
+	        for (var i = 0; i < nucs.length; i++) {
+	            fakeNodeUid += self.nodes[nucs[i] - 1].uid;
+	        }var newNode = { 'name': '',
+	            'num': -1,
+	            //'radius': 18 * radius -6,
+	            'radius': radius,
+	            'rna': self,
+	            'nodeType': 'middle',
+	            'elemType': 'f',
+	            'nucs': nucs,
+	            'uid': fakeNodeUid };
+	        self.nodes.push(newNode);
+
+	        var newX = 0;
+	        var newY = 0;
+	        var coordsCounted = 0;
+
+	        angle = (nucs.length - 2) * 3.14159 / (2 * nucs.length);
+	        radius = 0.5 / Math.cos(angle);
+
+	        for (var j = 0; j < nucs.length; j++) {
+	            if (nucs[j] === 0 || nucs[j] > self.dotbracket.length) continue;
+
+	            //link to the center node
+	            self.links.push({ 'source': self.nodes[nucs[j] - 1],
+	                'target': self.nodes[self.nodes.length - 1],
+	                'linkType': 'fake',
+	                'value': radius,
+	                'uid': generateUUID() });
+
+	            if (nucs.length > 4) {
+	                //link across the loop
+	                self.links.push({ 'source': self.nodes[nucs[j] - 1],
+	                    'target': self.nodes[nucs[(j + Math.floor(nucs.length / 2)) % nucs.length] - 1],
+	                    'linkType': 'fake',
+	                    'value': radius * 2,
+	                    'uid': generateUUID() });
+	            }
+
+	            var ia = (nucs.length - 2) * 3.14159 / nucs.length;
+	            var c = 2 * Math.cos(3.14159 / 2 - ia / 2);
+	            //link to over-neighbor
+	            self.links.push({ 'source': self.nodes[nucs[j] - 1],
+	                'target': self.nodes[nucs[(j + 2) % nucs.length] - 1],
+	                'linkType': 'fake',
+	                'value': c });
+
+	            // calculate the mean of the coordinats in this loop
+	            // and place the fake node there
+	            var fromNode = self.nodes[nucs[j] - 1];
+	            if ('x' in fromNode) {
+	                newX += fromNode.x;
+	                newY += fromNode.y;
+
+	                coordsCounted += 1;
+	            }
+	        }
+
+	        if (coordsCounted > 0) {
+	            // the nucleotides had set positions so we can calculate the position
+	            // of the fake node
+	            newNode.x = newX / coordsCounted;
+	            newNode.y = newY / coordsCounted;
+	            newNode.px = newNode.x;
+	            newNode.py = newNode.y;
+	        }
+
+	        return self;
+	    };
+
+	    self.connectFakeNodes = function () {
+	        var linkLength = 18;
+
+	        // We want to be able to connect all of the fake nodes
+	        // and create a structure consisting of just them
+	        var filterOutNonFakeNodes = function filterOutNonFakeNodes(d) {
+	            return d.nodeType == 'middle';
+	        };
+
+	        var nucsToNodes = {};
+	        var fakeNodes = self.nodes.filter(filterOutNonFakeNodes);
+	        var linked = {};
+
+	        // initialize the nucleotides to nodes
+	        for (var i = 1; i <= self.nodes.length; i++) {
+	            nucsToNodes[i] = [];
+	        }for (var i = 0; i < fakeNodes.length; i++) {
+	            var thisNode = fakeNodes[i];
+
+	            // each fake node represents a certain set of nucleotides (thisNode.nucs)
+	            for (var j = 0; j < thisNode.nucs.length; j++) {
+	                var thisNuc = thisNode.nucs[j];
+
+	                // check to see if this nucleotide has been seen in another fake node
+	                // if it has, then we add a link between the two nodes
+	                for (var k = 0; k < nucsToNodes[thisNuc].length; k++) {
+	                    if (JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort()) in linked) continue; //already linked
+
+	                    var distance = nucsToNodes[thisNuc][k].radius + thisNode.radius;
+
+	                    self.links.push({ 'source': nucsToNodes[thisNuc][k],
+	                        'target': thisNode,
+	                        'value': distance / linkLength,
+	                        'linkType': 'fake_fake' });
+
+	                    // note that we've already seen this link
+	                    linked[JSON.stringify([nucsToNodes[thisNuc][k].uid, thisNode.uid].sort())] = true;
+	                }
+
+	                nucsToNodes[thisNuc].push(thisNode);
+	            }
+	        }
+
+	        return self;
+	    };
+
+	    self.addExtraLinks = function (extraLinks) {
+	        if (typeof extraLinks == 'undefined') return self;
+
+	        for (var i = 0; i < extraLinks.length; i++) {
+	            var source = self.getNodeFromNucleotides(extraLinks[i].from);
+	            var target = self.getNodeFromNucleotides(extraLinks[i].to);
+
+	            var newLink = { 'source': source, 'target': target, 'linkType': 'extra',
+	                'extraLinkType': extraLinks[i].linkType, 'uid': generateUUID() };
+
+	            self.links.push(newLink);
+	        }
+
+	        return self;
+	    };
+
+	    self.elementsToJson = function () {
+	        /* Convert a set of secondary structure elements to a json
+	         * representation of the graph that can be used with d3's
+	         * force-directed layout to generate a visualization of 
+	         * the structure.
+	         */
+	        var pt = self.pairtable;
+	        var elements = self.elements;
+
+	        self.nodes = [];
+	        self.links = [];
+
+	        //create a reverse lookup so we can find out the type
+	        //of element that a node is part of
+	        var elemTypes = {};
+
+	        //sort so that we count stems last
+	        self.elements.sort();
+
+	        for (var i = 0; i < self.elements.length; i++) {
+	            var nucs = self.elements[i][2];
+	            for (var j = 0; j < nucs.length; j++) {
+	                elemTypes[nucs[j]] = self.elements[i][0];
+	            }
+	        }
+
+	        for (var i = 1; i <= pt[0]; i++) {
+	            var nodeName = self.seq[i - 1];
+
+	            if (self.dotBracketBreaks.indexOf(i - 1) >= 0 || self.dotBracketBreaks.indexOf(i - 2) >= 0) {
+	                nodeName = '';
+	            }
+
+	            //create a node for each nucleotide
+	            self.nodes.push({ 'name': nodeName,
+	                'num': i + self.startNumberArray[i - 1] - 1,
+	                'radius': 5,
+	                'rna': self,
+	                'nodeType': 'nucleotide',
+	                'structName': self.structName,
+	                'elemType': elemTypes[i],
+	                'uid': generateUUID(),
+	                'linked': false });
+	        }
+
+	        for (var i = 0; i < self.nodes.length; i++) {
+	            if (i === 0) self.nodes[i].prevNode = null;else {
+	                self.nodes[i].prevNode = self.nodes[i - 1];
+	            }
+
+	            if (i == self.nodes.length - 1) self.nodes[i].nextNode = null;else {
+	                self.nodes[i].nextNode = self.nodes[i + 1];
+	            }
+	        }
+
+	        for (var i = 1; i <= pt[0]; i++) {
+
+	            if (pt[i] !== 0) {
+	                // base-pair links
+	                self.links.push({ 'source': self.nodes[i - 1],
+	                    'target': self.nodes[pt[i] - 1],
+	                    'linkType': 'basepair',
+	                    'value': 1,
+	                    'uid': generateUUID() });
+	            }
+
+	            if (i > 1) {
+	                // backbone links
+	                if (self.dotBracketBreaks.indexOf(i - 1) === -1 && self.dotBracketBreaks.indexOf(i - 2) == -1 && self.dotBracketBreaks.indexOf(i - 3) == -1) {
+	                    // there is no break in the strands here
+	                    // we can add a backbone link
+	                    self.links.push({ 'source': self.nodes[i - 2],
+	                        'target': self.nodes[i - 1],
+	                        'linkType': 'backbone',
+	                        'value': 1,
+	                        'uid': generateUUID() });
+	                    self.nodes[i - 1].linked = true;
+	                }
+	            }
+	        }
+
+	        //add the pseudoknot links
+	        for (var i = 0; i < self.pseudoknotPairs.length; i++) {
+	            self.links.push({ 'source': self.nodes[self.pseudoknotPairs[i][0] - 1],
+	                'target': self.nodes[self.pseudoknotPairs[i][1] - 1],
+	                'linkType': 'pseudoknot',
+	                'value': 1,
+	                'uid': generateUUID() });
+	        }
+
+	        if (self.circular) {
+	            self.links.push({ 'source': self.nodes[0],
+	                'target': self.nodes[self.rnaLength - 1],
+	                'linkType': 'backbone',
+	                'value': 1,
+	                'uid': generateUUID() });
+	        }
+
+	        return self;
+	    };
+
+	    self.ptToElements = function (pt, level, i, j) {
+	        /* Convert a pair table to a list of secondary structure 
+	         * elements:
+	         *
+	         * [['s',1,[2,3]]
+	         *
+	         * The 's' indicates that an element can be a stem. It can also be
+	         * an interior loop ('i'), a hairpin loop ('h') or a multiloop ('m')
+	         *
+	         * The second number (1 in this case) indicates the depth or
+	         * how many base pairs have to be broken to get to this element.
+	         *
+	         * Finally, there is the list of nucleotides which are part of
+	         * of this element.
+	         */
+	        var elements = [];
+	        var u5 = [i - 1];
+	        var u3 = [j + 1];
+
+	        if (i > j) return [];
+
+	        //iterate over the unpaired regions on either side
+	        //this is either 5' and 3' unpaired if level == 0
+	        //or an interior loop or a multiloop
+	        for (; pt[i] === 0; i++) {
+	            u5.push(i);
+	        }
+	        for (; pt[j] === 0; j--) {
+	            u3.push(j);
+	        }
+
+	        if (i > j) {
+	            //hairpin loop or one large unpaired molecule
+	            u5.push(i);
+	            if (level === 0) return [['e', level, u5.sort(numberSort)]];else {
+	                // check to see if we have chain breaks due
+	                // to multiple strands in the input
+	                var external = false;
+	                var left = [];
+	                var right = [];
+	                for (var k = 0; k < u5.length; k++) {
+	                    if (external) right.push(u5[k]);else left.push(u5[k]);
+
+	                    if (self.dotBracketBreaks.indexOf(u5[k]) >= 0) external = true;
+	                }
+
+	                if (external) {
+	                    return [['h', level, u5.sort(numberSort)]];
+	                } else
+	                    // if not, this is a simple hairpin loop
+	                    return [['h', level, u5.sort(numberSort)]];
+	            }
+	        }
+
+	        if (pt[i] != j) {
+	            //multiloop
+	            var m = u5;
+	            var k = i;
+
+	            // the nucleotide before and the starting nucleotide
+	            m.push(k);
+	            while (k <= j) {
+	                // recurse into a stem
+	                elements = elements.concat(self.ptToElements(pt, level, k, pt[k]));
+
+	                // add the nucleotides between stems
+	                m.push(pt[k]);
+	                k = pt[k] + 1;
+	                for (; pt[k] === 0 && k <= j; k++) {
+	                    m.push(k);
+	                }
+	                m.push(k);
+	            }
+	            m.pop();
+	            m = m.concat(u3);
+
+	            if (m.length > 0) {
+	                if (level === 0) elements.push(['e', level, m.sort(numberSort)]);else elements.push(['m', level, m.sort(numberSort)]);
+	            }
+
+	            return elements;
+	        }
+
+	        if (pt[i] === j) {
+	            //interior loop
+	            u5.push(i);
+	            u3.push(j);
+
+	            var combined = u5.concat(u3);
+	            if (combined.length > 4) {
+	                if (level === 0) elements.push(['e', level, u5.concat(u3).sort(numberSort)]);else elements.push(['i', level, u5.concat(u3).sort(numberSort)]);
+	            }
+	        }
+
+	        var s = [];
+	        //go through the stem
+	        while (pt[i] === j && i < j) {
+	            //one stem
+	            s.push(i);
+	            s.push(j);
+
+	            i += 1;
+	            j -= 1;
+
+	            level += 1;
+	        }
+
+	        u5 = [i - 1];
+	        u3 = [j + 1];
+	        elements.push(['s', level, s.sort(numberSort)]);
+
+	        return elements.concat(self.ptToElements(pt, level, i, j));
+	    };
+
+	    self.addLabels = function (startNumber, labelInterval) {
+	        if (arguments.length === 0) {
+	            startNumber = 1;
+	            labelInterval = 10;
+	        }
+
+	        if (arguments.length === 1) labelInterval = 10;
+
+	        if (labelInterval === 0) return self;
+
+	        if (labelInterval <= 0) console.log('The label interval entered in invalid:', labelInterval);
+
+	        for (var i = 1; i <= self.pairtable[0]; i++) {
+	            // add labels
+	            if (i % labelInterval === 0) {
+	                //create a node for each label
+	                var newX, newY;
+
+	                var thisNode = self.nodes[i - 1];
+	                var prevNode, nextNode;
+	                var prevVec, nextVec;
+
+	                if (self.rnaLength == 1) {
+	                    nextVec = [thisNode.x - 15, thisNode.y];
+	                    prevVec = [thisNode.x - 15, thisNode.y];
+	                } else {
+	                    // if we're labelling the first node, then label it in relation to the last
+	                    if (i == 1) prevNode = self.nodes[self.rnaLength - 1];else prevNode = self.nodes[i - 2];
+
+	                    // if we're labelling the last node, then label it in relation to the first
+	                    if (i == self.rnaLength) nextNode = self.nodes[0];else nextNode = self.nodes[i];
+
+	                    // this nucleotide and its neighbors are paired
+	                    if (self.pairtable[nextNode.num] !== 0 && self.pairtable[prevNode.num] !== 0 && self.pairtable[thisNode.num] !== 0) {
+	                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num] - 1];
+	                    }
+
+	                    // this node is paired but at least one of its neighbors is unpaired
+	                    // place the label in the direction of the two neighbors
+	                    if (self.pairtable[thisNode.num] !== 0 && (self.pairtable[nextNode.num] === 0 || self.pairtable[prevNode.num] === 0)) {
+	                        nextVec = [thisNode.x - nextNode.x, thisNode.y - nextNode.y];
+	                        prevVec = [thisNode.x - prevNode.x, thisNode.y - prevNode.y];
+	                    } else {
+	                        nextVec = [nextNode.x - thisNode.x, nextNode.y - thisNode.y];
+	                        prevVec = [prevNode.x - thisNode.x, prevNode.y - thisNode.y];
+	                    }
+	                }
+
+	                var combinedVec = [nextVec[0] + prevVec[0], nextVec[1] + prevVec[1]];
+	                var vecLength = Math.sqrt(combinedVec[0] * combinedVec[0] + combinedVec[1] * combinedVec[1]);
+	                var normedVec = [combinedVec[0] / vecLength, combinedVec[1] / vecLength];
+	                var offsetVec = [-15 * normedVec[0], -15 * normedVec[1]];
+
+	                var newX = self.nodes[i - 1].x + offsetVec[0];
+	                var newY = self.nodes[i - 1].y + offsetVec[1];
+
+	                var newNode = { 'name': i + self.startNumberArray[i - 1] - 1,
+	                    'num': -1,
+	                    'radius': 6,
+	                    'rna': self,
+	                    'nodeType': 'label',
+	                    'structName': self.structName,
+	                    'elemType': 'l',
+	                    'x': newX,
+	                    'y': newY,
+	                    'px': newX,
+	                    'py': newY,
+	                    'uid': generateUUID() };
+	                var newLink = { 'source': self.nodes[i - 1],
+	                    'target': newNode,
+	                    'value': 1,
+	                    'linkType': 'label_link',
+	                    'uid': generateUUID() };
+
+	                self.nodes.push(newNode);
+	                self.links.push(newLink);
+	            }
+	        }
+
+	        return self;
+	    };
+
+	    self.recalculateElements = function () {
+	        self.removePseudoknots();
+	        self.elements = self.ptToElements(self.pairtable, 0, 1, self.dotbracket.length);
+
+	        if (self.circular) {
+	            //check to see if the external loop is a hairpin or a multiloop
+	            externalLoop = self.elements.filter(function (d) {
+	                if (d[0] == 'e') return true;
+	            });
+
+	            if (externalLoop.length > 0) {
+	                eloop = externalLoop[0];
+	                nucs = eloop[2].sort(numberSort);
+
+	                prev = nucs[0];
+	                hloop = true;
+	                numGreater = 0;
+	                for (var i = 1; i < nucs.length; i++) {
+	                    if (nucs[i] - prev > 1) {
+	                        numGreater += 1;
+	                    }
+	                    prev = nucs[i];
+	                }
+
+	                if (numGreater == 1) {
+	                    eloop[0] = 'h';
+	                } else if (numGreater == 2) {
+	                    eloop[0] = 'i';
+	                } else {
+	                    eloop[0] = 'm';
+	                }
+	            }
+	        }
+
+	        return self;
+	    };
+
+	    self.reassignLinkUids = function () {
+	        // reassign uids to the links, corresponding to the uids of the two nodes
+	        // they connect
+	        var i;
+
+	        for (var i = 0; i < self.links.length; i++) {
+	            self.links[i].uid = self.links[i].source.uid + self.links[i].target.uid;
+	        }
+
+	        return self;
+	    };
+
+	    self.removePseudoknots = function () {
+	        if (self.pairtable.length > 1) self.pseudoknotPairs = self.pseudoknotPairs.concat(_rnautils.rnaUtilities.removePseudoknotsFromPairtable(self.pairtable));
+
+	        return self;
+	    };
+
+	    self.addPseudoknots = function () {
+	        /* Add all of the pseudoknot pairs which are stored outside
+	         * of the pairtable back to the pairtable
+	         */
+	        var pt = self.pairtable;
+	        var pseudoknotPairs = self.pseudoknotPairs;
+
+	        for (var i = 0; i < pseudoknotPairs.length; i++) {
+	            pt[pseudoknotPairs[i][0]] = pseudoknotPairs[i][1];
+	            pt[pseudoknotPairs[i][1]] = pseudoknotPairs[i][0];
+	        }
+
+	        self.pseudoknotPairs = [];
+	        return self;
+	    };
+
+	    self.addName = function (name) {
+	        if (typeof name == 'undefined') {
+	            self.name = '';
+	            return self;
+	        } else {
+	            self.name = name;
+	            return self;
+	        }
+	    };
+
+	    if (self.rnaLength > 0) self.recalculateElements();
+	}
+
+	function moleculesToJson(moleculesJson) {
+	    /* Convert a list of RNA and protein molecules to a list of RNAGraph
+	     * ProteinGraph and extraLinks structure */
+
+	    var nodes = {}; //index the nodes by uid
+	    var graphs = [];
+	    var extraLinks = [];
+
+	    // Create the graphs for each molecule
+	    for (var i = 0; i < moleculesJson.molecules.length; i++) {
+	        var molecule = moleculesJson.molecules[i];
+	        var rg;
+
+	        if (molecule.type == 'rna') {
+	            rg = new RNAGraph(molecule.seq, molecule.ss, molecule.header);
+	            rg.circularizeExternal = true;
+	            rg.elementsToJson().addPositions('nucleotide', molecule.positions).addLabels().reinforceStems().reinforceLoops();
+	        } else if (molecule.type == 'protein') {
+	            rg = new ProteinGraph(molecule.header, molecule.size);
+	        }
+
+	        rg.addUids(molecule.uids);
+
+	        for (var j = 0; j < rg.nodes.length; j++) {
+	            nodes[rg.nodes[j].uid] = rg.nodes[j];
+	        }
+
+	        graphs.push(rg);
+	    }
+
+	    //Add the extra links
+	    for (var i = 0; i < moleculesJson.extraLinks.length; i++) {
+	        link = moleculesJson.extraLinks[i];
+
+	        link.source = nodes[link.source];
+	        link.target = nodes[link.target];
+	        link.uid = generateUUID();
+
+	        extraLinks.push(link);
+	    }
+
+	    return { 'graphs': graphs, 'extraLinks': extraLinks };
+	};
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	!function (r, t) {
+	  "object" == ( false ? "undefined" : _typeof(exports)) && "object" == ( false ? "undefined" : _typeof(module)) ? module.exports = t() :  true ? !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (t), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : "object" == (typeof exports === "undefined" ? "undefined" : _typeof(exports)) ? exports.rnautils = t() : r.rnautils = t();
+	}(undefined, function () {
+	  return function (r) {
+	    function t(n) {
+	      if (e[n]) return e[n].exports;var o = e[n] = { exports: {}, id: n, loaded: !1 };return r[n].call(o.exports, o, o.exports, t), o.loaded = !0, o.exports;
+	    }var e = {};return t.m = r, t.c = e, t.p = "", t(0);
+	  }([function (r, t, e) {
+	    r.exports = e(1);
+	  }, function (r, t) {
+	    "use strict";
+	    function e(r, t) {
+	      if (r === t) return !0;if (null === r || null === t) return !1;if (r.length != t.length) return !1;for (var e = 0; e < r.length; ++e) {
+	        if (r[e] !== t[e]) return !1;
+	      }return !0;
+	    }function n() {
+	      var r = this;r.bracketLeft = "([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), r.bracketRight = ")]}>abcdefghijklmnopqrstuvwxyz".split(""), r.inverseBrackets = function (r) {
+	        for (var t = {}, e = 0; e < r.length; e++) {
+	          t[r[e]] = e;
+	        }return t;
+	      }, r.maximumMatching = function (r) {
+	        for (var t = r[0], e = 0, n = new Array(t + 1), o = 0; t >= o; o++) {
+	          n[o] = new Array(t + 1);for (var a = o; t >= a; a++) {
+	            n[o][a] = 0;
+	          }
+	        }for (var s = 0, o = t - e - 1; o > 0; o--) {
+	          for (var a = o + e + 1; t >= a; a++) {
+	            s = n[o][a - 1];for (var i = a - e - 1; i >= o; i--) {
+	              r[i] === a && (s = Math.max(s, (i > o ? n[o][i - 1] : 0) + 1 + (a - i - 1 > 0 ? n[i + 1][a - 1] : 0)));
+	            }n[o][a] = s;
+	          }
+	        }return s = n[1][t], n;
+	      }, r.backtrackMaximumMatching = function (t, e) {
+	        var n = Array.apply(null, Array(t.length)).map(function () {
+	          return 0;
+	        });return r.mmBt(t, n, e, 1, t.length - 1), n;
+	      }, r.mmBt = function (t, e, n, o, a) {
+	        var s = t[o][a],
+	            i = 0;if (!(i > a - o - 1)) {
+	          if (t[o][a - 1] == s) return void r.mmBt(t, e, n, o, a - 1);for (var l = a - i - 1; l >= o; l--) {
+	            if (n[a] === l) {
+	              var u = l > o ? t[o][l - 1] : 0,
+	                  c = a - l - 1 > 0 ? t[l + 1][a - 1] : 0;if (u + c + 1 == s) return e[l] = a, e[a] = l, l > o && r.mmBt(t, e, n, o, l - 1), void r.mmBt(t, e, n, l + 1, a - 1);
+	            }
+	          }console.log("FAILED!!!" + o + "," + a + ": backtracking failed!");
+	        }
+	      }, r.dotbracketToPairtable = function (t) {
+	        var e = Array.apply(null, new Array(t.length + 1)).map(Number.prototype.valueOf, 0);e[0] = t.length;for (var n = {}, o = 0; o < r.bracketLeft.length; o++) {
+	          n[o] = [];
+	        }for (var a = r.inverseBrackets(r.bracketLeft), s = r.inverseBrackets(r.bracketRight), o = 0; o < t.length; o++) {
+	          var i = t[o],
+	              l = o + 1;if ("." == i || "o" == i) e[l] = 0;else if (i in a) n[a[i]].push(l);else {
+	            if (!(i in s)) throw "Unknown symbol in dotbracket string";var u = n[s[i]].pop();e[l] = u, e[u] = l;
+	          }
+	        }for (var c in n) {
+	          if (n[c].length > 0) throw "Unmatched base at position " + n[c][0];
+	        }return e;
+	      }, r.insertIntoStack = function (r, t, e) {
+	        for (var n = 0; r[n].length > 0 && r[n][r[n].length - 1] < e;) {
+	          n += 1;
+	        }return r[n].push(e), n;
+	      }, r.deleteFromStack = function (r, t) {
+	        for (var e = 0; 0 === r[e].length || r[e][r[e].length - 1] != t;) {
+	          e += 1;
+	        }return r[e].pop(), e;
+	      }, r.pairtableToDotbracket = function (t) {
+	        for (var e = {}, n = 0; n < t[0]; n++) {
+	          e[n] = [];
+	        }for (var n, o = {}, a = "", n = 1; n < t[0] + 1; n++) {
+	          if (0 !== t[n] && t[n] in o) throw "Invalid pairtable contains duplicate entries";o[t[n]] = !0, a += 0 === t[n] ? "." : t[n] > n ? r.bracketLeft[r.insertIntoStack(e, n, t[n])] : r.bracketRight[r.deleteFromStack(e, n)];
+	        }return a;
+	      }, r.findUnmatched = function (t, e, n) {
+	        for (var o, a = [], s = [], i = e, l = n, o = e; n >= o; o++) {
+	          0 !== t[o] && (t[o] < e || t[o] > n) && s.push([o, t[o]]);
+	        }for (var o = i; l >= o; o++) {
+	          for (; 0 === t[o] && l >= o;) {
+	            o++;
+	          }for (n = t[o]; t[o] === n;) {
+	            o++, n--;
+	          }a = a.concat(r.findUnmatched(t, o, n));
+	        }return s.length > 0 && a.push(s), a;
+	      }, r.removePseudoknotsFromPairtable = function (t) {
+	        for (var e = r.maximumMatching(t), n = r.backtrackMaximumMatching(e, t), o = [], a = 1; a < t.length; a++) {
+	          t[a] < a || n[a] != t[a] && (o.push([a, t[a]]), t[t[a]] = 0, t[a] = 0);
+	        }return o;
+	      }, r.ptToElements = function (t, e, n, o, s) {
+	        var i = [],
+	            l = [n - 1],
+	            u = [o + 1];if (arguments.length < 5 && (s = []), n > o) return [];for (; 0 === t[n]; n++) {
+	          l.push(n);
+	        }for (; 0 === t[o]; o--) {
+	          u.push(o);
+	        }if (n > o) {
+	          if (l.push(n), 0 === e) return [["e", e, l.sort(a)]];for (var c = !1, f = [], p = [], h = 0; h < l.length; h++) {
+	            c ? p.push(l[h]) : f.push(l[h]), s.indexOf(l[h]) >= 0 && (c = !0);
+	          }return c ? [["h", e, l.sort(a)]] : [["h", e, l.sort(a)]];
+	        }if (t[n] != o) {
+	          var m = l,
+	              h = n;for (m.push(h); o >= h;) {
+	            for (i = i.concat(r.ptToElements(t, e, h, t[h], s)), m.push(t[h]), h = t[h] + 1; 0 === t[h] && o >= h; h++) {
+	              m.push(h);
+	            }m.push(h);
+	          }return m.pop(), m = m.concat(u), m.length > 0 && (0 === e ? i.push(["e", e, m.sort(a)]) : i.push(["m", e, m.sort(a)])), i;
+	        }if (t[n] === o) {
+	          l.push(n), u.push(o);var v = l.concat(u);v.length > 4 && (0 === e ? i.push(["e", e, l.concat(u).sort(a)]) : i.push(["i", e, l.concat(u).sort(a)]));
+	        }for (var g = []; t[n] === o && o > n;) {
+	          g.push(n), g.push(o), n += 1, o -= 1, e += 1;
+	        }return l = [n - 1], u = [o + 1], i.push(["s", e, g.sort(a)]), i.concat(r.ptToElements(t, e, n, o, s));
+	      };
+	    }function o(r) {
+	      var t = this;return t.colorsText = r, t.parseRange = function (r) {
+	        for (var t = r.split(","), e = [], n = 0; n < t.length; n++) {
+	          var o = t[n].split("-");if (1 == o.length) e.push(parseInt(o[0]));else if (2 == o.length) for (var a = parseInt(o[0]), s = parseInt(o[1]), i = a; s >= i; i++) {
+	            e.push(i);
+	          } else console.log("Malformed range (too many dashes):", r);
+	        }return e;
+	      }, t.parseColorText = function (r) {
+	        for (var e = r.split("\n"), n = "", o = 1, a = { colorValues: { "": {} }, range: ["white", "steelblue"] }, s = [], i = 0; i < e.length; i++) {
+	          if (">" != e[i][0]) for (var l = e[i].trim().split(/[\s]+/), u = 0; u < l.length; u++) {
+	            if (isNaN(l[u])) {
+	              if (0 === l[u].search("range")) {
+	                var c = l[u].split("="),
+	                    f = c[1].split(":");a.range = [f[0], f[1]];continue;
+	              }if (0 == l[u].search("domain")) {
+	                var p = l[u].split("="),
+	                    f = p[1].split(":");a.domain = [f[0], f[1]];continue;
+	              }for (var h = l[u].split(":"), m = t.parseRange(h[0]), v = h[1], g = 0; g < m.length; g++) {
+	                isNaN(v) ? a.colorValues[n][m[g]] = v : (a.colorValues[n][m[g]] = +v, s.push(Number(v)));
+	              }
+	            } else a.colorValues[n][o] = Number(l[u]), o += 1, s.push(Number(l[u]));
+	          } else n = e[i].trim().slice(1), o = 1, a.colorValues[n] = {};
+	        }return "domain" in a || (a.domain = [Math.min.apply(null, s), Math.max.apply(null, s)]), t.colorsJson = a, t;
+	      }, t.normalizeColors = function () {
+	        var r;for (var e in t.colorsJson) {
+	          var n = Number.MAX_VALUE,
+	              o = Number.MIN_VALUE;for (var a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (n > r && (n = r), r > o && (o = r));
+	          }for (a in t.colorsJson.colorValues[e]) {
+	            r = t.colorsJson.colorValues[e][a], "number" == typeof r && (t.colorsJson.colorValues[e][a] = (r - n) / (o - n));
+	          }
+	        }return t;
+	      }, t.parseColorText(t.colorsText), t;
+	    }Object.defineProperty(t, "__esModule", { value: !0 }), t.arraysEqual = e, t.RNAUtilities = n, t.ColorScheme = o;var a = function a(r, t) {
+	      return r - t;
+	    };t.rnaUtilities = new n();
+	  }]);
+	});
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 4 */,
+/* 5 */,
+/* 6 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
+
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+
+		update(obj);
+
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+
+	var replaceText = (function () {
+		var textStore = [];
+
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+		var sourceMap = obj.sourceMap;
+
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+		var sourceMap = obj.sourceMap;
+
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+
+		var blob = new Blob([css], { type: "text/css" });
+
+		var oldSrc = linkElement.href;
+
+		linkElement.href = URL.createObjectURL(blob);
+
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ },
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */,
+/* 12 */,
+/* 13 */,
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */,
+/* 18 */,
+/* 19 */,
+/* 20 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.simpleXyCoordinates = simpleXyCoordinates;
+	function simpleXyCoordinates(pair_table) {
+	    var INIT_ANGLE = 0.; /* initial bending angle */
+	    var INIT_X = 100.; /* coordinate of first digit */
+	    var INIT_Y = 100.; /* see above */
+	    var RADIUS = 15.;
+
+	    var x = [],
+	        y = [];
+
+	    var i, len;
+	    var alpha;
+
+	    len = pair_table[0];
+	    var angle = Array.apply(null, new Array(len + 5)).map(Number.prototype.valueOf, 0);
+	    var loop_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
+	    var stack_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
+
+	    var lp = 0;
+	    var stk = 0;
+	    var PIHALF = Math.PI / 2;
+
+	    var loop = function loop(i, j, pair_table)
+	    /* i, j are the positions AFTER the last pair of a stack; i.e
+	       i-1 and j+1 are paired. */
+	    {
+	        var count = 2; /* counts the VERTICES of a loop polygon; that's
+	                          NOT necessarily the number of unpaired bases!
+	                          Upon entry the loop has already 2 vertices, namely
+	                          the pair i-1/j+1.  */
+
+	        var r = 0,
+	            bubble = 0; /* bubble counts the unpaired digits in loops */
+
+	        var i_old, partner, k, l, start_k, start_l, fill, ladder;
+	        var begin, v, diff;
+	        var polygon;
+
+	        var remember = Array.apply(null, new Array(3 + Math.floor((j - i) / 5) * 2)).map(Number.prototype.valueOf, 0);
+
+	        i_old = i - 1, j++; /* j has now been set to the partner of the
+	                               previous pair for correct while-loop
+	                               termination.  */
+	        while (i != j) {
+	            partner = pair_table[i];
+	            if (!partner || i == 0) i++, count++, bubble++;else {
+	                count += 2;
+	                k = i, l = partner; /* beginning of stack */
+	                remember[++r] = k;
+	                remember[++r] = l;
+	                i = partner + 1; /* next i for the current loop */
+
+	                start_k = k, start_l = l;
+	                ladder = 0;
+	                do {
+	                    k++, l--, ladder++; /* go along the stack region */
+	                } while (pair_table[k] == l && pair_table[k] > k);
+
+	                fill = ladder - 2;
+	                if (ladder >= 2) {
+	                    angle[start_k + 1 + fill] += PIHALF; /*  Loop entries and    */
+	                    angle[start_l - 1 - fill] += PIHALF; /*  exits get an        */
+	                    angle[start_k] += PIHALF; /*  additional PI/2.    */
+	                    angle[start_l] += PIHALF; /*  Why ? (exercise)    */
+	                    if (ladder > 2) {
+	                        for (; fill >= 1; fill--) {
+	                            angle[start_k + fill] = Math.PI; /*  fill in the angles  */
+	                            angle[start_l - fill] = Math.PI; /*  for the backbone    */
+	                        }
+	                    }
+	                }
+	                stack_size[++stk] = ladder;
+	                if (k <= l) loop(k, l, pair_table);
+	            }
+	        }
+
+	        polygon = Math.PI * (count - 2) / count; /* bending angle in loop polygon */
+	        remember[++r] = j;
+	        begin = i_old < 0 ? 0 : i_old;
+	        for (v = 1; v <= r; v++) {
+	            diff = remember[v] - begin;
+	            for (fill = 0; fill <= diff; fill++) {
+	                angle[begin + fill] += polygon;
+	            }if (v > r) break;
+	            begin = remember[++v];
+	        }
+	        loop_size[++lp] = bubble;
+	    };
+
+	    loop(0, len + 1, pair_table);
+	    loop_size[lp] -= 2; /* correct for cheating with function loop */
+
+	    alpha = INIT_ANGLE;
+	    x[0] = INIT_X;
+	    y[0] = INIT_Y;
+
+	    var poss = [];
+
+	    poss.push([x[0], y[0]]);
+	    for (i = 1; i < len; i++) {
+	        x[i] = x[i - 1] + RADIUS * Math.cos(alpha);
+	        y[i] = y[i - 1] + RADIUS * Math.sin(alpha);
+
+	        poss.push([x[i], y[i]]);
+	        alpha += Math.PI - angle[i + 1];
+	    }
+
+	    return poss;
+	}
+
+/***/ },
+/* 21 */,
+/* 22 */,
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.rnaPlot = rnaPlot;
+
+	var _simplernaplot = __webpack_require__(20);
+
+	var _rnagraph = __webpack_require__(1);
+
+	var _rnautils = __webpack_require__(2);
+
+	__webpack_require__(28);
+
+	function isNormalInteger(str) {
+	    //http://stackoverflow.com/a/10834843/899470
+	    return (/^\+?(0|[1-9]\d*)$/.test(str)
+	    );
+	}
+
+	if (typeof String.prototype.trim === 'undefined') {
+	    String.prototype.trim = function () {
+	        return String(this).replace(/^\s+|\s+$/g, '');
+	    };
+	}
+
+	function rnaPlot() {
+	    var options = {
+	        'width': 400,
+	        'height': 400,
+	        'nucleotideRadius': 5,
+	        'rnaEdgePadding': 0, // how far the leftmost, rightmost, topmost and bottomost
+	        // nucleotides are from the edge of the plot
+	        'labelInterval': 0,
+	        'showNucleotideLabels': true,
+	        'startNucleotideNumber': 1,
+	        'bundleExternalLinks': false
+	    };
+
+	    var xScale, yScale;
+
+	    function createTransformToFillViewport(xValues, yValues) {
+	        var molName = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+
+	        // create transform that will scale the x and y values so that
+	        // they fill the available viewport
+
+	        // find out leftmost, rightmost, topmost, bottommost positions of each
+	        // nucleotide so that we can create a scale
+	        var xExtent = d3.extent(xValues);
+	        var yExtent = d3.extent(yValues);
+
+	        var NAME_OFFSET = 30;
+	        if (molName != '') yExtent[1] += NAME_OFFSET;
+
+	        // add the radius of the nucleotides
+	        xExtent[0] -= options.nucleotideRadius + options.rnaEdgePadding;
+	        yExtent[0] -= options.nucleotideRadius + options.rnaEdgePadding;
+
+	        xExtent[1] += options.nucleotideRadius + options.rnaEdgePadding;
+	        yExtent[1] += options.nucleotideRadius + options.rnaEdgePadding;
+
+	        // find out how wide and height the molecule
+	        var xRange = xExtent[1] - xExtent[0];
+	        var yRange = yExtent[1] - yExtent[0];
+
+	        // how much wider / taller is it than the available viewport
+	        var xExtra = xRange - options.width;
+	        var yExtra = yRange - options.height;
+
+	        // once we have a scale for one dimension, we can create the scale for the other
+	        // keeping the same expansion / shrinking ratio
+	        function createOtherScale(firstScale, newDomain, newRange) {
+	            var scaleFactor = (firstScale.range()[1] - firstScale.range()[0]) / (firstScale.domain()[1] - firstScale.domain()[0]);
+	            var newWidth = (newDomain[1] - newDomain[0]) * scaleFactor;
+	            var newMargin = (newRange[1] - newRange[0] - newWidth) / 2;
+
+	            return { 'scaleFactor': scaleFactor,
+	                'scale': d3.scale.linear().domain(newDomain).range([newRange[0] + newMargin, newRange[1] - newMargin]) };
+	        }
+
+	        var ret;
+
+	        if (xExtra > yExtra) {
+	            // we have to shrink more in the x-dimension than the y
+	            xScale = d3.scale.linear().domain(xExtent).range([0, options.width]);
+
+	            ret = createOtherScale(xScale, yExtent, [0, options.height]);
+	            yScale = ret.scale;
+	        } else {
+	            // we have to shrink more in the x-dimension than the y
+	            yScale = d3.scale.linear().domain(yExtent).range([0, options.height]);
+
+	            ret = createOtherScale(yScale, xExtent, [0, options.width]);
+	            xScale = ret.scale;
+	        }
+
+	        var xOffset = xScale.range()[0] - xScale.domain()[0];
+	        var yOffset = yScale.range()[0] - yScale.domain()[0];
+
+	        return 'translate(' + -(xScale.domain()[0] * ret.scaleFactor - xScale.range()[0]) + ',' + -(yScale.domain()[0] * ret.scaleFactor - yScale.range()[0]) + ')' + 'scale(' + ret.scaleFactor + ')';
+	    }
+
+	    function createNucleotides(selection, nucleotideNodes) {
+	        // create groupings for each nucleotide and label
+	        var gs = selection.selectAll('.rna-base').data(nucleotideNodes).enter().append('svg:g').attr('transform', function (d) {
+	            return 'translate(' + d.x + ',' + d.y + ')';
+	        });
+
+	        var circles = gs.append('svg:circle').attr('r', options.nucleotideRadius).classed('rna-base', true);
+
+	        if (options.showNucleotideLabels) {
+	            var nucleotideLabels = gs.append('svg:text').text(function (d) {
+	                return d.name;
+	            }).attr('text-anchor', 'middle').attr('dominant-baseline', 'central').classed('nucleotide-label', true).append('svg:title').text(function (d) {
+	                return d.struct_name + ':' + d.num;
+	            });
+	        }
+	    }
+
+	    function createLabels(selection, labelNodes) {
+	        // create groupings for each nucleotide and label
+
+	        var gs = selection.selectAll('.rnaLabel').data(labelNodes).enter().append('svg:g').attr('transform', function (d) {
+	            return 'translate(' + d.x + ',' + d.y + ')';
+	        });
+
+	        var numberLabels = gs.append('svg:text').text(function (d) {
+	            return d.name;
+	        }).attr('text-anchor', 'middle').attr('font-weight', 'bold').attr('dominant-baseline', 'central').classed('number-label', true);
+	    }
+
+	    function createName(selection, name) {
+	        selection.append('svg:text').attr('transform', 'translate(' + xScale.invert(options.width / 2) + ',' + yScale.invert(options.height) + ')').attr('dy', -10).classed('rna-name', true).text(name);
+	    }
+
+	    function makeExternalLinksBundle(selection, links) {
+	        var nodesDict = {};
+	        var linksList = [];
+	        links = links.filter(function (d) {
+	            return d.linkType == 'correct' || d.linkType == 'incorrect' || d.linkType == 'extra';
+	        });
+
+	        selection.selectAll('[link-type=extra]').remove();
+
+	        for (var i = 0; i < links.length; i++) {
+	            if (links[i].source === null || links[i].target === null) continue;
+
+	            nodesDict[links[i].source.uid] = links[i].source;
+	            nodesDict[links[i].target.uid] = links[i].target;
+
+	            linksList.push({ 'source': links[i].source.uid, 'target': links[i].target.uid, 'linkType': links[i].linkType, 'extraLinkType': links[i].extraLinkType });
+	        }
+
+	        var fbundling = d3.ForceEdgeBundling().nodes(nodesDict).edges(linksList).compatibility_threshold(0.8).step_size(0.2);
+	        var results = fbundling();
+
+	        var d3line = d3.svg.line().x(function (d) {
+	            return d.x;
+	        }).y(function (d) {
+	            return d.y;
+	        }).interpolate('linear');
+
+	        for (var i = 0; i < results.length; i++) {
+	            var edge_subpoint_data = results[i];
+	            // for each of the arrays in the results
+	            // draw a line between the subdivions points for that edge
+
+	            selection.append('path').attr('d', d3line(edge_subpoint_data)).style('fill', 'none').attr('link-type', function (d) {
+	                return linksList[i].linkType;
+	            }).attr('extra-link-type', function (d) {
+	                return linksList[i].extraLinkType;
+	            }).style('stroke-opacity', 0.4); //use opacity as blending
+	        }
+	    }
+
+	    function createLinks(selection, links) {
+	        links = links.filter(function (d) {
+	            return d.source !== null && d.target !== null;
+	        });
+	        var gs = selection.selectAll('.rna-link').data(links).enter().append('svg:line').attr('x1', function (d) {
+	            return d.source.x;
+	        }).attr('x2', function (d) {
+	            return d.target.x;
+	        }).attr('y1', function (d) {
+	            return d.source.y;
+	        }).attr('y2', function (d) {
+	            return d.target.y;
+	        }).attr('link-type', function (d) {
+	            return d.linkType;
+	        }).attr('extra-link-type', function (d) {
+	            return d.extraLinkType;
+	        }).classed('rna-link', true);
+	    }
+
+	    function chart(selection) {
+	        selection.each(function (data) {
+	            // data should be a dictionary containing at least a structure
+	            // and possibly a sequence
+	            var rg = new _rnagraph.RNAGraph(data.sequence, data.structure, data.name).recalculateElements().elementsToJson().addName(data.name);
+
+	            data.rnaGraph = rg;
+	            // calculate the position of each nucleotide
+	            // the positions of the labels will be calculated in
+	            // the addLabels function
+	            //var positions = simpleXyCoordinates(rg.pairtable);
+	            var NAView = new NAView();
+
+	            var positions = naview.naview_xy_coordinates(rg.pairtable);
+	            rg.addPositions('nucleotide', positions).reinforceStems().reinforceLoops().addExtraLinks(data.extraLinks).addLabels(options.startNucleotideNumber, options.labelInterval);
+
+	            // create a transform that will fit the molecule to the
+	            // size of the viewport (canvas, svg, whatever)
+	            var fillViewportTransform = createTransformToFillViewport(rg.nodes.map(function (d) {
+	                return d.x;
+	            }), rg.nodes.map(function (d) {
+	                return d.y;
+	            }));
+
+	            var gTransform = d3.select(this).append('g').attr('transform', fillViewportTransform);
+
+	            var nucleotideNodes = rg.nodes.filter(function (d) {
+	                return d.nodeType == 'nucleotide';
+	            });
+
+	            var labelNodes = rg.nodes.filter(function (d) {
+	                return d.nodeType == 'label';
+	            });
+
+	            var links = rg.links;
+
+	            createLinks(gTransform, links);
+	            createNucleotides(gTransform, nucleotideNodes);
+	            createLabels(gTransform, labelNodes);
+	            createName(gTransform, data.name);
+
+	            if (options.bundleExternalLinks) {
+	                makeExternalLinksBundle(gTransform, links);
+	            }
+	        });
+	    }
+
+	    chart.width = function (_) {
+	        if (!arguments.length) return options.width;
+	        options.width = _;
+	        return chart;
+	    };
+
+	    chart.height = function (_) {
+	        if (!arguments.length) return options.height;
+	        options.height = _;
+	        return chart;
+	    };
+
+	    chart.showNucleotideLabels = function (_) {
+	        if (!arguments.length) return options.showNucleotideLabels;
+	        options.showNucleotideLabels = _;
+	        return chart;
+	    };
+
+	    chart.rnaEdgePadding = function (_) {
+	        if (!arguments.length) return options.rnaEdgePadding;
+	        options.rnaEdgePadding = _;
+	        return chart;
+	    };
+
+	    chart.nucleotideRadius = function (_) {
+	        if (!arguments.length) return options.nucleotideRadius;
+	        options.nucleotideRadius = _;
+	        return chart;
+	    };
+
+	    chart.labelInterval = function (_) {
+	        if (!arguments.length) return options.labelInterval;
+	        options.labelInterval = _;
+	        return chart;
+	    };
+
+	    chart.showNucleotideLabels = function (_) {
+	        if (!arguments.length) return options.showNucleotideLabels;
+	        options.showNucleotideLabels = _;
+	        return chart;
+	    };
+
+	    chart.startNucleotideNumber = function (_) {
+	        if (!arguments.length) return options.startNucleotideNumber;
+	        options.startNucleotideNumber = _;
+	        return chart;
+	    };
+
+	    chart.bundleExternalLinks = function (_) {
+	        if (!arguments.length) return options.bundleExternalLinks;
+	        options.bundleExternalLinks = _;
+	        return chart;
+	    };
+
+	    return chart;
+	}
+	var number_sort = function number_sort(a, b) {
+	    return a - b;
+	};
+
+	function RNAUtilities() {
+	    var self = this;
+
+	    // the brackets to use when constructing dotbracket strings
+	    // with pseudoknots
+	    self.bracket_left = '([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+	    self.bracket_right = ')]}>abcdefghijklmnopqrstuvwxyz'.split('');
+
+	    self.inverse_brackets = function (bracket) {
+	        res = {};
+	        for (i = 0; i < bracket.length; i++) {
+	            res[bracket[i]] = i;
+	        }
+	        return res;
+	    };
+
+	    self.maximumMatching = function maximumMatching(pt) {
+	        // Courtesy of the great Ronny Lorenz
+
+	        var n = pt[0];
+	        var TURN = 0; //minimal number of nucleotides in the hairpin
+
+	        /* array init */
+	        mm = new Array(n + 1);
+	        for (var i = 0; i <= n; i++) {
+	            mm[i] = new Array(n + 1);
+	            for (var j = i; j <= n; j++) {
+	                mm[i][j] = 0;
+	            }
+	        }
+	        var maximum = 0;
+
+	        /* actual computation */
+	        for (var i = n - TURN - 1; i > 0; i--) {
+
+	            for (var j = i + TURN + 1; j <= n; j++) {
+	                maximum = mm[i][j - 1];
+
+	                for (var l = j - TURN - 1; l >= i; l--) {
+	                    if (pt[l] === j) {
+
+	                        // we have a base pair here
+	                        maximum = Math.max(maximum, (l > i ? mm[i][l - 1] : 0) + 1 + (j - l - 1 > 0 ? mm[l + 1][j - 1] : 0));
+	                    }
+	                }
+
+	                mm[i][j] = maximum;
+	            }
+	        }maximum = mm[1][n];
+
+	        return mm;
+	    };
+
+	    self.backtrackMaximumMatching = function (mm, old_pt) {
+	        var pt = Array.apply(null, Array(mm.length)).map(function () {
+	            return 0;
+	        });
+	        //create an array containing zeros
+
+	        self.mm_bt(mm, pt, old_pt, 1, mm.length - 1);
+	        return pt;
+	    };
+
+	    self.mm_bt = function (mm, pt, old_pt, i, j) {
+	        // Create a pairtable from the backtracking
+	        var maximum = mm[i][j];
+	        var TURN = 0;
+
+	        if (j - i - 1 < TURN) return; /* no more pairs */
+
+	        if (mm[i][j - 1] == maximum) {
+	            /* j is unpaired */
+	            self.mm_bt(mm, pt, old_pt, i, j - 1);
+	            return;
+	        }
+
+	        for (var q = j - TURN - 1; q >= i; q--) {
+	            /* j is paired with some q */
+	            if (old_pt[j] !== q) continue;
+
+	            var left_part = q > i ? mm[i][q - 1] : 0;
+	            var enclosed_part = j - q - 1 > 0 ? mm[q + 1][j - 1] : 0;
+
+	            if (left_part + enclosed_part + 1 == maximum) {
+	                // there's a base pair between j and q
+	                pt[q] = j;
+	                pt[j] = q;
+
+	                if (i < q) self.mm_bt(mm, pt, old_pt, i, q - 1);
+
+	                self.mm_bt(mm, pt, old_pt, q + 1, j - 1);
+	                return;
+	            }
+	        }
+
+	        //alert(i + ',' + j + ': backtracking failed!');
+	        console.log('FAILED!!!' + i + ',' + j + ': backtracking failed!');
+	    };
+
+	    self.dotbracketToPairtable = function (dotbracket) {
+	        // create an array and initialize it to 0
+	        pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf, 0);
+
+	        //  the first element is always the length of the RNA molecule
+	        pt[0] = dotbracket.length;
+
+	        // store the pairing partners for each symbol
+	        stack = {};
+	        for (i = 0; i < self.bracket_left.length; i++) {
+	            stack[i] = [];
+	        }
+
+	        // lookup the index of each symbol in the bracket array
+	        inverse_bracket_left = self.inverse_brackets(self.bracket_left);
+	        inverse_bracket_right = self.inverse_brackets(self.bracket_right);
+
+	        for (i = 0; i < dotbracket.length; i++) {
+	            a = dotbracket[i];
+	            ni = i + 1;
+
+	            if (a == '.') {
+	                // unpaired
+	                pt[ni] = 0;
+	            } else {
+	                if (a in inverse_bracket_left) {
+	                    // open pair?
+	                    stack[inverse_bracket_left[a]].push(ni);
+	                } else if (a in inverse_bracket_right) {
+	                    // close pair?
+	                    j = stack[inverse_bracket_right[a]].pop();
+
+	                    pt[ni] = j;
+	                    pt[j] = ni;
+	                } else {
+	                    throw 'Unknown symbol in dotbracket string';
+	                }
+	            }
+	        }
+
+	        for (key in stack) {
+	            if (stack[key].length > 0) {
+	                throw 'Unmatched base at position ' + stack[key][0];
+	            }
+	        }
+
+	        return pt;
+	    };
+
+	    self.insert_into_stack = function (stack, i, j) {
+	        var k = 0;
+	        while (stack[k].length > 0 && stack[k][stack[k].length - 1] < j) {
+	            k += 1;
+	        }
+
+	        stack[k].push(j);
+	        return k;
+	    };
+
+	    self.delete_from_stack = function (stack, j) {
+	        var k = 0;
+	        while (stack[k].length === 0 || stack[k][stack[k].length - 1] != j) {
+	            k += 1;
+	        }
+	        stack[k].pop();
+	        return k;
+	    };
+
+	    self.pairtableToDotbracket = function (pt) {
+	        // store the pairing partners for each symbol
+	        stack = {};
+	        for (i = 0; i < pt[0]; i++) {
+	            stack[i] = [];
+	        }
+
+	        seen = {};
+	        res = '';
+	        for (i = 1; i < pt[0] + 1; i++) {
+	            if (pt[i] !== 0 && pt[i] in seen) {
+	                throw 'Invalid pairtable contains duplicate entries';
+	            }
+	            seen[pt[i]] = true;
+
+	            if (pt[i] === 0) {
+	                res += '.';
+	            } else {
+	                if (pt[i] > i) {
+	                    res += self.bracket_left[self.insert_into_stack(stack, i, pt[i])];
+	                } else {
+	                    res += self.bracket_right[self.delete_from_stack(stack, i)];
+	                }
+	            }
+	        }
+
+	        return res;
+	    };
+
+	    self.find_unmatched = function (pt, from, to) {
+	        /*
+	         * Find unmatched nucleotides in this molecule.
+	         */
+	        var to_remove = [];
+	        var unmatched = [];
+
+	        var orig_from = from;
+	        var orig_to = to;
+
+	        for (var i = from; i <= to; i++) {
+	            if (pt[i] !== 0 && (pt[i] < from || pt[i] > to)) unmatched.push([i, pt[i]]);
+	        }for (i = orig_from; i <= orig_to; i++) {
+	            while (pt[i] === 0 && i <= orig_to) {
+	                i++;
+	            }to = pt[i];
+
+	            while (pt[i] === to) {
+	                i++;
+	                to--;
+	            }
+
+	            to_remove = to_remove.concat(self.find_unmatched(pt, i, to));
+	        }
+
+	        if (unmatched.length > 0) to_remove.push(unmatched);
+
+	        return to_remove;
+	    };
+
+	    self.removePseudoknotsFromPairtable = function (pt) {
+	        /* Remove the pseudoknots from this structure in such a fashion
+	         * that the least amount of base-pairs need to be broken
+	         *
+	         * The pairtable is manipulated in place and a list of tuples
+	         * indicating the broken base pairs is returned.
+	         */
+
+	        var mm = self.maximumMatching(pt);
+	        var new_pt = self.backtrackMaximumMatching(mm, pt);
+	        var removed = [];
+
+	        for (var i = 1; i < pt.length; i++) {
+	            if (pt[i] < i) continue;
+
+	            if (new_pt[i] != pt[i]) {
+	                removed.push([i, pt[i]]);
+	                pt[pt[i]] = 0;
+	                pt[i] = 0;
+	            }
+	        }
+
+	        return removed;
+	    };
+	}
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(29);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(7)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./rnaplot.css", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./rnaplot.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(6)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".structure-background-rect {\n    stroke: black;\n    stroke-width: 5;\n    fill: transparent;\n}\n\ncircle.rna-base {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\ncircle.rna-base.label {\n    stroke: transparent;\n    stroke-width: 0;\n    fill: white;\n}\n\nline.link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\nline.rna-link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\n.overlay {\n    fill: transparent;\n}\n\n.rna-name {\n    text-anchor: middle;\n    dy: -10;\n    font-family: Tahoma, Geneva, sans-serif;\n    font-size: 8pt;\n}\n\nline.rna-link[link-type=\"backbone\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"basepair\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"fake\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"extra\"] {\n    stroke: grey;\n}\n\nline.rna-link[extra-link-type=\"correct\"] {\n    stroke: green;\n}\n\nline.rna-link[extra-link-type=\"incorrect\"] {\n    stroke: green;\n}\n\n\npath {\n    stroke: grey;\n  stroke-width: 2;\n}\n\npath[extra-link-type=\"correct\"] {\n    stroke: green;\n}\n\npath[extra-link-type=\"incorrect\"] {\n    stroke: red;\n}\n\n\nline.basepair {\n  stroke: red;\n}\n\nline.intermolecule {\n  stroke: blue;\n}\n\nline.chain_chain {\n  stroke-dasharray: 3,3;\n}\n\nline.fake {\n  stroke: green;\n}\n\n.transparent {\n    fill: transparent;\n    stroke-width: 0;\n    stroke-opacity: 0;\n    opacity: 0;\n}\n\n.d3-tip {\n    line-height: 1;\n    font-weight: bold;\n    padding: 6px;\n    background: rgba(0, 0, 0, 0.6);\n    color: #fff;\n    border-radius: 4px;\n    pointer-events: none;\n          }\n\ntext.nucleotide-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext.number-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext {\n    pointer-events: none;\n}\n\ng.gnode {\n\n}\n\n.brush .extent {\n  fill-opacity: .1;\n  stroke: #fff;\n  shape-rendering: crispEdges;\n}\n\n.noselect {\n    -webkit-touch-callout: none;\n    -webkit-user-select: none;\n    -khtml-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n}\n", ""]);
+
+	// exports
+
+
+/***/ }
+/******/ ])
+});
+;

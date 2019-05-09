@@ -36,11 +36,15 @@ RNA Grid Extra Links:
 <script type='text/javascript' src='scripts/fornac.js'></script>
 <!-- endbuild -->
 
+<!-- build:js scripts/rnaplot.js -->
+<script type='text/javascript' src='scripts/rnaplot.js'></script>
+<!-- endbuild -->
+
 <!-- build:js scripts/rnatreemap.js -->
 <script type='text/javascript' src='scripts/rnatreemap.js'></script>
 <!-- endbuild -->
 
-<!-- d3-context-menu -->
+<!-- d3-grid -->
 <!-- build:js scripts/d3-grid.js -->
 <!-- bower:js -->
 <script src='/bower_components/jquery/dist/jquery.js'></script>
@@ -90,7 +94,7 @@ var root = {'name': 'graph',
                     .attr("width", function(d) { return Math.max(0, d.dx); })
                     .attr("height", function(d) { return Math.max(0, d.dy); })
 
-                    var chart = fornac.rnaPlot()
+                    var chart = rnaplot.rnaPlot()
                     .width( Math.max(0, d.dx))
                     .height( Math.max(0, d.dy))
                     .labelInterval(0)
@@ -205,7 +209,7 @@ var root = [
     // which is dependent on the on the number of data points
     var numCols = Math.floor((svgWidth + padding[0]) / (cellWidth + padding[0]));
     var svgHeight = Math.ceil(root.length / numCols) * (cellHeight + padding[1]) - padding[1] + margin.bottom;
-    var chart = fornac.rnaPlot()
+    var chart = rnaplot.rnaPlot()
     .width(cellWidth)
     .height(cellHeight)
      var rectGrid = d3.layout.grid()

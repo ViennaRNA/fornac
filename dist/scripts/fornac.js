@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.rnaPlot = exports.RNAGraph = undefined;
+	exports.RNAGraph = undefined;
 
 	var _rnagraph = __webpack_require__(1);
 
@@ -69,28 +69,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _rnagraph.RNAGraph;
 	    }
 	});
-
-	var _rnaplot = __webpack_require__(4);
-
-	Object.defineProperty(exports, 'rnaPlot', {
-	    enumerable: true,
-	    get: function get() {
-	        return _rnaplot.rnaPlot;
-	    }
-	});
 	exports.FornaContainer = FornaContainer;
 
-	__webpack_require__(16);
+	__webpack_require__(4);
 
-	var _d = __webpack_require__(18);
+	var _d = __webpack_require__(8);
 
 	var _d2 = _interopRequireDefault(_d);
 
-	var _simplernaplot = __webpack_require__(5);
+	var _slugid = __webpack_require__(9);
+
+	var _slugid2 = _interopRequireDefault(_slugid);
+
+	var _d3ContextMenu = __webpack_require__(17);
+
+	var _simplernaplot = __webpack_require__(20);
 
 	var _rnautils = __webpack_require__(2);
 
-	var _naview = __webpack_require__(6);
+	var _naview = __webpack_require__(21);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -98,6 +95,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var self = this;
 
 	    self.options = {
+	        'editable': false,
 	        'displayAllLinks': false,
 	        'labelInterval': 10,
 	        'applyForce': true,
@@ -110,7 +108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'layout': 'standard-polygonal',
 	        'allowPanningAndZooming': true,
 	        'transitionDuration': 500,
-	        'maxNodeRadius': 40, // the maximum radius of a node when the view is centered
+	        'maxNodeRadius': 80, // the maximum radius of a node when the view is centered
 	        'resizeSvgOnResize': true //change the size of the svg when resizing the container
 	        //sometimes its beneficial to turn this off, especially when
 	        //performance is an issue
@@ -130,12 +128,157 @@ return /******/ (function(modules) { // webpackBootstrap
 	        self.options.svgH = 800;
 	    }
 
+	    if (self.options.editable == true) {
+	        var backgroundMenu = [{
+	            title: 'Add Node',
+	            action: function action(elm, d, i, mousePos) {},
+	            children: [{
+	                'title': 'A',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'A', 'centerPos': canvasMousePos });
+	                }
+	            }, {
+	                'title': 'C',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'C', 'centerPos': canvasMousePos });
+	                }
+
+	            }, {
+	                'title': 'G',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'G', 'centerPos': canvasMousePos });
+	                }
+
+	            }, {
+	                'title': 'U',
+	                action: function action(elm, d, i, mousePos) {
+	                    console.log('mousePos:', mousePos, self.options.svgW, self.options.svgH);
+	                    var canvasMousePos = [xScale.invert(mousePos[0]), yScale.invert(mousePos[1])];
+	                    console.log('canvasMousePos', canvasMousePos);
+
+	                    self.addRNA('.', { 'sequence': 'U', 'centerPos': canvasMousePos });
+	                }
+	            }],
+	            disabled: false // optional, defaults to false
+	        }, {
+	            title: 'Item #2',
+	            action: function action(elm, d, i) {
+	                console.log('You have clicked the second item!');
+	                console.log('The data for this circle is: ' + d);
+	            }
+	        }];
+
+	        var nodeMenu = [{
+	            title: 'Delete Node',
+	            action: function action(elm, d, i) {
+	                self.deleteNode(d);
+	            },
+	            disabled: false // optional, defaults to false
+	        }, {
+	            title: 'Change Node',
+	            action: function action(elm, d, i) {
+	                console.log('You have clicked the second item!');
+	                console.log('The data for this circle is: ' + d);
+	            },
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('A', d);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('C', d);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('G', d);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.changeNode('U', d);
+	                }
+	            }]
+	        }, {
+	            title: 'Insert Before',
+	            action: function action(elm, d, i) {},
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('A', d, -1);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('C', d, -1);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('G', d, -1);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('U', d, -1);
+	                }
+	            }]
+	        }, {
+	            title: 'Insert After',
+	            action: function action(elm, d, i) {
+	                console.log('d:', d);
+	            },
+	            children: [{
+	                title: 'A',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('A', d, 0);
+	                }
+	            }, {
+	                title: 'C',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('C', d, 0);
+	                }
+	            }, {
+	                title: 'G',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('G', d, 0);
+	                }
+	            }, {
+	                title: 'U',
+	                action: function action(elm, d, i) {
+	                    self.insertNodeBeforeOrAfter('U', d, 0);
+	                }
+	            }]
+	        }];
+
+	        self.nodeContextMenu = (0, _d3ContextMenu.contextMenu)(nodeMenu);
+	        self.backgroundContextMenu = (0, _d3ContextMenu.contextMenu)(backgroundMenu);
+	    } else {
+	        console.log('empty context menu');
+	        self.nodeContextMenu = function () {};
+	    }
+
 	    var fill = _d2.default.scale.category20();
 
 	    // mouse event vars
 	    var mousedownLink = null,
 	        mousedownNode = null,
 	        mouseupNode = null;
+	    var linkContextMenuShown = false;
 
 	    var xScale = _d2.default.scale.linear().domain([0, self.options.svgW]).range([0, self.options.svgW]);
 	    var yScale = _d2.default.scale.linear().domain([0, self.options.svgH]).range([0, self.options.svgH]);
@@ -210,6 +353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
+	        console.log('options.uids:', options.uids);
 	        var rg = new _rnagraph.RNAGraph(options.sequence, structure, options.name);
 	        rg.circularizeExternal = options.circularizeExternal;
 
@@ -223,8 +367,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
 	                options.positions = [];
-	                for (var _i = 0; _i < naViewPositions.nbase; _i++) {
-	                    options.positions.push([naViewPositions.x[_i], naViewPositions.y[_i]]);
+	                for (var i = 0; i < naViewPositions.nbase; i++) {
+	                    options.positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
 	                }
 	            } else {
 	                options.positions = (0, _simplernaplot.simpleXyCoordinates)(rnaJson.pairtable);
@@ -238,6 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    self.addRNA = function (structure, passedOptions) {
 	        var rnaJson = self.createInitialLayout(structure, passedOptions);
+	        var centerView = false;
 
 	        /*
 	         * Code to display the JSONs representing the structure
@@ -261,9 +406,107 @@ return /******/ (function(modules) { // webpackBootstrap
 	            self.extraLinks = self.extraLinks.concat(newLinks);
 	        }
 
-	        if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, passedOptions.avoidOthers);else self.addRNAJSON(rnaJson, true);
+	        if ('centerPos' in passedOptions) self.addRNAJSON(rnaJson, { centerPos: passedOptions.centerPos,
+	            centerView: false });else if ('avoidOthers' in passedOptions) self.addRNAJSON(rnaJson, { avoidOthers: passedOptions.avoidOthers });else self.addRNAJSON(rnaJson, { centerView: passedOptions.centerView });
 
 	        return rnaJson;
+	    };
+
+	    self.changeNode = function (nodeName, referenceNode) {
+	        //insert a new node before or after another one
+	        //positionOffset specifies who far from the original to insert the new node
+	        var rna = referenceNode.rna;
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions('nucleotide');
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newNodeNum = referenceNode.num;
+
+	        var newDotbracket = dotbracket;
+	        var newSequence = sequence.slice(0, newNodeNum - 1) + nodeName + sequence.slice(newNodeNum);
+
+	        console.log('newSequence:', newSequence);
+
+	        console.log('uids:', uids);
+	        uids.splice(newNodeNum - 1, 1, _slugid2.default.nice());
+	        var newPositions = positions;
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': uids,
+	            'centerView': false });
+	    };
+
+	    self.insertNodeBeforeOrAfter = function (nodeName, referenceNode, positionOffset) {
+	        //insert a new node before or after another one
+	        //positionOffset specifies who far from the original to insert the new node
+	        var rna = referenceNode.rna;
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions('nucleotide');
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newNodeNum = referenceNode.num + positionOffset;
+
+	        var newDotbracket = dotbracket.slice(0, newNodeNum) + '.' + dotbracket.slice(newNodeNum);
+	        var newSequence = sequence.slice(0, newNodeNum) + nodeName + sequence.slice(newNodeNum);
+
+	        console.log('newSequence:', newSequence);
+
+	        uids.splice(newNodeNum, 0, _slugid2.default.nice());
+	        positions.splice(newNodeNum, 0, positions[newNodeNum - positionOffset - 1]);
+
+	        var newUids = uids;
+	        var newPositions = positions;
+
+	        console.log('positions:', positions);
+	        console.log('new node positions:', newPositions);
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': newUids,
+	            'centerView': false });
+	    };
+
+	    self.deleteNode = function (node) {
+	        console.log('deleting...', node);
+	        // get the dotbracket string for this rna
+	        var rna = node.rna;
+	        var pair = rna.pairtable[node.num];
+
+	        // remove basepairs for this node
+	        if (pair != 0) {
+	            rna.pairtable[node.num] = 0;
+	            rna.pairtable[pair] = 0;
+	        }
+
+	        var dotbracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        var positions = rna.getPositions('nucleotide');
+	        var sequence = rna.seq;
+	        var uids = rna.getUids();
+
+	        var newDotbracket = dotbracket.slice(0, node.num - 1) + dotbracket.slice(node.num);
+	        var newPositions = positions.slice(0, node.num - 1).concat(positions.slice(node.num));
+	        var newSequence = sequence.slice(0, node.num - 1) + sequence.slice(node.num);
+	        var newUids = uids.slice(0, node.num - 1).concat(uids.slice(node.num));
+
+	        delete self.rnas[rna.uid];
+	        var newRNA = self.addRNA(newDotbracket, { 'sequence': newSequence,
+	            'positions': newPositions,
+	            'uids': newUids,
+	            'centerView': false });
+
+	        console.log('new dotbracket:', newDotbracket);
+	        //self.recalculateGraph();
+
+	        //remove backbone links associated with this node
+
+	        //remove this node
 	    };
 
 	    self.addExternalLinks = function (rnaJson, externalLinks) {
@@ -318,13 +561,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return newLinks;
 	    };
 
-	    self.addRNAJSON = function (rnaGraph, avoidOthers) {
+	    self.addRNAJSON = function (rnaGraph, _ref) {
+	        var _ref$avoidOthers = _ref.avoidOthers;
+	        var avoidOthers = _ref$avoidOthers === undefined ? false : _ref$avoidOthers;
+	        var _ref$centerPos = _ref.centerPos;
+	        var centerPos = _ref$centerPos === undefined ? null : _ref$centerPos;
+	        var _ref$centerView = _ref.centerView;
+	        var centerView = _ref$centerView === undefined ? true : _ref$centerView;
+
 	        // Add an RNAGraph, which contains nodes and links as part of the
 	        // structure
 	        // Each RNA will have uid to identify it
 	        // when it is modified, it is replaced in the global list of RNAs
 	        //
 	        var maxX, minX;
+	        console.log('centerView:', centerView);
+
+	        if (centerPos != null) {
+	            (function () {
+	                // center the newly created RNA at a given position
+	                var totalX = 0;
+	                var totalY = 0;
+	                var nodeCount = 0;
+
+	                rnaGraph.nodes.forEach(function (node) {
+	                    totalX += node.x;
+	                    totalY += node.y;
+	                    nodeCount += 1;
+	                });
+
+	                if (nodeCount > 0) {
+	                    // center the nodes at centerPos
+
+	                    rnaGraph.nodes.forEach(function (node) {
+	                        node.x = node.x + centerPos[0] - totalX / nodeCount;
+	                        node.y = node.y + centerPos[1] - totalY / nodeCount;
+
+	                        node.px = node.x;
+	                        node.py = node.y;
+	                    });
+	                }
+	            })();
+	        }
 
 	        if (avoidOthers) {
 	            if (self.graph.nodes.length > 0) maxX = _d2.default.max(self.graph.nodes.map(function (d) {
@@ -349,7 +627,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        self.recalculateGraph();
 
 	        self.update();
-	        self.centerView();
+
+	        if (centerView) self.centerView();
 
 	        return rnaGraph;
 	    };
@@ -370,6 +649,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // point back toward the previous node
 	        var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+
+	        if (u[0] == 0 && u[1] == 0) return; // will lead to a NaN error
+
 	        u = [u[0] / magnitude(u), u[1] / magnitude(u)];
 	        var v = [-u[1], u[0]];
 
@@ -381,7 +663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function realLinkFilter(d) {
-	        return d.linkType == 'basepair' || d.linkType == 'backbone' || d.linkType == 'pseudoknot' || d.linkType == 'label_link' || d.linkType == 'external' || d.linkType == 'chain_chain';
+	        return d.linkType == 'basepair' || d.linkType == 'backbone' || d.linkType == 'intermolecule' || d.linkType == 'pseudoknot' || d.linkType == 'label_link' || d.linkType == 'external' || d.linkType == 'chain_chain';
 	    }
 
 	    self.transitionRNA = function (newStructure, nextFunction) {
@@ -509,9 +791,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        for (i = 0; i < self.extraLinks.length; i++) {
 	            // the actual node objects may have changed, so we hae to recreate
 	            // the extra links based on the uids
-
 	            if (!(self.extraLinks[i].target.uid in uidsToNodes)) {
 	                console.log('not there:', self.extraLinks[i]);
+	                continue;
 	            }
 
 	            self.extraLinks[i].source = uidsToNodes[self.extraLinks[i].source.uid];
@@ -519,7 +801,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (self.extraLinks[i].linkType == 'intermolecule') {
 	                //remove links to middle nodes
-	                fakeLinks = self.graph.links.filter(function (d) {
+	                var fakeLinks = self.graph.links.filter(function (d) {
 	                    return (d.source == self.extraLinks[i].source || d.source == self.extraLinks[i].target || d.target == self.extraLinks[i].source || d.target == self.extraLinks[i].source) && d.linkType == 'fake';
 	                });
 
@@ -777,14 +1059,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function mousemove() {
 	        if (!mousedownNode) return;
 
-	        mpos = _d2.default.mouse(vis.node());
+	        var mpos = _d2.default.mouse(vis.node());
 	        // update drag line
 	        dragLine.attr('x1', mousedownNode.x).attr('y1', mousedownNode.y).attr('x2', mpos[0]).attr('y2', mpos[1]);
 	    }
 
 	    function mouseup() {
 	        if (mousedownNode) {
-	            dragLine.attr('class', 'drag_line_hidden');
+
+	            if (!linkContextMenuShown) dragLine.attr('class', 'drag_line_hidden');
 	        }
 
 	        // clear mouse event vars
@@ -807,6 +1090,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var svgGraph = svg.append('svg:g').on('mousemove', mousemove).on('mousedown', mousedown).on('mouseup', mouseup);
 
 	    if (self.options.allowPanningAndZooming) svgGraph.call(self.zoomer);
+
+	    if (self.options.editable) svgGraph.on('contextmenu', self.backgroundContextMenu);
 
 	    /*
 	    var rect = svgGraph.append('svg:rect')
@@ -1057,6 +1342,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (shiftKeydown) return;
 
 	        switch (_d2.default.event.keyCode) {
+	            case 68:
+	                //'d' key
+	                console.log('dotbracket:', self.getStructuresDotBracket());
+	                break;
 	            case 16:
 	                shiftKeydown = true;
 	                break;
@@ -1116,9 +1405,97 @@ return /******/ (function(modules) { // webpackBootstrap
 	        r.recalculateElements().elementsToJson().addPseudoknots().addPositions('nucleotide', nucleotidePositions).addUids(uids).addLabels(1, self.options.labelInterval).addPositions('label', labelPositions).reinforceStems().reinforceLoops().updateLinkUids();
 	    };
 
+	    var removeBackBoneLink = function removeBackBoneLink(d) {
+	        if (d.target.num - d.source.num != 1) {
+	            console.log('ERROR: non adjacent nodes. Target:', d.target, 'Source:', d.source, 'Link:', d);
+	            return;
+	        }
+
+	        var rna = d.target.rna;
+	        var toRemove = [];
+
+	        for (var i = 0; i < rna.links.length; i++) {
+	            var _link = rna.links[i];
+
+	            if (_link.linkType != 'basepair') continue;
+
+	            if (_link.source.num <= d.source.num && _link.target.num >= d.target.num) {
+	                console.log('crossing basepair', _link);
+	                toRemove.push(_link);
+	            }
+	        }
+
+	        // Remove all base pairs that are between these two nodes and add them as extra
+	        // links
+	        console.log('toRemove:', toRemove);
+
+	        for (var i = 0; i < toRemove.length; i++) {
+	            rna.pairtable[toRemove[i].source.num] = 0;
+	            rna.pairtable[toRemove[i].target.num] = 0;
+
+	            toRemove[i].from = toRemove[i].source.num;
+	            toRemove[i].to = toRemove[i].target.num - d.source.num;
+	        }
+
+	        // extract the dotbracket string of the rna
+	        // cut it at the position of this backbone bond
+	        var sequence = rna.seq;
+	        var sequence1 = rna.seq.slice(0, d.source.num);
+	        var sequence2 = rna.seq.slice(d.source.num);
+
+	        var rnaDotBracket = _rnautils.rnaUtilities.pairtableToDotbracket(rna.pairtable);
+	        console.log('rnaDotBracket:', rnaDotBracket);
+	        var dotBracket1 = rnaDotBracket.slice(0, d.source.num);
+	        var dotBracket2 = rnaDotBracket.slice(d.source.num);
+
+	        console.log('dotBracket1:', dotBracket1);
+	        console.log('dotBracket2:', dotBracket2);
+
+	        // get the nucleotide positions
+	        // cut them at the positions of the backbone bond
+	        var positions = rna.getPositions('nucleotide');
+	        var uids = rna.getUids();
+
+	        var positions1 = positions.slice(0, d.source.num);
+	        var positions2 = positions.slice(d.source.num);
+
+	        var uids1 = uids.slice(0, d.source.num);
+	        var uids2 = uids.slice(d.source.num);
+
+	        console.log('positions1:', positions1);
+	        console.log('positions2:', positions2);
+
+	        delete self.rnas[rna.uid];
+	        var rna1 = self.addRNA(dotBracket1, { 'sequence': sequence1,
+	            'positions': positions1,
+	            'uids': uids1 });
+	        var rna2 = self.addRNA(dotBracket2, { 'sequence': sequence2,
+	            'positions': positions2,
+	            'uids': uids2 });
+	        for (var i = 0; i < toRemove.length; i++) {
+	            console.log('rna1:', rna1);
+	            console.log('rna2:', rna2);
+	            console.log('toRemove[i]', toRemove[i]);
+	            self.extraLinks.push({ 'source': rna1.nodes[toRemove[i].from - 1],
+	                'target': rna2.nodes[toRemove[i].to - 1],
+	                'value': 1,
+	                'uid': _slugid2.default.nice(),
+	                'linkType': 'intermolecule' });
+	            self.recalculateGraph();
+	            self.update();
+	        }
+	        console.log('self.extraLinks:', self.extraLinks);
+	        //self.extraLinks.push({'source': rna1.nodes[
+
+	        // create two new rnas
+	        // add their positions
+	        // add them back to the plot
+	    };
+
 	    var removeLink = function removeLink(d) {
 	        // remove a link between two nodes
-	        index = self.graph.links.indexOf(d);
+	        var index = self.graph.links.indexOf(d);
+	        console.log('removing link:', index);
 
 	        if (index > -1) {
 	            //remove a link
@@ -1128,16 +1505,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // 1. The link is within a single molecule
 
 	            if (d.source.rna == d.target.rna) {
-	                var r = d.source.rna;
+	                if (d.linkType == 'backbone') {
+	                    console.log('trying to remove a backbone link', d.source.num, d.target.num);
 
-	                r.addPseudoknots();
-	                r.pairtable[d.source.num] = 0;
-	                r.pairtable[d.target.num] = 0;
+	                    removeBackBoneLink(d);
 
-	                updateRnaGraph(r);
+	                    return;
+	                } else {
+	                    var r = d.source.rna;
+
+	                    r.addPseudoknots();
+	                    r.pairtable[d.source.num] = 0;
+	                    r.pairtable[d.target.num] = 0;
+
+	                    updateRnaGraph(r);
+	                }
 	            } else {
 	                // 2. The link is between two different molecules
-	                extraLinkIndex = self.extraLinks.indexOf(d);
+	                var extraLinkIndex = self.extraLinks.indexOf(d);
 
 	                self.extraLinks.splice(extraLinkIndex, 1);
 	            }
@@ -1153,14 +1538,130 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        var invalidLinks = { 'backbone': true,
+	        var invalidLinks = { //'backbone': true,
 	            'fake': true,
 	            'fake_fake': true,
 	            'label_link': true };
 
+	        console.log('d.linkType:', d.linkType);
 	        if (d.linkType in invalidLinks) return;
 
 	        removeLink(d);
+	    };
+
+	    self.getStructuresDotBracket = function () {
+	        console.log('self.rnas:', self.rnas);
+	        var sequence = [];
+	        var currIdx = 1;
+	        var nodeIdxs = {};
+	        var breaks = [];
+	        var pairtable = [];
+
+	        // add the nodes
+	        for (var uid in self.rnas) {
+	            var rna = self.rnas[uid];
+
+	            for (var j = 0; j < rna.nodes.length; j++) {
+	                var _node = rna.nodes[j];
+
+	                if (_node.nodeType != 'nucleotide') continue;
+
+	                console.log('node:', _node);
+	                nodeIdxs[_node.uid] = currIdx;
+	                currIdx += 1;
+
+	                sequence.push(_node.name);
+	            }
+
+	            breaks.push(currIdx);
+	        }
+
+	        pairtable = [currIdx - 1];
+	        for (var i = 0; i < currIdx; i++) {
+	            pairtable.push(0);
+	        } // add the links
+	        for (var uid in self.rnas) {
+	            var rna = self.rnas[uid];
+
+	            for (var j = 0; j < rna.links.length; j++) {
+	                var _link2 = rna.links[j];
+
+	                if (_link2.linkType != 'basepair') continue;
+
+	                var idx1 = nodeIdxs[_link2.source.uid];
+	                var idx2 = nodeIdxs[_link2.target.uid];
+	                pairtable[idx1] = idx2;
+	                pairtable[idx2] = idx1;
+	            }
+	        }
+
+	        for (var i = 0; i < self.extraLinks.length; i++) {
+	            var _link3 = self.extraLinks[i];
+
+	            var idx1 = nodeIdxs[_link3.source.uid];
+	            var idx2 = nodeIdxs[_link3.target.uid];
+
+	            pairtable[idx1] = idx2;
+	            pairtable[idx2] = idx1;
+	        }
+
+	        var structure = _rnautils.rnaUtilities.pairtableToDotbracket(pairtable).split('');
+
+	        for (var i = 0; i < breaks.length - 1; i++) {
+	            console.log('breaks[i]:', breaks[i]);
+	            sequence.splice(breaks[i] + i - 1, 0, '&');
+	            structure.splice(breaks[i] + i - 1, 0, '&');
+	        }
+
+	        console.log('sequence:', sequence, sequence.join(''));
+	        console.log('structure:', structure, structure.join(''));
+	        return [sequence.join(''), structure.join('')];
+	    };
+
+	    self.addBackBoneLink = function (newLink) {
+	        // opposite of deleting a link
+	        // get the two dotbracket strings
+	        var rna1 = newLink.source.rna;
+	        var rna2 = newLink.target.rna;
+
+	        var dotbracket1 = _rnautils.rnaUtilities.pairtableToDotbracket(rna1.pairtable);
+	        var dotbracket2 = _rnautils.rnaUtilities.pairtableToDotbracket(rna2.pairtable);
+
+	        var seq1 = newLink.source.rna.seq;
+	        var seq2 = newLink.target.rna.seq;
+
+	        var positions1 = rna1.getPositions('nucleotide');
+	        var positions2 = rna2.getPositions('nucleotide');
+
+	        // concatenate them
+	        var newDotbracket = dotbracket1 + dotbracket2;
+	        var newSeq = seq1 + seq2;
+	        var newPositions = positions1.concat(positions2);
+
+	        var toAdd = [];
+
+	        for (var i = 0; i < self.extraLinks; i++) {
+	            if (self.extraLinks[i].source == rna1 && self.extraLinks[i].target == rna2) {
+	                self.extraLinks[i].from = self.extraLinks[i].source.num;
+	                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].target.num;
+	                toAdd.push(self.extraLinks[i]);
+	            } else if (self.extraLinks[i].target == rna1 && self.extraLinks[i].source == rna1) {
+	                self.extraLinks[i].from = self.extraLinks[i].target.num;
+	                self.extraLinks[i].to = dotbracket1.length + self.extraLinks[i].source.num;
+
+	                toAdd.push(self.extraLinks[i]);
+	            }
+	        }
+
+	        delete self.rnas[rna1.uid];
+	        delete self.rnas[rna2.uid];
+
+	        // create a new RNA
+	        if (self.options.applyForce) self.addRNA(newDotbracket, { 'sequence': newSeq,
+	            'positions': newPositions });else self.addRNA(newDotbracket, { 'sequence': newSeq });
+
+	        // add the extra links between them as base pairs
+	        // remove the old ones
 	    };
 
 	    self.addLink = function (newLink) {
@@ -1168,15 +1669,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // to recalculate the structure and change the colors
 	        // appropriately
 	        //
+	        console.log('adding new link');
 	        if (newLink.source.rna == newLink.target.rna) {
-	            r = newLink.source.rna;
+	            // must be a basepair
+	            var _r = newLink.source.rna;
 
-	            r.pairtable[newLink.source.num] = newLink.target.num;
-	            r.pairtable[newLink.target.num] = newLink.source.num;
+	            _r.pairtable[newLink.source.num] = newLink.target.num;
+	            _r.pairtable[newLink.target.num] = newLink.source.num;
 
-	            updateRnaGraph(r);
+	            updateRnaGraph(_r);
 	        } else {
 	            //Add an extra link
+	            console.log('intermolecule');
 	            newLink.linkType = 'intermolecule';
 	            self.extraLinks.push(newLink);
 	        }
@@ -1197,27 +1701,35 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // always select this node
 	        _d2.default.select(this).select('circle').classed('selected', d.selected = self.options.applyForce && !d.previouslySelected);
+	        _d2.default.event.stopPropagation();
 	    };
 
-	    var nodeMouseup = function nodeMouseup(d) {
+	    var nodeMouseup = function nodeMouseup(d, i) {
+
 	        if (mousedownNode) {
 	            mouseupNode = d;
 
 	            if (mouseupNode == mousedownNode) {
 	                resetMouseVars();return;
 	            }
-	            var newLink = { source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: generateUUID() };
+	            var newLink = { source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: _slugid2.default.nice() };
 
-	            for (i = 0; i < self.graph.links.length; i++) {
-	                if (self.graph.links[i].source == mousedownNode || self.graph.links[i].target == mousedownNode || self.graph.links[i].source == mouseupNode || self.graph.links[i].target == mouseupNode) {
+	            for (var _i = 0; _i < self.graph.links.length; _i++) {
+	                if (self.graph.links[_i].source == mousedownNode || self.graph.links[_i].target == mousedownNode || self.graph.links[_i].source == mouseupNode || self.graph.links[_i].target == mouseupNode) {
 
-	                    if (self.graph.links[i].linkType == 'basepair' || self.graph.links[i].linkType == 'pseudoknot') {
+	                    // if any of the nodes are already involved in a basepair or a pseudoknot
+	                    // then we can't make a link
+	                    if (self.graph.links[_i].linkType == 'basepair' || self.graph.links[_i].linkType == 'pseudoknot') {
+	                        // although should be able to make a backbone link
 	                        return;
 	                    }
 	                }
 
-	                if (self.graph.links[i].source == mouseupNode && self.graph.links[i].target == mousedownNode || self.graph.links[i].source == mousedownNode && self.graph.links[i].target == mouseupNode) {
-	                    if (self.graph.links[i].linkType == 'backbone') {
+	                if (self.graph.links[_i].source == mouseupNode && self.graph.links[_i].target == mousedownNode || self.graph.links[_i].source == mousedownNode && self.graph.links[_i].target == mouseupNode) {
+
+	                    // if we're trying to make a link between two nodes which already have
+	                    // a backbone between them, then we can't make a link
+	                    if (self.graph.links[_i].linkType == 'backbone') {
 	                        return;
 	                    }
 	                }
@@ -1225,7 +1737,42 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (mouseupNode.nodeType == 'middle' || mousedownNode.nodeType == 'middle' || mouseupNode.nodeType == 'label' || mousedownNode.nodeType == 'label') return;
 
-	            self.addLink(newLink);
+	            if (newLink.source.rna != newLink.target.rna) {
+	                // could be either a backbone link or an intermolecule link
+
+	                if (newLink.source.num == 1 && newLink.target.num == newLink.target.rna.rnaLength || newLink.target.num == 1 && newLink.source.num == newLink.source.rna.rnaLength) {
+	                    var linkMenu = [{
+	                        title: 'Backbone Link',
+	                        action: function action(elm, d, i) {
+	                            linkContextMenuShown = false;
+	                            console.log('Item #1 clicked!');
+	                            console.log('The data for this circle is: ' + d);
+	                            dragLine.attr('class', 'drag_line_hidden');
+	                            self.addBackBoneLink(newLink);
+	                        },
+	                        disabled: false // optional, defaults to false
+	                    }, {
+	                        title: 'Basepair Link',
+	                        action: function action(elm, d, i) {
+	                            linkContextMenuShown = false;
+	                            console.log('You have clicked the second item!');
+	                            console.log('The data for this circle is: ' + d);
+	                            dragLine.attr('class', 'drag_line_hidden');
+	                            self.addLink(newLink);
+	                        }
+	                    }];
+	                    linkContextMenuShown = true;
+	                    var linkContextMenu = (0, _d3ContextMenu.contextMenu)(linkMenu);
+	                    console.log('newLinkMenu');
+	                    linkContextMenu.apply(this, [d, i, true, function () {
+	                        dragLine.attr('class', 'drag_line_hidden');
+	                    }]);
+	                } else {
+	                    self.addLink(newLink);
+	                }
+	            } else {
+	                self.addLink(newLink);
+	            }
 	        }
 	    };
 
@@ -1419,7 +1966,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return 'n' + d.num;
 	        }).attr('rnum', function (d) {
 	            return 'n' + (d.rna.rnaLength - d.num + 1);
-	        }).on('click', nodeMouseclick).transition().duration(750).ease('elastic');
+	        }).on('click', nodeMouseclick).on('contextmenu', self.nodeContextMenu).transition().duration(750).ease('elastic');
 
 	        // create nodes behind the circles which will serve to highlight them
 	        var labelAndProteinNodes = gnodesEnter.filter(function (d) {
@@ -1586,12 +2133,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            gnodes.selectAll('[node_type=nucleotide]').filter(function (d, i) {
 	                if (i == 0) return true;else return false;
 	            }).each(function (d, i) {
-	                console.log("pos", d.num, d.x, d.y);
+	                //console.log("pos", d.num, d.x, d.y);
 	            });
 
 	            for (var uid in self.rnas) {
-	                for (var _i2 = 1; _i2 < self.rnas[uid].pairtable[0]; _i2++) {
-	                    console.log('pt', _i2, self.rnas[uid].pairtable[_i2]);
+	                for (var i = 1; i < self.rnas[uid].pairtable[0]; i++) {
+	                    //console.log('pt', i, self.rnas[uid].pairtable[i]);
 	                }
 	            }
 	        });
@@ -1732,7 +2279,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        for (var i = 0; i < uids.length && i < nucleotideNodes.length; i++) {
 	            nucleotideNodes[i].uid = uids[i];
-	        }return self;
+	        }
+
+	        return self;
 	    };
 
 	    self.computePairtable = function () {
@@ -2677,2114 +3226,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.rnaPlot = rnaPlot;
-
-	var _simplernaplot = __webpack_require__(5);
-
-	var _rnagraph = __webpack_require__(1);
-
-	var _naview = __webpack_require__(6);
-
-	var _rnautils = __webpack_require__(2);
-
-	__webpack_require__(12);
-
-	function isNormalInteger(str) {
-	    //http://stackoverflow.com/a/10834843/899470
-	    return (/^\+?(0|[1-9]\d*)$/.test(str)
-	    );
-	}
-
-	if (typeof String.prototype.trim === 'undefined') {
-	    String.prototype.trim = function () {
-	        return String(this).replace(/^\s+|\s+$/g, '');
-	    };
-	}
-
-	function rnaPlot() {
-	    var options = {
-	        'width': 400,
-	        'height': 400,
-	        'nucleotideRadius': 5,
-	        'rnaEdgePadding': 0, // how far the leftmost, rightmost, topmost and bottomost
-	        // nucleotides are from the edge of the plot
-	        'labelInterval': 0,
-	        'showNucleotideLabels': true,
-	        'startNucleotideNumber': 1,
-	        'bundleExternalLinks': false
-	    };
-
-	    var xScale, yScale;
-
-	    function createTransformToFillViewport(xValues, yValues) {
-	        var molName = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
-
-	        // create transform that will scale the x and y values so that
-	        // they fill the available viewport
-
-	        // find out leftmost, rightmost, topmost, bottommost positions of each
-	        // nucleotide so that we can create a scale
-	        var xExtent = d3.extent(xValues);
-	        var yExtent = d3.extent(yValues);
-
-	        var NAME_OFFSET = 30;
-	        if (molName != '') yExtent[1] += NAME_OFFSET;
-
-	        // add the radius of the nucleotides
-	        xExtent[0] -= options.nucleotideRadius + options.rnaEdgePadding;
-	        yExtent[0] -= options.nucleotideRadius + options.rnaEdgePadding;
-
-	        xExtent[1] += options.nucleotideRadius + options.rnaEdgePadding;
-	        yExtent[1] += options.nucleotideRadius + options.rnaEdgePadding;
-
-	        // find out how wide and height the molecule
-	        var xRange = xExtent[1] - xExtent[0];
-	        var yRange = yExtent[1] - yExtent[0];
-
-	        // how much wider / taller is it than the available viewport
-	        var xExtra = xRange - options.width;
-	        var yExtra = yRange - options.height;
-
-	        // once we have a scale for one dimension, we can create the scale for the other
-	        // keeping the same expansion / shrinking ratio
-	        function createOtherScale(firstScale, newDomain, newRange) {
-	            var scaleFactor = (firstScale.range()[1] - firstScale.range()[0]) / (firstScale.domain()[1] - firstScale.domain()[0]);
-	            var newWidth = (newDomain[1] - newDomain[0]) * scaleFactor;
-	            var newMargin = (newRange[1] - newRange[0] - newWidth) / 2;
-
-	            return { 'scaleFactor': scaleFactor,
-	                'scale': d3.scale.linear().domain(newDomain).range([newRange[0] + newMargin, newRange[1] - newMargin]) };
-	        }
-
-	        var ret;
-
-	        if (xExtra > yExtra) {
-	            // we have to shrink more in the x-dimension than the y
-	            xScale = d3.scale.linear().domain(xExtent).range([0, options.width]);
-
-	            ret = createOtherScale(xScale, yExtent, [0, options.height]);
-	            yScale = ret.scale;
-	        } else {
-	            // we have to shrink more in the x-dimension than the y
-	            yScale = d3.scale.linear().domain(yExtent).range([0, options.height]);
-
-	            ret = createOtherScale(yScale, xExtent, [0, options.width]);
-	            xScale = ret.scale;
-	        }
-
-	        var xOffset = xScale.range()[0] - xScale.domain()[0];
-	        var yOffset = yScale.range()[0] - yScale.domain()[0];
-
-	        return 'translate(' + -(xScale.domain()[0] * ret.scaleFactor - xScale.range()[0]) + ',' + -(yScale.domain()[0] * ret.scaleFactor - yScale.range()[0]) + ')' + 'scale(' + ret.scaleFactor + ')';
-	    }
-
-	    function createNucleotides(selection, nucleotideNodes) {
-	        // create groupings for each nucleotide and label
-	        var gs = selection.selectAll('.rna-base').data(nucleotideNodes).enter().append('svg:g').attr('transform', function (d) {
-	            return 'translate(' + d.x + ',' + d.y + ')';
-	        });
-
-	        var circles = gs.append('svg:circle').attr('r', options.nucleotideRadius).classed('rna-base', true);
-
-	        if (options.showNucleotideLabels) {
-	            var nucleotideLabels = gs.append('svg:text').text(function (d) {
-	                return d.name;
-	            }).attr('text-anchor', 'middle').attr('dominant-baseline', 'central').classed('nucleotide-label', true).append('svg:title').text(function (d) {
-	                return d.struct_name + ':' + d.num;
-	            });
-	        }
-	    }
-
-	    function createLabels(selection, labelNodes) {
-	        // create groupings for each nucleotide and label
-
-	        var gs = selection.selectAll('.rnaLabel').data(labelNodes).enter().append('svg:g').attr('transform', function (d) {
-	            return 'translate(' + d.x + ',' + d.y + ')';
-	        });
-
-	        var numberLabels = gs.append('svg:text').text(function (d) {
-	            return d.name;
-	        }).attr('text-anchor', 'middle').attr('font-weight', 'bold').attr('dominant-baseline', 'central').classed('number-label', true);
-	    }
-
-	    function createName(selection, name) {
-	        selection.append('svg:text').attr('transform', 'translate(' + xScale.invert(options.width / 2) + ',' + yScale.invert(options.height) + ')').attr('dy', -10).classed('rna-name', true).text(name);
-	    }
-
-	    function makeExternalLinksBundle(selection, links) {
-	        var nodesDict = {};
-	        var linksList = [];
-	        links = links.filter(function (d) {
-	            return d.linkType == 'correct' || d.linkType == 'incorrect' || d.linkType == 'extra';
-	        });
-
-	        selection.selectAll('[link-type=extra]').remove();
-
-	        for (var i = 0; i < links.length; i++) {
-	            if (links[i].source === null || links[i].target === null) continue;
-
-	            nodesDict[links[i].source.uid] = links[i].source;
-	            nodesDict[links[i].target.uid] = links[i].target;
-
-	            linksList.push({ 'source': links[i].source.uid, 'target': links[i].target.uid, 'linkType': links[i].linkType, 'extraLinkType': links[i].extraLinkType });
-	        }
-
-	        var fbundling = d3.ForceEdgeBundling().nodes(nodesDict).edges(linksList).compatibility_threshold(0.8).step_size(0.2);
-	        var results = fbundling();
-
-	        var d3line = d3.svg.line().x(function (d) {
-	            return d.x;
-	        }).y(function (d) {
-	            return d.y;
-	        }).interpolate('linear');
-
-	        for (var i = 0; i < results.length; i++) {
-	            var edge_subpoint_data = results[i];
-	            // for each of the arrays in the results
-	            // draw a line between the subdivions points for that edge
-
-	            selection.append('path').attr('d', d3line(edge_subpoint_data)).style('fill', 'none').attr('link-type', function (d) {
-	                return linksList[i].linkType;
-	            }).attr('extra-link-type', function (d) {
-	                return linksList[i].extraLinkType;
-	            }).style('stroke-opacity', 0.4); //use opacity as blending
-	        }
-	    }
-
-	    function createLinks(selection, links) {
-	        links = links.filter(function (d) {
-	            return d.source !== null && d.target !== null;
-	        });
-	        var gs = selection.selectAll('.rna-link').data(links).enter().append('svg:line').attr('x1', function (d) {
-	            return d.source.x;
-	        }).attr('x2', function (d) {
-	            return d.target.x;
-	        }).attr('y1', function (d) {
-	            return d.source.y;
-	        }).attr('y2', function (d) {
-	            return d.target.y;
-	        }).attr('link-type', function (d) {
-	            return d.linkType;
-	        }).attr('extra-link-type', function (d) {
-	            return d.extraLinkType;
-	        }).classed('rna-link', true);
-	    }
-
-	    function chart(selection) {
-	        selection.each(function (data) {
-	            // data should be a dictionary containing at least a structure
-	            // and possibly a sequence
-	            var rg = new _rnagraph.RNAGraph(data.sequence, data.structure, data.name).recalculateElements().elementsToJson().addName(data.name);
-
-	            data.rnaGraph = rg;
-	            // calculate the position of each nucleotide
-	            // the positions of the labels will be calculated in
-	            // the addLabels function
-	            //var positions = simpleXyCoordinates(rg.pairtable);
-	            var naview = new _naview.NAView();
-
-	            var naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
-	            var positions = [];
-	            for (var i = 0; i < naViewPositions.nbase; i++) {
-	                positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
-	            }
-	            rg.addPositions('nucleotide', positions).reinforceStems().reinforceLoops().addExtraLinks(data.extraLinks).addLabels(options.startNucleotideNumber, options.labelInterval);
-
-	            // create a transform that will fit the molecule to the
-	            // size of the viewport (canvas, svg, whatever)
-	            var fillViewportTransform = createTransformToFillViewport(rg.nodes.map(function (d) {
-	                return d.x;
-	            }), rg.nodes.map(function (d) {
-	                return d.y;
-	            }));
-
-	            var gTransform = d3.select(this).append('g').attr('transform', fillViewportTransform);
-
-	            var nucleotideNodes = rg.nodes.filter(function (d) {
-	                return d.nodeType == 'nucleotide';
-	            });
-
-	            var labelNodes = rg.nodes.filter(function (d) {
-	                return d.nodeType == 'label';
-	            });
-
-	            var links = rg.links;
-
-	            createLinks(gTransform, links);
-	            createNucleotides(gTransform, nucleotideNodes);
-	            createLabels(gTransform, labelNodes);
-	            createName(gTransform, data.name);
-
-	            if (options.bundleExternalLinks) {
-	                makeExternalLinksBundle(gTransform, links);
-	            }
-	        });
-	    }
-
-	    chart.width = function (_) {
-	        if (!arguments.length) return options.width;
-	        options.width = _;
-	        return chart;
-	    };
-
-	    chart.height = function (_) {
-	        if (!arguments.length) return options.height;
-	        options.height = _;
-	        return chart;
-	    };
-
-	    chart.showNucleotideLabels = function (_) {
-	        if (!arguments.length) return options.showNucleotideLabels;
-	        options.showNucleotideLabels = _;
-	        return chart;
-	    };
-
-	    chart.rnaEdgePadding = function (_) {
-	        if (!arguments.length) return options.rnaEdgePadding;
-	        options.rnaEdgePadding = _;
-	        return chart;
-	    };
-
-	    chart.nucleotideRadius = function (_) {
-	        if (!arguments.length) return options.nucleotideRadius;
-	        options.nucleotideRadius = _;
-	        return chart;
-	    };
-
-	    chart.labelInterval = function (_) {
-	        if (!arguments.length) return options.labelInterval;
-	        options.labelInterval = _;
-	        return chart;
-	    };
-
-	    chart.showNucleotideLabels = function (_) {
-	        if (!arguments.length) return options.showNucleotideLabels;
-	        options.showNucleotideLabels = _;
-	        return chart;
-	    };
-
-	    chart.startNucleotideNumber = function (_) {
-	        if (!arguments.length) return options.startNucleotideNumber;
-	        options.startNucleotideNumber = _;
-	        return chart;
-	    };
-
-	    chart.bundleExternalLinks = function (_) {
-	        if (!arguments.length) return options.bundleExternalLinks;
-	        options.bundleExternalLinks = _;
-	        return chart;
-	    };
-
-	    return chart;
-	}
-	var number_sort = function number_sort(a, b) {
-	    return a - b;
-	};
-
-	function RNAUtilities() {
-	    var self = this;
-
-	    // the brackets to use when constructing dotbracket strings
-	    // with pseudoknots
-	    self.bracket_left = '([{<ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-	    self.bracket_right = ')]}>abcdefghijklmnopqrstuvwxyz'.split('');
-
-	    self.inverse_brackets = function (bracket) {
-	        res = {};
-	        for (i = 0; i < bracket.length; i++) {
-	            res[bracket[i]] = i;
-	        }
-	        return res;
-	    };
-
-	    self.maximumMatching = function maximumMatching(pt) {
-	        // Courtesy of the great Ronny Lorenz
-
-	        var n = pt[0];
-	        var TURN = 0; //minimal number of nucleotides in the hairpin
-
-	        /* array init */
-	        mm = new Array(n + 1);
-	        for (var i = 0; i <= n; i++) {
-	            mm[i] = new Array(n + 1);
-	            for (var j = i; j <= n; j++) {
-	                mm[i][j] = 0;
-	            }
-	        }
-	        var maximum = 0;
-
-	        /* actual computation */
-	        for (var i = n - TURN - 1; i > 0; i--) {
-
-	            for (var j = i + TURN + 1; j <= n; j++) {
-	                maximum = mm[i][j - 1];
-
-	                for (var l = j - TURN - 1; l >= i; l--) {
-	                    if (pt[l] === j) {
-
-	                        // we have a base pair here
-	                        maximum = Math.max(maximum, (l > i ? mm[i][l - 1] : 0) + 1 + (j - l - 1 > 0 ? mm[l + 1][j - 1] : 0));
-	                    }
-	                }
-
-	                mm[i][j] = maximum;
-	            }
-	        }maximum = mm[1][n];
-
-	        return mm;
-	    };
-
-	    self.backtrackMaximumMatching = function (mm, old_pt) {
-	        var pt = Array.apply(null, Array(mm.length)).map(function () {
-	            return 0;
-	        });
-	        //create an array containing zeros
-
-	        self.mm_bt(mm, pt, old_pt, 1, mm.length - 1);
-	        return pt;
-	    };
-
-	    self.mm_bt = function (mm, pt, old_pt, i, j) {
-	        // Create a pairtable from the backtracking
-	        var maximum = mm[i][j];
-	        var TURN = 0;
-
-	        if (j - i - 1 < TURN) return; /* no more pairs */
-
-	        if (mm[i][j - 1] == maximum) {
-	            /* j is unpaired */
-	            self.mm_bt(mm, pt, old_pt, i, j - 1);
-	            return;
-	        }
-
-	        for (var q = j - TURN - 1; q >= i; q--) {
-	            /* j is paired with some q */
-	            if (old_pt[j] !== q) continue;
-
-	            var left_part = q > i ? mm[i][q - 1] : 0;
-	            var enclosed_part = j - q - 1 > 0 ? mm[q + 1][j - 1] : 0;
-
-	            if (left_part + enclosed_part + 1 == maximum) {
-	                // there's a base pair between j and q
-	                pt[q] = j;
-	                pt[j] = q;
-
-	                if (i < q) self.mm_bt(mm, pt, old_pt, i, q - 1);
-
-	                self.mm_bt(mm, pt, old_pt, q + 1, j - 1);
-	                return;
-	            }
-	        }
-
-	        //alert(i + ',' + j + ': backtracking failed!');
-	        console.log('FAILED!!!' + i + ',' + j + ': backtracking failed!');
-	    };
-
-	    self.dotbracketToPairtable = function (dotbracket) {
-	        // create an array and initialize it to 0
-	        pt = Array.apply(null, new Array(dotbracket.length + 1)).map(Number.prototype.valueOf, 0);
-
-	        //  the first element is always the length of the RNA molecule
-	        pt[0] = dotbracket.length;
-
-	        // store the pairing partners for each symbol
-	        stack = {};
-	        for (i = 0; i < self.bracket_left.length; i++) {
-	            stack[i] = [];
-	        }
-
-	        // lookup the index of each symbol in the bracket array
-	        inverse_bracket_left = self.inverse_brackets(self.bracket_left);
-	        inverse_bracket_right = self.inverse_brackets(self.bracket_right);
-
-	        for (i = 0; i < dotbracket.length; i++) {
-	            a = dotbracket[i];
-	            ni = i + 1;
-
-	            if (a == '.') {
-	                // unpaired
-	                pt[ni] = 0;
-	            } else {
-	                if (a in inverse_bracket_left) {
-	                    // open pair?
-	                    stack[inverse_bracket_left[a]].push(ni);
-	                } else if (a in inverse_bracket_right) {
-	                    // close pair?
-	                    j = stack[inverse_bracket_right[a]].pop();
-
-	                    pt[ni] = j;
-	                    pt[j] = ni;
-	                } else {
-	                    throw 'Unknown symbol in dotbracket string';
-	                }
-	            }
-	        }
-
-	        for (key in stack) {
-	            if (stack[key].length > 0) {
-	                throw 'Unmatched base at position ' + stack[key][0];
-	            }
-	        }
-
-	        return pt;
-	    };
-
-	    self.insert_into_stack = function (stack, i, j) {
-	        var k = 0;
-	        while (stack[k].length > 0 && stack[k][stack[k].length - 1] < j) {
-	            k += 1;
-	        }
-
-	        stack[k].push(j);
-	        return k;
-	    };
-
-	    self.delete_from_stack = function (stack, j) {
-	        var k = 0;
-	        while (stack[k].length === 0 || stack[k][stack[k].length - 1] != j) {
-	            k += 1;
-	        }
-	        stack[k].pop();
-	        return k;
-	    };
-
-	    self.pairtableToDotbracket = function (pt) {
-	        // store the pairing partners for each symbol
-	        stack = {};
-	        for (i = 0; i < pt[0]; i++) {
-	            stack[i] = [];
-	        }
-
-	        seen = {};
-	        res = '';
-	        for (i = 1; i < pt[0] + 1; i++) {
-	            if (pt[i] !== 0 && pt[i] in seen) {
-	                throw 'Invalid pairtable contains duplicate entries';
-	            }
-	            seen[pt[i]] = true;
-
-	            if (pt[i] === 0) {
-	                res += '.';
-	            } else {
-	                if (pt[i] > i) {
-	                    res += self.bracket_left[self.insert_into_stack(stack, i, pt[i])];
-	                } else {
-	                    res += self.bracket_right[self.delete_from_stack(stack, i)];
-	                }
-	            }
-	        }
-
-	        return res;
-	    };
-
-	    self.find_unmatched = function (pt, from, to) {
-	        /*
-	         * Find unmatched nucleotides in this molecule.
-	         */
-	        var to_remove = [];
-	        var unmatched = [];
-
-	        var orig_from = from;
-	        var orig_to = to;
-
-	        for (var i = from; i <= to; i++) {
-	            if (pt[i] !== 0 && (pt[i] < from || pt[i] > to)) unmatched.push([i, pt[i]]);
-	        }for (i = orig_from; i <= orig_to; i++) {
-	            while (pt[i] === 0 && i <= orig_to) {
-	                i++;
-	            }to = pt[i];
-
-	            while (pt[i] === to) {
-	                i++;
-	                to--;
-	            }
-
-	            to_remove = to_remove.concat(self.find_unmatched(pt, i, to));
-	        }
-
-	        if (unmatched.length > 0) to_remove.push(unmatched);
-
-	        return to_remove;
-	    };
-
-	    self.removePseudoknotsFromPairtable = function (pt) {
-	        /* Remove the pseudoknots from this structure in such a fashion
-	         * that the least amount of base-pairs need to be broken
-	         *
-	         * The pairtable is manipulated in place and a list of tuples
-	         * indicating the broken base pairs is returned.
-	         */
-
-	        var mm = self.maximumMatching(pt);
-	        var new_pt = self.backtrackMaximumMatching(mm, pt);
-	        var removed = [];
-
-	        for (var i = 1; i < pt.length; i++) {
-	            if (pt[i] < i) continue;
-
-	            if (new_pt[i] != pt[i]) {
-	                removed.push([i, pt[i]]);
-	                pt[pt[i]] = 0;
-	                pt[i] = 0;
-	            }
-	        }
-
-	        return removed;
-	    };
-	}
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.simpleXyCoordinates = simpleXyCoordinates;
-	function simpleXyCoordinates(pair_table) {
-	    var INIT_ANGLE = 0.; /* initial bending angle */
-	    var INIT_X = 100.; /* coordinate of first digit */
-	    var INIT_Y = 100.; /* see above */
-	    var RADIUS = 15.;
-
-	    var x = [],
-	        y = [];
-
-	    var i, len;
-	    var alpha;
-
-	    len = pair_table[0];
-	    var angle = Array.apply(null, new Array(len + 5)).map(Number.prototype.valueOf, 0);
-	    var loop_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
-	    var stack_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
-
-	    var lp = 0;
-	    var stk = 0;
-	    var PIHALF = Math.PI / 2;
-
-	    var loop = function loop(i, j, pair_table)
-	    /* i, j are the positions AFTER the last pair of a stack; i.e
-	       i-1 and j+1 are paired. */
-	    {
-	        var count = 2; /* counts the VERTICES of a loop polygon; that's
-	                          NOT necessarily the number of unpaired bases!
-	                          Upon entry the loop has already 2 vertices, namely
-	                          the pair i-1/j+1.  */
-
-	        var r = 0,
-	            bubble = 0; /* bubble counts the unpaired digits in loops */
-
-	        var i_old, partner, k, l, start_k, start_l, fill, ladder;
-	        var begin, v, diff;
-	        var polygon;
-
-	        var remember = Array.apply(null, new Array(3 + Math.floor((j - i) / 5) * 2)).map(Number.prototype.valueOf, 0);
-
-	        i_old = i - 1, j++; /* j has now been set to the partner of the
-	                               previous pair for correct while-loop
-	                               termination.  */
-	        while (i != j) {
-	            partner = pair_table[i];
-	            if (!partner || i == 0) i++, count++, bubble++;else {
-	                count += 2;
-	                k = i, l = partner; /* beginning of stack */
-	                remember[++r] = k;
-	                remember[++r] = l;
-	                i = partner + 1; /* next i for the current loop */
-
-	                start_k = k, start_l = l;
-	                ladder = 0;
-	                do {
-	                    k++, l--, ladder++; /* go along the stack region */
-	                } while (pair_table[k] == l && pair_table[k] > k);
-
-	                fill = ladder - 2;
-	                if (ladder >= 2) {
-	                    angle[start_k + 1 + fill] += PIHALF; /*  Loop entries and    */
-	                    angle[start_l - 1 - fill] += PIHALF; /*  exits get an        */
-	                    angle[start_k] += PIHALF; /*  additional PI/2.    */
-	                    angle[start_l] += PIHALF; /*  Why ? (exercise)    */
-	                    if (ladder > 2) {
-	                        for (; fill >= 1; fill--) {
-	                            angle[start_k + fill] = Math.PI; /*  fill in the angles  */
-	                            angle[start_l - fill] = Math.PI; /*  for the backbone    */
-	                        }
-	                    }
-	                }
-	                stack_size[++stk] = ladder;
-	                if (k <= l) loop(k, l, pair_table);
-	            }
-	        }
-
-	        polygon = Math.PI * (count - 2) / count; /* bending angle in loop polygon */
-	        remember[++r] = j;
-	        begin = i_old < 0 ? 0 : i_old;
-	        for (v = 1; v <= r; v++) {
-	            diff = remember[v] - begin;
-	            for (fill = 0; fill <= diff; fill++) {
-	                angle[begin + fill] += polygon;
-	            }if (v > r) break;
-	            begin = remember[++v];
-	        }
-	        loop_size[++lp] = bubble;
-	    };
-
-	    loop(0, len + 1, pair_table);
-	    loop_size[lp] -= 2; /* correct for cheating with function loop */
-
-	    alpha = INIT_ANGLE;
-	    x[0] = INIT_X;
-	    y[0] = INIT_Y;
-
-	    var poss = [];
-
-	    poss.push([x[0], y[0]]);
-	    for (i = 1; i < len; i++) {
-	        x[i] = x[i - 1] + RADIUS * Math.cos(alpha);
-	        y[i] = y[i - 1] + RADIUS * Math.sin(alpha);
-
-	        poss.push([x[i], y[i]]);
-	        alpha += Math.PI - angle[i + 1];
-	    }
-
-	    return poss;
-	}
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.NAView = NAView;
-
-	var _radloop = __webpack_require__(7);
-
-	var _connection = __webpack_require__(8);
-
-	var _region = __webpack_require__(10);
-
-	var _base = __webpack_require__(11);
-
-	var _loop = __webpack_require__(9);
-
-	function NAView() {
-	    this.ANUM = 9999.0;
-	    this.MAXITER = 500;
-
-	    this.bases = [];
-	    this.nbase = null;
-	    this.nregion = null;
-	    this.loop_count = null;
-
-	    this.root = new _loop.Loop();
-	    this.loops = [];
-
-	    this.regions = [];
-
-	    this.rlphead = new _radloop.Radloop();
-
-	    this.lencut = 0.8;
-	    this.RADIUS_REDUCTION_FACTOR = 1.4;
-
-	    // show algorithm step by step
-	    this.angleinc = null;
-
-	    this._h = null;
-
-	    // private boolean noIterationFailureYet = true;
-
-	    this.HELIX_FACTOR = 0.6;
-	    this.BACKBONE_DISTANCE = 27;
-	}
-
-	NAView.prototype.naview_xy_coordinates = function (pair_table) {
-	    var x = [];
-	    var y = [];
-	    if (pair_table.length === 0 || pair_table[0] === 0) {
-	        return 0;
-	    }
-	    var i;
-	    this.nbase = pair_table[0];
-	    this.bases = [];
-	    for (var index = 0; index < this.nbase + 1; index++) {
-	        this.bases.push(new _base.Base());
-	    }
-	    this.regions = [];
-	    for (var index = 0; index < this.nbase + 1; index++) {
-	        this.regions.push(new _region.Region());
-	    }
-	    this.read_in_bases(pair_table);
-	    this.rlphead = null;
-	    this.find_regions();
-	    this.loop_count = 0;
-	    this.loops = [];
-	    for (var index = 0; index < this.nbase + 1; index++) {
-	        this.loops.push(new _loop.Loop());
-	    }
-	    this.construct_loop(0);
-	    this.find_central_loop();
-	    this.traverse_loop(this.root, null);
-
-	    for (i = 0; i < this.nbase; i++) {
-	        x.push(100 + this.BACKBONE_DISTANCE * this.bases[i + 1].getX());
-	        y.push(100 + this.BACKBONE_DISTANCE * this.bases[i + 1].getY());
-	    }
-
-	    return {
-	        nbase: this.nbase,
-	        x: x,
-	        y: y
-	    };
-	};
-
-	NAView.prototype.read_in_bases = function read_in_bases(pair_table) {
-	    var i = null;
-	    var npairs = null;
-
-	    // Set up an origin.
-	    this.bases.push(new _base.Base());
-	    this.bases[0].setMate(0);
-	    this.bases[0].setExtracted(false);
-	    this.bases[0].setX(this.ANUM);
-	    this.bases[0].setY(this.ANUM);
-
-	    for (npairs = 0, i = 1; i <= this.nbase; i++) {
-	        this.bases.push(new _base.Base());
-	        this.bases[i].setExtracted(false);
-	        this.bases[i].setX(this.ANUM);
-	        this.bases[i].setY(this.ANUM);
-	        this.bases[i].setMate(pair_table[i]);
-	        if (pair_table[i] > i) npairs++;
-	    }
-	    // must have at least 1 pair to avoid segfault
-	    if (npairs == 0) {
-	        this.bases[1].setMate(this.nbase);
-	        this.bases[this.nbase].setMate(1);
-	    }
-	};
-
-	NAView.prototype.find_regions = function find_regions() {
-	    var i = null;
-	    var mate = null;
-	    var nb1 = null;
-
-	    nb1 = this.nbase + 1;
-	    var mark = [];
-	    for (i = 0; i < nb1; i++) {
-	        mark.push(false);
-	    }
-	    this.nregion = 0;
-	    for (i = 0; i <= this.nbase; i++) {
-	        if ((mate = this.bases[i].getMate()) != 0 && !mark[i]) {
-	            this.regions[this.nregion].setStart1(i);
-	            this.regions[this.nregion].setEnd2(mate);
-	            mark[i] = true;
-	            mark[mate] = true;
-	            this.bases[i].setRegion(this.regions[this.nregion]);
-	            this.bases[mate].setRegion(this.regions[this.nregion]);
-	            for (i++, mate--; i < mate && this.bases[i].getMate() == mate; i++, mate--) {
-	                mark[mate] = true;
-	                mark[i] = true;
-	                this.bases[i].setRegion(this.regions[this.nregion]);
-	                this.bases[mate].setRegion(this.regions[this.nregion]);
-	            }
-	            this.regions[this.nregion].setEnd1(--i);
-	            this.regions[this.nregion].setStart2(mate + 1);
-
-	            this.nregion++;
-	        }
-	    }
-	};
-
-	NAView.prototype.construct_loop = function construct_loop(ibase) {
-	    var i = null;
-	    var mate = null;
-	    var retloop = new _loop.Loop();
-	    var lp = new _loop.Loop();
-	    var cp = new _connection.Connection();
-	    var rp = new _region.Region();
-	    var rlp = new _radloop.Radloop();
-	    retloop = this.loops[this.loop_count++];
-	    retloop.setNconnection(0);
-	    retloop.setDepth(0);
-	    retloop.setNumber(this.loop_count);
-	    retloop.setRadius(0.0);
-
-	    for (rlp = this.rlphead; rlp != null; rlp = rlp.getNext()) {
-	        if (rlp.getLoopnumber() == this.loop_count) retloop.setRadius(rlp.getRadius());
-	    }i = ibase;
-	    do {
-	        if ((mate = this.bases[i].getMate()) != 0) {
-	            rp = this.bases[i].getRegion();
-	            if (!this.bases[rp.getStart1()].isExtracted()) {
-	                if (i == rp.getStart1()) {
-	                    this.bases[rp.getStart1()].setExtracted(true);
-	                    this.bases[rp.getEnd1()].setExtracted(true);
-	                    this.bases[rp.getStart2()].setExtracted(true);
-	                    this.bases[rp.getEnd2()].setExtracted(true);
-	                    lp = this.construct_loop(rp.getEnd1() < this.nbase ? rp.getEnd1() + 1 : 0);
-	                } else if (i == rp.getStart2()) {
-	                    this.bases[rp.getStart2()].setExtracted(true);
-	                    this.bases[rp.getEnd2()].setExtracted(true);
-	                    this.bases[rp.getStart1()].setExtracted(true);
-	                    this.bases[rp.getEnd1()].setExtracted(true);
-	                    lp = this.construct_loop(rp.getEnd2() < this.nbase ? rp.getEnd2() + 1 : 0);
-	                } else {
-	                    console.log("Something went terribly wrong ....");
-	                }
-	                retloop.setNconnection(retloop.getNconnection() + 1);
-	                cp = new _connection.Connection();
-	                retloop.setConnection(retloop.getNconnection() - 1, cp);
-	                retloop.setConnection(retloop.getNconnection(), null);
-	                cp.setLoop(lp);
-	                cp.setRegion(rp);
-	                if (i == rp.getStart1()) {
-	                    cp.setStart(rp.getStart1());
-	                    cp.setEnd(rp.getEnd2());
-	                } else {
-	                    cp.setStart(rp.getStart2());
-	                    cp.setEnd(rp.getEnd1());
-	                }
-	                cp.setExtruded(false);
-	                cp.setBroken(false);
-	                lp.setNconnection(lp.getNconnection() + 1);
-	                cp = new _connection.Connection();
-	                lp.setConnection(lp.getNconnection() - 1, cp);
-	                lp.setConnection(lp.getNconnection(), null);
-	                cp.setLoop(retloop);
-	                cp.setRegion(rp);
-	                if (i == rp.getStart1()) {
-	                    cp.setStart(rp.getStart2());
-	                    cp.setEnd(rp.getEnd1());
-	                } else {
-	                    cp.setStart(rp.getStart1());
-	                    cp.setEnd(rp.getEnd2());
-	                }
-	                cp.setExtruded(false);
-	                cp.setBroken(false);
-	            }
-	            i = mate;
-	        }
-	        if (++i > this.nbase) i = 0;
-	    } while (i != ibase);
-	    return retloop;
-	};
-
-	NAView.prototype.find_central_loop = function find_central_loop() {
-	    var lp = new _loop.Loop();
-	    var maxconn = null;
-	    var maxdepth = null;
-	    var i = null;
-
-	    determine_depths.bind(this)();
-	    maxconn = 0;
-	    maxdepth = -1;
-	    for (i = 0; i < this.loop_count; i++) {
-	        lp = this.loops[i];
-	        if (lp.getNconnection() > maxconn) {
-	            maxdepth = lp.getDepth();
-	            maxconn = lp.getNconnection();
-	            this.root = lp;
-	        } else if (lp.getDepth() > maxdepth && lp.getNconnection() == maxconn) {
-	            maxdepth = lp.getDepth();
-	            this.root = lp;
-	        }
-	    }
-	};
-
-	function determine_depths() {
-	    var lp = new _loop.Loop();
-	    var i = null;
-	    var j = null;
-
-	    for (i = 0; i < this.loop_count; i++) {
-	        lp = this.loops[i];
-	        for (j = 0; j < this.loop_count; j++) {
-	            this.loops[j].setMark(false);
-	        }
-	        lp.setDepth(depth(lp));
-	    }
-	}
-
-	function depth(lp) {
-	    var count = null;
-	    var ret = null;
-	    var d = null;
-
-	    if (lp.getNconnection() <= 1) {
-	        return 0;
-	    }
-	    if (lp.isMark()) {
-	        return -1;
-	    }
-	    lp.setMark(true);
-	    count = 0;
-	    ret = 0;
-	    for (var i = 0; lp.getConnection(i) != null; i++) {
-	        d = depth(lp.getConnection(i).getLoop());
-	        if (d >= 0) {
-	            if (++count == 1) {
-	                ret = d;
-	            } else if (ret > d) {
-	                ret = d;
-	            }
-	        }
-	    }
-	    lp.setMark(false);
-	    return ret + 1;
-	}
-
-	NAView.prototype.traverse_loop = function traverse_loop(lp, anchor_connection) {
-	    var xs, ys, xe, ye, xn, yn, angleinc, r;
-	    var radius, xc, yc, xo, yo, astart, aend, a;
-	    var cp, cpnext, acp, cpprev;
-	    var i, j, n, ic;
-	    var da, maxang;
-	    var count, icstart, icend, icmiddle, icroot;
-	    var done, done_all_connections, rooted;
-	    var sign;
-	    var midx, midy, nrx, nry, mx, my, vx, vy, dotmv, nmidx, nmidy;
-	    var icstart1, icup, icdown, icnext, direction;
-	    var dan, dx, dy, rr;
-	    var cpx, cpy, cpnextx, cpnexty, cnx, cny, rcn, rc, lnx, lny, rl, ac, acn, sx, sy, dcp;
-	    var imaxloop = 0;
-
-	    angleinc = 2 * Math.PI / (this.nbase + 1);
-	    acp = null;
-	    icroot = -1;
-	    var indice = 0;
-
-	    for (ic = 0; (cp = lp.getConnection(indice)) != null; indice++, ic++) {
-	        xs = -Math.sin(angleinc * cp.getStart());
-	        ys = Math.cos(angleinc * cp.getStart());
-	        xe = -Math.sin(angleinc * cp.getEnd());
-	        ye = Math.cos(angleinc * cp.getEnd());
-	        xn = ye - ys;
-	        yn = xs - xe;
-	        r = Math.sqrt(xn * xn + yn * yn);
-	        cp.setXrad(xn / r);
-	        cp.setYrad(yn / r);
-	        cp.setAngle(Math.atan2(yn, xn));
-	        if (cp.getAngle() < 0.0) {
-	            cp.setAngle(cp.getAngle() + 2 * Math.PI);
-	        }
-	        if (anchor_connection != null && anchor_connection.getRegion() == cp.getRegion()) {
-	            acp = cp;
-	            icroot = ic;
-	        }
-	    }
-	    set_radius: while (true) {
-	        this.determine_radius(lp, this.lencut);
-	        radius = lp.getRadius() / this.RADIUS_REDUCTION_FACTOR;
-	        if (anchor_connection == null) {
-	            xc = yc = 0.0;
-	        } else {
-	            xo = (this.bases[acp.getStart()].getX() + this.bases[acp.getEnd()].getX()) / 2.0;
-	            yo = (this.bases[acp.getStart()].getY() + this.bases[acp.getEnd()].getY()) / 2.0;
-	            xc = xo - radius * acp.getXrad();
-	            yc = yo - radius * acp.getYrad();
-	        }
-
-	        // The construction of the connectors will proceed in blocks of
-	        // connected connectors, where a connected connector pairs means two
-	        // connectors that are forced out of the drawn circle because they
-	        // are too close together in angle.
-
-	        // First, find the start of a block of connected connectors
-
-	        if (icroot == -1) {
-	            icstart = 0;
-	        } else {
-	            icstart = icroot;
-	        }
-	        cp = lp.getConnection(icstart);
-	        count = 0;
-	        done = false;
-	        do {
-	            j = icstart - 1;
-	            if (j < 0) {
-	                j = lp.getNconnection() - 1;
-	            }
-	            cpprev = lp.getConnection(j);
-	            if (!this.connected_connection(cpprev, cp)) {
-	                done = true;
-	            } else {
-	                icstart = j;
-	                cp = cpprev;
-	            }
-	            if (++count > lp.getNconnection()) {
-	                // Here everything is connected. Break on maximum angular
-	                // separation between connections.
-	                maxang = -1.0;
-	                for (ic = 0; ic < lp.getNconnection(); ic++) {
-	                    j = ic + 1;
-	                    if (j >= lp.getNconnection()) {
-	                        j = 0;
-	                    }
-	                    cp = lp.getConnection(ic);
-	                    cpnext = lp.getConnection(j);
-	                    ac = cpnext.getAngle() - cp.getAngle();
-	                    if (ac < 0.0) {
-	                        ac += 2 * Math.PI;
-	                    }
-	                    if (ac > maxang) {
-	                        maxang = ac;
-	                        imaxloop = ic;
-	                    }
-	                }
-	                icend = imaxloop;
-	                icstart = imaxloop + 1;
-	                if (icstart >= lp.getNconnection()) {
-	                    icstart = 0;
-	                }
-	                cp = lp.getConnection(icend);
-	                cp.setBroken(true);
-	                done = true;
-	            }
-	        } while (!done);
-	        done_all_connections = false;
-	        icstart1 = icstart;
-	        while (!done_all_connections) {
-	            count = 0;
-	            done = false;
-	            icend = icstart;
-	            rooted = false;
-	            while (!done) {
-	                cp = lp.getConnection(icend);
-	                if (icend == icroot) {
-	                    rooted = true;
-	                }
-	                j = icend + 1;
-	                if (j >= lp.getNconnection()) {
-	                    j = 0;
-	                }
-	                cpnext = lp.getConnection(j);
-	                if (this.connected_connection(cp, cpnext)) {
-	                    if (++count >= lp.getNconnection()) {
-	                        break;
-	                    }
-	                    icend = j;
-	                } else {
-	                    done = true;
-	                }
-	            }
-	            icmiddle = this.find_ic_middle(icstart, icend, anchor_connection, acp, lp);
-	            ic = icup = icdown = icmiddle;
-	            done = false;
-	            direction = 0;
-	            while (!done) {
-	                if (direction < 0) {
-	                    ic = icup;
-	                } else if (direction == 0) {
-	                    ic = icmiddle;
-	                } else {
-	                    ic = icdown;
-	                }
-	                if (ic >= 0) {
-	                    cp = lp.getConnection(ic);
-	                    if (anchor_connection == null || acp != cp) {
-	                        if (direction == 0) {
-	                            astart = cp.getAngle() - Math.asin(1.0 / 2.0 / radius);
-	                            aend = cp.getAngle() + Math.asin(1.0 / 2.0 / radius);
-	                            this.bases[cp.getStart()].setX(xc + radius * Math.cos(astart));
-	                            this.bases[cp.getStart()].setY(yc + radius * Math.sin(astart));
-	                            this.bases[cp.getEnd()].setX(xc + radius * Math.cos(aend));
-	                            this.bases[cp.getEnd()].setY(yc + radius * Math.sin(aend));
-	                        } else if (direction < 0) {
-	                            j = ic + 1;
-	                            if (j >= lp.getNconnection()) {
-	                                j = 0;
-	                            }
-	                            cp = lp.getConnection(ic);
-	                            cpnext = lp.getConnection(j);
-	                            cpx = cp.getXrad();
-	                            cpy = cp.getYrad();
-	                            ac = (cp.getAngle() + cpnext.getAngle()) / 2.0;
-	                            if (cp.getAngle() > cpnext.getAngle()) {
-	                                ac -= Math.PI;
-	                            }
-	                            cnx = Math.cos(ac);
-	                            cny = Math.sin(ac);
-	                            lnx = cny;
-	                            lny = -cnx;
-	                            da = cpnext.getAngle() - cp.getAngle();
-	                            if (da < 0.0) {
-	                                da += 2 * Math.PI;
-	                            }
-	                            if (cp.isExtruded()) {
-	                                if (da <= Math.PI / 2) {
-	                                    rl = 2.0;
-	                                } else {
-	                                    rl = 1.5;
-	                                }
-	                            } else {
-	                                rl = 1.0;
-	                            }
-	                            this.bases[cp.getEnd()].setX(this.bases[cpnext.getStart()].getX() + rl * lnx);
-	                            this.bases[cp.getEnd()].setY(this.bases[cpnext.getStart()].getY() + rl * lny);
-	                            this.bases[cp.getStart()].setX(this.bases[cp.getEnd()].getX() + cpy);
-	                            this.bases[cp.getStart()].setY(this.bases[cp.getEnd()].getY() - cpx);
-	                        } else {
-	                            j = ic - 1;
-	                            if (j < 0) {
-	                                j = lp.getNconnection() - 1;
-	                            }
-	                            cp = lp.getConnection(j);
-	                            cpnext = lp.getConnection(ic);
-	                            cpnextx = cpnext.getXrad();
-	                            cpnexty = cpnext.getYrad();
-	                            ac = (cp.getAngle() + cpnext.getAngle()) / 2.0;
-	                            if (cp.getAngle() > cpnext.getAngle()) {
-	                                ac -= Math.PI;
-	                            }
-	                            cnx = Math.cos(ac);
-	                            cny = Math.sin(ac);
-	                            lnx = -cny;
-	                            lny = cnx;
-	                            da = cpnext.getAngle() - cp.getAngle();
-	                            if (da < 0.0) {
-	                                da += 2 * Math.PI;
-	                            }
-	                            if (cp.isExtruded()) {
-	                                if (da <= Math.PI / 2) {
-	                                    rl = 2.0;
-	                                } else {
-	                                    rl = 1.5;
-	                                }
-	                            } else {
-	                                rl = 1.0;
-	                            }
-	                            this.bases[cpnext.getStart()].setX(this.bases[cp.getEnd()].getX() + rl * lnx);
-	                            this.bases[cpnext.getStart()].setY(this.bases[cp.getEnd()].getY() + rl * lny);
-	                            this.bases[cpnext.getEnd()].setX(this.bases[cpnext.getStart()].getX() - cpnexty);
-	                            this.bases[cpnext.getEnd()].setY(this.bases[cpnext.getStart()].getY() + cpnextx);
-	                        }
-	                    }
-	                }
-	                if (direction < 0) {
-	                    if (icdown == icend) {
-	                        icdown = -1;
-	                    } else if (icdown >= 0) {
-	                        if (++icdown >= lp.getNconnection()) {
-	                            icdown = 0;
-	                        }
-	                    }
-	                    direction = 1;
-	                } else {
-	                    if (icup == icstart) {
-	                        icup = -1;
-	                    } else if (icup >= 0) {
-	                        if (--icup < 0) {
-	                            icup = lp.getNconnection() - 1;
-	                        }
-	                    }
-	                    direction = -1;
-	                }
-	                done = icup == -1 && icdown == -1;
-	            }
-	            icnext = icend + 1;
-	            if (icnext >= lp.getNconnection()) {
-	                icnext = 0;
-	            }
-	            if (icend != icstart && !(icstart == icstart1 && icnext == icstart1)) {
-
-	                // Move the bases just constructed (or the radius) so that
-	                // the bisector of the end points is radius distance away
-	                // from the loop center.
-
-	                cp = lp.getConnection(icstart);
-	                cpnext = lp.getConnection(icend);
-	                dx = this.bases[cpnext.getEnd()].getX() - this.bases[cp.getStart()].getX();
-	                dy = this.bases[cpnext.getEnd()].getY() - this.bases[cp.getStart()].getY();
-	                midx = this.bases[cp.getStart()].getX() + dx / 2.0;
-	                midy = this.bases[cp.getStart()].getY() + dy / 2.0;
-	                rr = Math.sqrt(dx * dx + dy * dy);
-	                mx = dx / rr;
-	                my = dy / rr;
-	                vx = xc - midx;
-	                vy = yc - midy;
-	                rr = Math.sqrt(dx * dx + dy * dy);
-	                vx /= rr;
-	                vy /= rr;
-	                dotmv = vx * mx + vy * my;
-	                nrx = dotmv * mx - vx;
-	                nry = dotmv * my - vy;
-	                rr = Math.sqrt(nrx * nrx + nry * nry);
-	                nrx /= rr;
-	                nry /= rr;
-
-	                // Determine which side of the bisector the center should
-	                // be.
-
-	                dx = this.bases[cp.getStart()].getX() - xc;
-	                dy = this.bases[cp.getStart()].getY() - yc;
-	                ac = Math.atan2(dy, dx);
-	                if (ac < 0.0) {
-	                    ac += 2 * Math.PI;
-	                }
-	                dx = this.bases[cpnext.getEnd()].getX() - xc;
-	                dy = this.bases[cpnext.getEnd()].getY() - yc;
-	                acn = Math.atan2(dy, dx);
-	                if (acn < 0.0) {
-	                    acn += 2 * Math.PI;
-	                }
-	                if (acn < ac) {
-	                    acn += 2 * Math.PI;
-	                }
-	                if (acn - ac > Math.PI) {
-	                    sign = -1;
-	                } else {
-	                    sign = 1;
-	                }
-	                nmidx = xc + sign * radius * nrx;
-	                nmidy = yc + sign * radius * nry;
-	                if (rooted) {
-	                    xc -= nmidx - midx;
-	                    yc -= nmidy - midy;
-	                } else {
-	                    for (ic = icstart;;) {
-	                        cp = lp.getConnection(ic);
-	                        i = cp.getStart();
-	                        this.bases[i].setX(this.bases[i].getX() + nmidx - midx);
-	                        this.bases[i].setY(this.bases[i].getY() + nmidy - midy);
-	                        i = cp.getEnd();
-	                        this.bases[i].setX(this.bases[i].getX() + nmidx - midx);
-	                        this.bases[i].setY(this.bases[i].getY() + nmidy - midy);
-	                        if (ic == icend) {
-	                            break;
-	                        }
-	                        if (++ic >= lp.getNconnection()) {
-	                            ic = 0;
-	                        }
-	                    }
-	                }
-	            }
-	            icstart = icnext;
-	            done_all_connections = icstart == icstart1;
-	        }
-	        for (ic = 0; ic < lp.getNconnection(); ic++) {
-	            cp = lp.getConnection(ic);
-	            j = ic + 1;
-	            if (j >= lp.getNconnection()) {
-	                j = 0;
-	            }
-	            cpnext = lp.getConnection(j);
-	            dx = this.bases[cp.getEnd()].getX() - xc;
-	            dy = this.bases[cp.getEnd()].getY() - yc;
-	            rc = Math.sqrt(dx * dx + dy * dy);
-	            ac = Math.atan2(dy, dx);
-	            if (ac < 0.0) {
-	                ac += 2 * Math.PI;
-	            }
-	            dx = this.bases[cpnext.getStart()].getX() - xc;
-	            dy = this.bases[cpnext.getStart()].getY() - yc;
-	            rcn = Math.sqrt(dx * dx + dy * dy);
-	            acn = Math.atan2(dy, dx);
-	            if (acn < 0.0) {
-	                acn += 2 * Math.PI;
-	            }
-	            if (acn < ac) {
-	                acn += 2 * Math.PI;
-	            }
-	            dan = acn - ac;
-	            dcp = cpnext.getAngle() - cp.getAngle();
-	            if (dcp <= 0.0) {
-	                dcp += 2 * Math.PI;
-	            }
-	            if (Math.abs(dan - dcp) > Math.PI) {
-	                if (cp.isExtruded()) {
-	                    console.log("Warning from traverse_loop. Loop " + lp.getNumber() + " has crossed regions\n");
-	                } else if (cpnext.getStart() - cp.getEnd() != 1) {
-	                    cp.setExtruded(true);
-	                    continue set_radius; // remplacement du goto
-	                }
-	            }
-	            if (cp.isExtruded()) {
-	                this.construct_extruded_segment(cp, cpnext);
-	            } else {
-	                n = cpnext.getStart() - cp.getEnd();
-	                if (n < 0) {
-	                    n += this.nbase + 1;
-	                }
-	                angleinc = dan / n;
-	                for (j = 1; j < n; j++) {
-	                    i = cp.getEnd() + j;
-	                    if (i > this.nbase) {
-	                        i -= this.nbase + 1;
-	                    }
-	                    a = ac + j * angleinc;
-	                    rr = rc + (rcn - rc) * (a - ac) / dan;
-	                    this.bases[i].setX(xc + rr * Math.cos(a));
-	                    this.bases[i].setY(yc + rr * Math.sin(a));
-	                }
-	            }
-	        }
-	        break;
-	    }
-	    for (ic = 0; ic < lp.getNconnection(); ic++) {
-	        if (icroot != ic) {
-	            cp = lp.getConnection(ic);
-	            //IM HERE
-	            this.generate_region(cp);
-	            this.traverse_loop(cp.getLoop(), cp);
-	        }
-	    }
-	    n = 0;
-	    sx = 0.0;
-	    sy = 0.0;
-	    for (ic = 0; ic < lp.getNconnection(); ic++) {
-	        j = ic + 1;
-	        if (j >= lp.getNconnection()) {
-	            j = 0;
-	        }
-	        cp = lp.getConnection(ic);
-	        cpnext = lp.getConnection(j);
-	        n += 2;
-	        sx += this.bases[cp.getStart()].getX() + this.bases[cp.getEnd()].getX();
-	        sy += this.bases[cp.getStart()].getY() + this.bases[cp.getEnd()].getY();
-	        if (!cp.isExtruded()) {
-	            for (j = cp.getEnd() + 1; j != cpnext.getStart(); j++) {
-	                if (j > this.nbase) {
-	                    j -= this.nbase + 1;
-	                }
-	                n++;
-	                sx += this.bases[j].getX();
-	                sy += this.bases[j].getY();
-	            }
-	        }
-	    }
-	    lp.setX(sx / n);
-	    lp.setY(sy / n);
-	};
-
-	NAView.prototype.determine_radius = function determine_radius(lp, lencut) {
-	    var mindit, ci, dt, sumn, sumd, radius, dit;
-	    var i,
-	        j,
-	        end,
-	        start,
-	        imindit = 0;
-	    var cp = new _connection.Connection(),
-	        cpnext = new _connection.Connection();
-	    var rt2_2 = 0.7071068;
-
-	    do {
-	        mindit = 1.0e10;
-	        for (sumd = 0.0, sumn = 0.0, i = 0; i < lp.getNconnection(); i++) {
-	            cp = lp.getConnection(i);
-	            j = i + 1;
-	            if (j >= lp.getNconnection()) {
-	                j = 0;
-	            }
-	            cpnext = lp.getConnection(j);
-	            end = cp.getEnd();
-	            start = cpnext.getStart();
-	            if (start < end) {
-	                start += this.nbase + 1;
-	            }
-	            dt = cpnext.getAngle() - cp.getAngle();
-	            if (dt <= 0.0) {
-	                dt += 2 * Math.PI;
-	            }
-	            if (!cp.isExtruded()) {
-	                ci = start - end;
-	            } else {
-	                if (dt <= Math.PI / 2) {
-	                    ci = 2.0;
-	                } else {
-	                    ci = 1.5;
-	                }
-	            }
-	            sumn += dt * (1.0 / ci + 1.0);
-	            sumd += dt * dt / ci;
-	            dit = dt / ci;
-	            if (dit < mindit && !cp.isExtruded() && ci > 1.0) {
-	                mindit = dit;
-	                imindit = i;
-	            }
-	        }
-	        radius = sumn / sumd;
-	        if (radius < rt2_2) {
-	            radius = rt2_2;
-	        }
-	        if (mindit * radius < lencut) {
-	            lp.getConnection(imindit).setExtruded(true);
-	        }
-	    } while (mindit * radius < lencut);
-	    if (lp.getRadius() > 0.0) {
-	        radius = lp.getRadius();
-	    } else {
-	        lp.setRadius(radius);
-	    }
-	};
-
-	NAView.prototype.find_ic_middle = function find_ic_middle(icstart, icend, anchor_connection, acp, lp) {
-	    var count, ret, ic, i;
-	    var done;
-
-	    count = 0;
-	    ret = -1;
-	    ic = icstart;
-	    done = false;
-	    while (!done) {
-	        if (count++ > lp.getNconnection() * 2) {
-	            console.log("Infinite loop in 'find_ic_middle'");
-	        }
-	        if (anchor_connection != null && lp.getConnection(ic) == acp) {
-	            ret = ic;
-	        }
-	        done = ic == icend;
-	        if (++ic >= lp.getNconnection()) {
-	            ic = 0;
-	        }
-	    }
-	    if (ret == -1) {
-	        for (i = 1, ic = icstart; i < (count + 1) / 2; i++) {
-	            if (++ic >= lp.getNconnection()) ic = 0;
-	        }
-	        ret = ic;
-	    }
-	    return ret;
-	};
-
-	NAView.prototype.construct_extruded_segment = function construct_extruded_segment(cp, cpnext) {
-	    var astart, aend1, aend2, aave, dx, dy, a1, a2, ac, rr, da, dac;
-	    var start, end, n, nstart, nend;
-	    var collision;
-
-	    astart = cp.getAngle();
-	    aend2 = aend1 = cpnext.getAngle();
-	    if (aend2 < astart) {
-	        aend2 += 2 * Math.PI;
-	    }
-	    aave = (astart + aend2) / 2.0;
-	    start = cp.getEnd();
-	    end = cpnext.getStart();
-	    n = end - start;
-	    if (n < 0) {
-	        n += this.nbase + 1;
-	    }
-	    da = cpnext.getAngle() - cp.getAngle();
-	    if (da < 0.0) {
-	        da += 2 * Math.PI;
-	    }
-	    if (n == 2) {
-	        this.construct_circle_segment(start, end);
-	    } else {
-	        dx = this.bases[end].getX() - this.bases[start].getX();
-	        dy = this.bases[end].getY() - this.bases[start].getY();
-	        rr = Math.sqrt(dx * dx + dy * dy);
-	        dx /= rr;
-	        dy /= rr;
-	        if (rr >= 1.5 && da <= Math.PI / 2) {
-	            nstart = start + 1;
-	            if (nstart > this.nbase) {
-	                nstart -= this.nbase + 1;
-	            }
-	            nend = end - 1;
-	            if (nend < 0) {
-	                nend += this.nbase + 1;
-	            }
-	            this.bases[nstart].setX(this.bases[start].getX() + 0.5 * dx);
-	            this.bases[nstart].setY(this.bases[start].getY() + 0.5 * dy);
-	            this.bases[nend].setX(this.bases[end].getX() - 0.5 * dx);
-	            this.bases[nend].setY(this.bases[end].getY() - 0.5 * dy);
-	            start = nstart;
-	            end = nend;
-	        }
-	        do {
-	            collision = false;
-	            this.construct_circle_segment(start, end);
-	            nstart = start + 1;
-	            if (nstart > this.nbase) {
-	                nstart -= this.nbase + 1;
-	            }
-	            dx = this.bases[nstart].getX() - this.bases[start].getX();
-	            dy = this.bases[nstart].getY() - this.bases[start].getY();
-	            a1 = Math.atan2(dy, dx);
-	            if (a1 < 0.0) {
-	                a1 += 2 * Math.PI;
-	            }
-	            dac = a1 - astart;
-	            if (dac < 0.0) {
-	                dac += 2 * Math.PI;
-	            }
-	            if (dac > Math.PI) {
-	                collision = true;
-	            }
-	            nend = end - 1;
-	            if (nend < 0) {
-	                nend += this.nbase + 1;
-	            }
-	            dx = this.bases[nend].getX() - this.bases[end].getX();
-	            dy = this.bases[nend].getY() - this.bases[end].getY();
-	            a2 = Math.atan2(dy, dx);
-	            if (a2 < 0.0) {
-	                a2 += 2 * Math.PI;
-	            }
-	            dac = aend1 - a2;
-	            if (dac < 0.0) {
-	                dac += 2 * Math.PI;
-	            }
-	            if (dac > Math.PI) {
-	                collision = true;
-	            }
-	            if (collision) {
-	                ac = this.minf2(aave, astart + 0.5);
-	                this.bases[nstart].setX(this.bases[start].getX() + Math.cos(ac));
-	                this.bases[nstart].setY(this.bases[start].getY() + Math.sin(ac));
-	                start = nstart;
-	                ac = this.maxf2(aave, aend2 - 0.5);
-	                this.bases[nend].setX(this.bases[end].getX() + Math.cos(ac));
-	                this.bases[nend].setY(this.bases[end].getY() + Math.sin(ac));
-	                end = nend;
-	                n -= 2;
-	            }
-	        } while (collision && n > 1);
-	    }
-	};
-
-	NAView.prototype.construct_circle_segment = function construct_circle_segment(start, end) {
-	    var dx, dy, rr, midx, midy, xn, yn, nrx, nry, mx, my, a;
-	    var l, j, i;
-
-	    dx = this.bases[end].getX() - this.bases[start].getX();
-	    dy = this.bases[end].getY() - this.bases[start].getY();
-	    rr = Math.sqrt(dx * dx + dy * dy);
-	    l = end - start;
-	    if (l < 0) {
-	        l += this.nbase + 1;
-	    }
-	    if (rr >= l) {
-	        dx /= rr;
-	        dy /= rr;
-	        for (j = 1; j < l; j++) {
-	            i = start + j;
-	            if (i > this.nbase) {
-	                i -= this.nbase + 1;
-	            }
-	            this.bases[i].setX(this.bases[start].getX() + dx * j / l);
-	            this.bases[i].setY(this.bases[start].getY() + dy * j / l);
-	        }
-	    } else {
-	        this.find_center_for_arc(l - 1, rr);
-	        dx /= rr;
-	        dy /= rr;
-	        midx = this.bases[start].getX() + dx * rr / 2.0;
-	        midy = this.bases[start].getY() + dy * rr / 2.0;
-	        xn = dy;
-	        yn = -dx;
-	        nrx = midx + this._h * xn;
-	        nry = midy + this._h * yn;
-	        mx = this.bases[start].getX() - nrx;
-	        my = this.bases[start].getY() - nry;
-	        rr = Math.sqrt(mx * mx + my * my);
-	        a = Math.atan2(my, mx);
-	        for (j = 1; j < l; j++) {
-	            i = start + j;
-	            if (i > this.nbase) {
-	                i -= this.nbase + 1;
-	            }
-	            this.bases[i].setX(nrx + rr * Math.cos(a + j * this.angleinc));
-	            this.bases[i].setY(nry + rr * Math.sin(a + j * this.angleinc));
-	        }
-	    }
-	};
-
-	NAView.prototype.find_center_for_arc = function find_center_for_arc(n, b) {
-	    var h, hhi, hlow, r, disc, theta, e, phi;
-	    var iter;
-
-	    hhi = (n + 1.0) / Math.PI;
-	    // changed to prevent div by zero if (ih)
-	    hlow = -hhi - b / (n + 1.000001 - b);
-	    if (b < 1) {
-	        // otherwise we might fail below (ih)
-	        hlow = 0;
-	    }
-	    iter = 0;
-	    do {
-	        h = (hhi + hlow) / 2.0;
-	        r = Math.sqrt(h * h + b * b / 4.0);
-	        disc = 1.0 - 0.5 / (r * r);
-	        if (Math.abs(disc) > 1.0) {
-	            console.log("Unexpected large magnitude discriminant = " + disc + " " + r);
-	        }
-	        theta = Math.acos(disc);
-	        phi = Math.acos(h / r);
-	        e = theta * (n + 1) + 2 * phi - 2 * Math.PI;
-	        if (e > 0.0) {
-	            hlow = h;
-	        } else {
-	            hhi = h;
-	        }
-	    } while (Math.abs(e) > 0.0001 && ++iter < this.MAXITER);
-	    if (iter >= this.MAXITER) {
-	        if (noIterationFailureYet) {
-	            console.log("Iteration failed in find_center_for_arc");
-	            noIterationFailureYet = false;
-	        }
-	        h = 0.0;
-	        theta = 0.0;
-	    }
-	    this._h = h;
-	    this.angleinc = theta;
-	};
-
-	NAView.prototype.generate_region = function generate_region(cp) {
-	    var l, start, end, i, mate;
-	    var rp;
-
-	    rp = cp.getRegion();
-	    l = 0;
-	    if (cp.getStart() == rp.getStart1()) {
-	        start = rp.getStart1();
-	        end = rp.getEnd1();
-	    } else {
-	        start = rp.getStart2();
-	        end = rp.getEnd2();
-	    }
-	    if (this.bases[cp.getStart()].getX() > this.ANUM - 100.0 || this.bases[cp.getEnd()].getX() > this.ANUM - 100.0) {
-	        console.log("Bad region passed to generate_region. Coordinates not defined.");
-	    }
-	    for (i = start + 1; i <= end; i++) {
-	        l++;
-	        this.bases[i].setX(this.bases[cp.getStart()].getX() + this.HELIX_FACTOR * l * cp.getXrad());
-	        this.bases[i].setY(this.bases[cp.getStart()].getY() + this.HELIX_FACTOR * l * cp.getYrad());
-	        mate = this.bases[i].getMate();
-	        this.bases[mate].setX(this.bases[cp.getEnd()].getX() + this.HELIX_FACTOR * l * cp.getXrad());
-	        this.bases[mate].setY(this.bases[cp.getEnd()].getY() + this.HELIX_FACTOR * l * cp.getYrad());
-	    }
-	};
-
-	NAView.prototype.minf2 = function minf2(x1, x2) {
-	    return x1 < x2 ? x1 : x2;
-	};
-
-	NAView.prototype.maxf2 = function maxf2(x1, x2) {
-	    return x1 > x2 ? x1 : x2;
-	};
-
-	NAView.prototype.connected_connection = function connected_connection(cp, cpnext) {
-	    if (cp.isExtruded()) {
-	        return true;
-	    } else if (cp.getEnd() + 1 == cpnext.getStart()) {
-	        return true;
-	    } else {
-	        return false;
-	    }
-	};
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.Radloop = Radloop;
-	function Radloop() {
-		this.radius = null;
-		this.loopnumber = null;
-		this.next = null;
-		this.prev = null;
-	}
-
-	Radloop.prototype.getRadius = function () {
-		return this.radius;
-	};
-
-	Radloop.prototype.setRadius = function (radius) {
-		this.radius = radius;
-	};
-
-	Radloop.prototype.getLoopnumber = function () {
-		return this.loopnumber;
-	};
-
-	Radloop.prototype.setLoopnumber = function (loopnumber) {
-		this.loopnumber = loopnumber;
-	};
-
-	Radloop.prototype.getNext = function () {
-		return this.next;
-	};
-
-	Radloop.prototype.setNext = function (next) {
-		this.next = next;
-	};
-
-	Radloop.prototype.getPrev = function () {
-		return this.prev;
-	};
-
-	Radloop.prototype.setPrev = function (prev) {
-		this.prev = prev;
-	};
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.Connection = Connection;
-
-	var _loop = __webpack_require__(9);
-
-	var _region = __webpack_require__(10);
-
-	function Connection() {
-		this.loop = new _loop.Loop();
-		this.region = new _region.Region();
-		// Start and end form the 1st base pair of the region.
-		this.start = null;
-		this.end = null;
-		this.xrad = null;
-		this.yrad = null;
-		this.angle = null;
-		// True if segment between this connection and the
-		// next must be extruded out of the circle
-		this.extruded = null;
-		// True if the extruded segment must be drawn long.
-		this.broken = null;
-
-		this._isNull = false;
-	}
-
-	Connection.prototype.isNull = function () {
-		return this._isNull;
-	};
-
-	Connection.prototype.setNull = function (isNull) {
-		this._isNull = isNull;
-	};
-
-	Connection.prototype.getLoop = function () {
-		return this.loop;
-	};
-
-	Connection.prototype.setLoop = function (loop) {
-		this.loop = loop;
-	};
-
-	Connection.prototype.getRegion = function () {
-		return this.region;
-	};
-
-	Connection.prototype.setRegion = function (region) {
-		this.region = region;
-	};
-
-	Connection.prototype.getStart = function () {
-		return this.start;
-	};
-
-	Connection.prototype.setStart = function (start) {
-		this.start = start;
-	};
-
-	Connection.prototype.getEnd = function () {
-		return this.end;
-	};
-
-	Connection.prototype.setEnd = function (end) {
-		this.end = end;
-	};
-
-	Connection.prototype.getXrad = function () {
-		return this.xrad;
-	};
-
-	Connection.prototype.setXrad = function (xrad) {
-		this.xrad = xrad;
-	};
-
-	Connection.prototype.getYrad = function () {
-		return this.yrad;
-	};
-
-	Connection.prototype.setYrad = function (yrad) {
-		this.yrad = yrad;
-	};
-
-	Connection.prototype.getAngle = function () {
-		return this.angle;
-	};
-
-	Connection.prototype.setAngle = function (angle) {
-		this.angle = angle;
-	};
-
-	Connection.prototype.isExtruded = function () {
-		return this.extruded;
-	};
-
-	Connection.prototype.setExtruded = function (extruded) {
-		this.extruded = extruded;
-	};
-
-	Connection.prototype.isBroken = function () {
-		return this.broken;
-	};
-
-	Connection.prototype.setBroken = function (broken) {
-		this.broken = broken;
-	};
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.Loop = Loop;
-
-	var _connection = __webpack_require__(8);
-
-	function Loop() {
-		this.nconnection = null;
-		this.connections = [];
-		this._connections = [];
-		this.number = null;
-		this.depth = null;
-		this.mark = null;
-		this.x = null;
-		this.y = null;
-		this.radius = null;
-	}
-
-	Loop.prototype.getNconnection = function () {
-		return this.nconnection;
-	};
-
-	Loop.prototype.setNconnection = function (nconnection) {
-		this.nconnection = nconnection;
-	};
-
-	Loop.prototype.setConnection = function (i, c) {
-		if (c != null) {
-			this._connections[i] = c;
-		} else {
-			if (!this._connections[i]) {
-				this._connections[i] = new _connection.Connection();
-			}
-			this._connections[i].setNull(true);
-		}
-	};
-
-	Loop.prototype.getConnection = function (i) {
-		var Connection = __webpack_require__(8);
-		if (!this._connections[i]) {
-			this._connections[i] = new Connection();
-		}
-		var c = this._connections[i];
-		if (c.isNull()) {
-			return null;
-		} else {
-			return c;
-		}
-	};
-
-	Loop.prototype.addConnection = function (i, c) {
-		this._connections.push(c);
-	};
-
-	Loop.prototype.getNumber = function () {
-		return this.number;
-	};
-
-	Loop.prototype.setNumber = function (number) {
-		this.number = number;
-	};
-
-	Loop.prototype.getDepth = function () {
-		return this.depth;
-	};
-
-	Loop.prototype.setDepth = function (depth) {
-		this.depth = depth;
-	};
-
-	Loop.prototype.isMark = function () {
-		return this.mark;
-	};
-
-	Loop.prototype.setMark = function (mark) {
-		this.mark = mark;
-	};
-
-	Loop.prototype.getX = function () {
-		return this.x;
-	};
-
-	Loop.prototype.setX = function (x) {
-		this.x = x;
-	};
-
-	Loop.prototype.getY = function () {
-		return this.y;
-	};
-
-	Loop.prototype.setY = function (y) {
-		this.y = y;
-	};
-
-	Loop.prototype.getRadius = function () {
-		return this.radius;
-	};
-
-	Loop.prototype.setRadius = function (radius) {
-		this.radius = radius;
-	};
-
-/***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.Region = Region;
-	function Region() {
-		this._start1 = null;
-		this._end1 = null;
-		this._start2 = null;
-		this._end2 = null;
-	}
-
-	Region.prototype.getStart1 = function () {
-		return this._start1;
-	};
-
-	Region.prototype.setStart1 = function (start1) {
-		this._start1 = start1;
-	};
-
-	Region.prototype.getEnd1 = function () {
-		return this._end1;
-	};
-
-	Region.prototype.setEnd1 = function (end1) {
-		this._end1 = end1;
-	};
-
-	Region.prototype.getStart2 = function () {
-		return this._start2;
-	};
-
-	Region.prototype.setStart2 = function (start2) {
-		this._start2 = start2;
-	};
-
-	Region.prototype.getEnd2 = function () {
-		return this._end2;
-	};
-
-	Region.prototype.setEnd2 = function (end2) {
-		this._end2 = end2;
-	};
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.Base = Base;
-
-	var _region = __webpack_require__(10);
-
-	function Base() {
-		this.mate = null;
-		this.x = null;
-		this.y = null;
-		this.extracted = null;
-		this.region = new _region.Region();
-	}
-
-	Base.prototype.getMate = function () {
-		return this.mate;
-	};
-
-	Base.prototype.setMate = function (mate) {
-		this.mate = mate;
-	};
-
-	Base.prototype.getX = function () {
-		return this.x;
-	};
-
-	Base.prototype.setX = function (x) {
-		this.x = x;
-	};
-
-	Base.prototype.getY = function () {
-		return this.y;
-	};
-
-	Base.prototype.setY = function (y) {
-		this.y = y;
-	};
-
-	Base.prototype.isExtracted = function () {
-		return this.extracted;
-	};
-
-	Base.prototype.setExtracted = function (extracted) {
-		this.extracted = extracted;
-	};
-
-	Base.prototype.getRegion = function () {
-		return this.region;
-	};
-
-	Base.prototype.setRegion = function (region) {
-		this.region = region;
-	};
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(13);
+	var content = __webpack_require__(5);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(15)(content, {});
+	var update = __webpack_require__(7)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js!./rnaplot.css", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js!./rnaplot.css");
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./fornac.css", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./fornac.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -4794,21 +3249,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 13 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(14)();
+	exports = module.exports = __webpack_require__(6)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".structure-background-rect {\n    stroke: black;\n    stroke-width: 5;\n    fill: transparent;\n}\n\ncircle.rna-base {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\ncircle.rna-base.label {\n    stroke: transparent;\n    stroke-width: 0;\n    fill: white;\n}\n\nline.link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\nline.rna-link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\n.overlay {\n    fill: transparent;\n}\n\n.rna-name {\n    text-anchor: middle;\n    dy: -10;\n    font-family: Tahoma, Geneva, sans-serif;\n    font-size: 8pt;\n}\n\nline.rna-link[link-type=\"backbone\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"basepair\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"fake\"] {\n    stroke: transparent;\n}\n\nline.rna-link[link-type=\"extra\"] {\n    stroke: grey;\n}\n\nline.rna-link[extra-link-type=\"correct\"] {\n    stroke: green;\n}\n\nline.rna-link[extra-link-type=\"incorrect\"] {\n    stroke: green;\n}\n\n\npath {\n    stroke: grey;\n  stroke-width: 2;\n}\n\npath[extra-link-type=\"correct\"] {\n    stroke: green;\n}\n\npath[extra-link-type=\"incorrect\"] {\n    stroke: red;\n}\n\n\nline.basepair {\n  stroke: red;\n}\n\nline.intermolecule {\n  stroke: blue;\n}\n\nline.chain_chain {\n  stroke-dasharray: 3,3;\n}\n\nline.fake {\n  stroke: green;\n}\n\n.transparent {\n    fill: transparent;\n    stroke-width: 0;\n    stroke-opacity: 0;\n    opacity: 0;\n}\n\n.d3-tip {\n    line-height: 1;\n    font-weight: bold;\n    padding: 6px;\n    background: rgba(0, 0, 0, 0.6);\n    color: #fff;\n    border-radius: 4px;\n    pointer-events: none;\n          }\n\ntext.nucleotide-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext.number-label {\n    font-size: 5.5pt;\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext {\n    pointer-events: none;\n}\n\ng.gnode {\n\n}\n\n.brush .extent {\n  fill-opacity: .1;\n  stroke: #fff;\n  shape-rendering: crispEdges;\n}\n\n.noselect {\n    -webkit-touch-callout: none;\n    -webkit-user-select: none;\n    -khtml-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n}\n", ""]);
+	exports.push([module.id, "svg {\n  display: block;\n  //min-width: 100%;\n  //width: 100%;\n  min-height: 100%;\n}\n\ncircle.node {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\npolygon.node {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\ncircle.node.label {\n    stroke: transparent;\n    stroke-width: 0;\n    fill: white;\n    display: inline;\n}\n\ncircle.outline_node {\n    stroke-width: 1px;\n    fill: red;\n}\n\ncircle.protein {\n    fill: gray;\n    fill-opacity: 0.5;\n    stroke-width: 4;\n}\n\ncircle.hidden_outline {\n    stroke-width: 0px;\n}\n\n\nline.link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\nline.pseudoknot {\n    stroke: red;\n}\n\nline.basepair {\n  stroke: red;\n}\n\nline.intermolecule {\n  stroke: blue;\n}\n\nline.chain_chain {\n  stroke-dasharray: 3,3;\n}\n\nline.fake {\n  stroke: green;\n}\n\n.transparent {\n    fill: transparent;\n    stroke-width: 0;\n    stroke-opacity: 0;\n    opacity: 0;\n    visibility: hidden;\n}\n\n.drag_line {\n  stroke: #999;\n  stroke-width: 2;\n  pointer-events: none;\n}\n\n.drag_line_hidden {\n  stroke: #999;\n  stroke-width: 0;\n  pointer-events: none;\n}\n\n.d3-tip {\n    line-height: 1;\n    font-weight: bold;\n    padding: 6px;\n    background: rgba(0, 0, 0, 0.6);\n    color: #fff;\n    border-radius: 4px;\n    pointer-events: none;\n          }\n\ntext.node-label {\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext {\n    pointer-events: none;\n}\n\ng.gnode {\n\n}\n\ncircle.outline_node.selected {\n    visibility: visible;\n}\n\ncircle.outline_node {\n    visibility: hidden;\n}\n\n.brush .extent {\n  fill-opacity: .1;\n  stroke: #fff;\n  shape-rendering: crispEdges;\n}\n\n.noselect {\n    -webkit-touch-callout: none;\n    -webkit-user-select: none;\n    -khtml-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n}\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 14 */
+/* 6 */
 /***/ function(module, exports) {
 
 	/*
@@ -4864,7 +3319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -5118,47 +3573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(17);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(15)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js!./fornac.css", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js!./fornac.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(14)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "svg {\n  display: block;\n  min-width: 100%;\n  width: 100%;\n  min-height: 100%;\n}\n\ncircle.node {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\npolygon.node {\n  stroke: #ccc;\n  stroke-width: 1px;\n  opacity: 1;\n  fill: white;\n}\n\ncircle.node.label {\n    stroke: transparent;\n    stroke-width: 0;\n    fill: white;\n    display: inline;\n}\n\ncircle.outline_node {\n    stroke-width: 1px;\n    fill: red;\n}\n\ncircle.protein {\n    fill: gray;\n    fill-opacity: 0.5;\n    stroke-width: 4;\n}\n\ncircle.hidden_outline {\n    stroke-width: 0px;\n}\n\n\nline.link {\n  stroke: #999;\n  stroke-opacity: 0.8;\n  stroke-width: 2;\n}\n\nline.pseudoknot {\n    stroke: red;\n}\n\nline.basepair {\n  stroke: red;\n}\n\nline.intermolecule {\n  stroke: blue;\n}\n\nline.chain_chain {\n  stroke-dasharray: 3,3;\n}\n\nline.fake {\n  stroke: green;\n}\n\n.transparent {\n    fill: transparent;\n    stroke-width: 0;\n    stroke-opacity: 0;\n    opacity: 0;\n    visibility: hidden;\n}\n\n.drag_line {\n  stroke: #999;\n  stroke-width: 2;\n  pointer-events: none;\n}\n\n.drag_line_hidden {\n  stroke: #999;\n  stroke-width: 0;\n  pointer-events: none;\n}\n\n.d3-tip {\n    line-height: 1;\n    font-weight: bold;\n    padding: 6px;\n    background: rgba(0, 0, 0, 0.6);\n    color: #fff;\n    border-radius: 4px;\n    pointer-events: none;\n          }\n\ntext.node-label {\n    font-weight: bold;\n    font-family: Tahoma, Geneva, sans-serif;\n    color: rgb(100,100,100);\n    pointer-events: none;\n}\n\ntext {\n    pointer-events: none;\n}\n\ng.gnode {\n\n}\n\ncircle.outline_node.selected {\n    visibility: visible;\n}\n\ncircle.outline_node {\n    visibility: hidden;\n}\n\n.brush .extent {\n  fill-opacity: .1;\n  stroke: #fff;\n  shape-rendering: crispEdges;\n}\n\n.noselect {\n    -webkit-touch-callout: none;\n    -webkit-user-select: none;\n    -khtml-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n}\n", ""]);
-
-	// exports
-
-
-/***/ },
-/* 18 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
@@ -14714,6 +13129,3949 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  if (true) this.d3 = d3, !(__WEBPACK_AMD_DEFINE_FACTORY__ = (d3), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)); else if (typeof module === "object" && module.exports) module.exports = d3; else this.d3 = d3;
 	}();
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// The MIT License (MIT)
+	//
+	// Copyright (c) 2014 Jonas Finnemann Jensen
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a copy
+	// of this software and associated documentation files (the "Software"), to deal
+	// in the Software without restriction, including without limitation the rights
+	// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	// copies of the Software, and to permit persons to whom the Software is
+	// furnished to do so, subject to the following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included in
+	// all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	// THE SOFTWARE.
+
+	module.exports = __webpack_require__(10);
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Buffer) {// The MIT License (MIT)
+	//
+	// Copyright (c) 2014 Jonas Finnemann Jensen
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a copy
+	// of this software and associated documentation files (the "Software"), to deal
+	// in the Software without restriction, including without limitation the rights
+	// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	// copies of the Software, and to permit persons to whom the Software is
+	// furnished to do so, subject to the following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included in
+	// all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	// THE SOFTWARE.
+
+	var uuid = __webpack_require__(15);
+
+	/**
+	 * Returns the given uuid as a 22 character slug. This can be a regular v4
+	 * slug or a "nice" slug.
+	 */
+	exports.encode = function(uuid_) {
+	  var bytes   = uuid.parse(uuid_);
+	  var base64  = (new Buffer(bytes)).toString('base64');
+	  var slug = base64
+	              .replace(/\+/g, '-')  // Replace + with - (see RFC 4648, sec. 5)
+	              .replace(/\//g, '_')  // Replace / with _ (see RFC 4648, sec. 5)
+	              .substring(0, 22);    // Drop '==' padding
+	  return slug;
+	};
+
+	/**
+	 * Returns the uuid represented by the given v4 or "nice" slug
+	 */
+	exports.decode = function(slug) {
+	  var base64 = slug
+	                  .replace(/-/g, '+')
+	                  .replace(/_/g, '/')
+	                  + '==';
+	  return uuid.unparse(new Buffer(base64, 'base64'));
+	};
+
+	/**
+	 * Returns a randomly generated uuid v4 compliant slug
+	 */
+	exports.v4 = function() {
+	  var bytes   = uuid.v4(null, new Buffer(16));
+	  var base64  = bytes.toString('base64');
+	  var slug = base64
+	              .replace(/\+/g, '-')  // Replace + with - (see RFC 4648, sec. 5)
+	              .replace(/\//g, '_')  // Replace / with _ (see RFC 4648, sec. 5)
+	              .substring(0, 22);    // Drop '==' padding
+	  return slug;
+	};
+
+	/** 
+	 * Returns a randomly generated uuid v4 compliant slug which conforms to a set
+	 * of "nice" properties, at the cost of some entropy. Currently this means one
+	 * extra fixed bit (the first bit of the uuid is set to 0) which guarantees the
+	 * slug will begin with [A-Za-f]. For example such slugs don't require special
+	 * handling when used as command line parameters (whereas non-nice slugs may
+	 * start with `-` which can confuse command line tools).
+	 *
+	 * Potentially other "nice" properties may be added in future to further
+	 * restrict the range of potential uuids that may be generated.
+	 */
+	exports.nice = function() {
+	  var bytes   = uuid.v4(null, new Buffer(16));
+	  bytes[0] = bytes[0] & 0x7f;  // unset first bit to ensure [A-Za-f] first char
+	  var base64  = bytes.toString('base64');
+	  var slug = base64
+	              .replace(/\+/g, '-')  // Replace + with - (see RFC 4648, sec. 5)
+	              .replace(/\//g, '_')  // Replace / with _ (see RFC 4648, sec. 5)
+	              .substring(0, 22);    // Drop '==' padding
+	  return slug;
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
+	 * The buffer module from node.js, for the browser.
+	 *
+	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+	 * @license  MIT
+	 */
+	/* eslint-disable no-proto */
+
+	'use strict'
+
+	var base64 = __webpack_require__(12)
+	var ieee754 = __webpack_require__(13)
+	var isArray = __webpack_require__(14)
+
+	exports.Buffer = Buffer
+	exports.SlowBuffer = SlowBuffer
+	exports.INSPECT_MAX_BYTES = 50
+	Buffer.poolSize = 8192 // not used by this implementation
+
+	var rootParent = {}
+
+	/**
+	 * If `Buffer.TYPED_ARRAY_SUPPORT`:
+	 *   === true    Use Uint8Array implementation (fastest)
+	 *   === false   Use Object implementation (most compatible, even IE6)
+	 *
+	 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+	 * Opera 11.6+, iOS 4.2+.
+	 *
+	 * Due to various browser bugs, sometimes the Object implementation will be used even
+	 * when the browser supports typed arrays.
+	 *
+	 * Note:
+	 *
+	 *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+	 *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+	 *
+	 *   - Safari 5-7 lacks support for changing the `Object.prototype.constructor` property
+	 *     on objects.
+	 *
+	 *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+	 *
+	 *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+	 *     incorrect length in some situations.
+
+	 * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+	 * get the Object implementation, which is slower but behaves correctly.
+	 */
+	Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+	  ? global.TYPED_ARRAY_SUPPORT
+	  : typedArraySupport()
+
+	function typedArraySupport () {
+	  function Bar () {}
+	  try {
+	    var arr = new Uint8Array(1)
+	    arr.foo = function () { return 42 }
+	    arr.constructor = Bar
+	    return arr.foo() === 42 && // typed array instances can be augmented
+	        arr.constructor === Bar && // constructor can be set
+	        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+	        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
+	  } catch (e) {
+	    return false
+	  }
+	}
+
+	function kMaxLength () {
+	  return Buffer.TYPED_ARRAY_SUPPORT
+	    ? 0x7fffffff
+	    : 0x3fffffff
+	}
+
+	/**
+	 * Class: Buffer
+	 * =============
+	 *
+	 * The Buffer constructor returns instances of `Uint8Array` that are augmented
+	 * with function properties for all the node `Buffer` API functions. We use
+	 * `Uint8Array` so that square bracket notation works as expected -- it returns
+	 * a single octet.
+	 *
+	 * By augmenting the instances, we can avoid modifying the `Uint8Array`
+	 * prototype.
+	 */
+	function Buffer (arg) {
+	  if (!(this instanceof Buffer)) {
+	    // Avoid going through an ArgumentsAdaptorTrampoline in the common case.
+	    if (arguments.length > 1) return new Buffer(arg, arguments[1])
+	    return new Buffer(arg)
+	  }
+
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+	    this.length = 0
+	    this.parent = undefined
+	  }
+
+	  // Common case.
+	  if (typeof arg === 'number') {
+	    return fromNumber(this, arg)
+	  }
+
+	  // Slightly less common case.
+	  if (typeof arg === 'string') {
+	    return fromString(this, arg, arguments.length > 1 ? arguments[1] : 'utf8')
+	  }
+
+	  // Unusual.
+	  return fromObject(this, arg)
+	}
+
+	function fromNumber (that, length) {
+	  that = allocate(that, length < 0 ? 0 : checked(length) | 0)
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
+	    for (var i = 0; i < length; i++) {
+	      that[i] = 0
+	    }
+	  }
+	  return that
+	}
+
+	function fromString (that, string, encoding) {
+	  if (typeof encoding !== 'string' || encoding === '') encoding = 'utf8'
+
+	  // Assumption: byteLength() return value is always < kMaxLength.
+	  var length = byteLength(string, encoding) | 0
+	  that = allocate(that, length)
+
+	  that.write(string, encoding)
+	  return that
+	}
+
+	function fromObject (that, object) {
+	  if (Buffer.isBuffer(object)) return fromBuffer(that, object)
+
+	  if (isArray(object)) return fromArray(that, object)
+
+	  if (object == null) {
+	    throw new TypeError('must start with number, buffer, array or string')
+	  }
+
+	  if (typeof ArrayBuffer !== 'undefined') {
+	    if (object.buffer instanceof ArrayBuffer) {
+	      return fromTypedArray(that, object)
+	    }
+	    if (object instanceof ArrayBuffer) {
+	      return fromArrayBuffer(that, object)
+	    }
+	  }
+
+	  if (object.length) return fromArrayLike(that, object)
+
+	  return fromJsonObject(that, object)
+	}
+
+	function fromBuffer (that, buffer) {
+	  var length = checked(buffer.length) | 0
+	  that = allocate(that, length)
+	  buffer.copy(that, 0, 0, length)
+	  return that
+	}
+
+	function fromArray (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	// Duplicate of fromArray() to keep fromArray() monomorphic.
+	function fromTypedArray (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  // Truncating the elements is probably not what people expect from typed
+	  // arrays with BYTES_PER_ELEMENT > 1 but it's compatible with the behavior
+	  // of the old Buffer constructor.
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	function fromArrayBuffer (that, array) {
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    // Return an augmented `Uint8Array` instance, for best performance
+	    array.byteLength
+	    that = Buffer._augment(new Uint8Array(array))
+	  } else {
+	    // Fallback: Return an object instance of the Buffer class
+	    that = fromTypedArray(that, new Uint8Array(array))
+	  }
+	  return that
+	}
+
+	function fromArrayLike (that, array) {
+	  var length = checked(array.length) | 0
+	  that = allocate(that, length)
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	// Deserialize { type: 'Buffer', data: [1,2,3,...] } into a Buffer object.
+	// Returns a zero-length buffer for inputs that don't conform to the spec.
+	function fromJsonObject (that, object) {
+	  var array
+	  var length = 0
+
+	  if (object.type === 'Buffer' && isArray(object.data)) {
+	    array = object.data
+	    length = checked(array.length) | 0
+	  }
+	  that = allocate(that, length)
+
+	  for (var i = 0; i < length; i += 1) {
+	    that[i] = array[i] & 255
+	  }
+	  return that
+	}
+
+	if (Buffer.TYPED_ARRAY_SUPPORT) {
+	  Buffer.prototype.__proto__ = Uint8Array.prototype
+	  Buffer.__proto__ = Uint8Array
+	} else {
+	  // pre-set for values that may exist in the future
+	  Buffer.prototype.length = undefined
+	  Buffer.prototype.parent = undefined
+	}
+
+	function allocate (that, length) {
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    // Return an augmented `Uint8Array` instance, for best performance
+	    that = Buffer._augment(new Uint8Array(length))
+	    that.__proto__ = Buffer.prototype
+	  } else {
+	    // Fallback: Return an object instance of the Buffer class
+	    that.length = length
+	    that._isBuffer = true
+	  }
+
+	  var fromPool = length !== 0 && length <= Buffer.poolSize >>> 1
+	  if (fromPool) that.parent = rootParent
+
+	  return that
+	}
+
+	function checked (length) {
+	  // Note: cannot use `length < kMaxLength` here because that fails when
+	  // length is NaN (which is otherwise coerced to zero.)
+	  if (length >= kMaxLength()) {
+	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+	                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
+	  }
+	  return length | 0
+	}
+
+	function SlowBuffer (subject, encoding) {
+	  if (!(this instanceof SlowBuffer)) return new SlowBuffer(subject, encoding)
+
+	  var buf = new Buffer(subject, encoding)
+	  delete buf.parent
+	  return buf
+	}
+
+	Buffer.isBuffer = function isBuffer (b) {
+	  return !!(b != null && b._isBuffer)
+	}
+
+	Buffer.compare = function compare (a, b) {
+	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+	    throw new TypeError('Arguments must be Buffers')
+	  }
+
+	  if (a === b) return 0
+
+	  var x = a.length
+	  var y = b.length
+
+	  var i = 0
+	  var len = Math.min(x, y)
+	  while (i < len) {
+	    if (a[i] !== b[i]) break
+
+	    ++i
+	  }
+
+	  if (i !== len) {
+	    x = a[i]
+	    y = b[i]
+	  }
+
+	  if (x < y) return -1
+	  if (y < x) return 1
+	  return 0
+	}
+
+	Buffer.isEncoding = function isEncoding (encoding) {
+	  switch (String(encoding).toLowerCase()) {
+	    case 'hex':
+	    case 'utf8':
+	    case 'utf-8':
+	    case 'ascii':
+	    case 'binary':
+	    case 'base64':
+	    case 'raw':
+	    case 'ucs2':
+	    case 'ucs-2':
+	    case 'utf16le':
+	    case 'utf-16le':
+	      return true
+	    default:
+	      return false
+	  }
+	}
+
+	Buffer.concat = function concat (list, length) {
+	  if (!isArray(list)) throw new TypeError('list argument must be an Array of Buffers.')
+
+	  if (list.length === 0) {
+	    return new Buffer(0)
+	  }
+
+	  var i
+	  if (length === undefined) {
+	    length = 0
+	    for (i = 0; i < list.length; i++) {
+	      length += list[i].length
+	    }
+	  }
+
+	  var buf = new Buffer(length)
+	  var pos = 0
+	  for (i = 0; i < list.length; i++) {
+	    var item = list[i]
+	    item.copy(buf, pos)
+	    pos += item.length
+	  }
+	  return buf
+	}
+
+	function byteLength (string, encoding) {
+	  if (typeof string !== 'string') string = '' + string
+
+	  var len = string.length
+	  if (len === 0) return 0
+
+	  // Use a for loop to avoid recursion
+	  var loweredCase = false
+	  for (;;) {
+	    switch (encoding) {
+	      case 'ascii':
+	      case 'binary':
+	      // Deprecated
+	      case 'raw':
+	      case 'raws':
+	        return len
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8ToBytes(string).length
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return len * 2
+	      case 'hex':
+	        return len >>> 1
+	      case 'base64':
+	        return base64ToBytes(string).length
+	      default:
+	        if (loweredCase) return utf8ToBytes(string).length // assume utf8
+	        encoding = ('' + encoding).toLowerCase()
+	        loweredCase = true
+	    }
+	  }
+	}
+	Buffer.byteLength = byteLength
+
+	function slowToString (encoding, start, end) {
+	  var loweredCase = false
+
+	  start = start | 0
+	  end = end === undefined || end === Infinity ? this.length : end | 0
+
+	  if (!encoding) encoding = 'utf8'
+	  if (start < 0) start = 0
+	  if (end > this.length) end = this.length
+	  if (end <= start) return ''
+
+	  while (true) {
+	    switch (encoding) {
+	      case 'hex':
+	        return hexSlice(this, start, end)
+
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8Slice(this, start, end)
+
+	      case 'ascii':
+	        return asciiSlice(this, start, end)
+
+	      case 'binary':
+	        return binarySlice(this, start, end)
+
+	      case 'base64':
+	        return base64Slice(this, start, end)
+
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return utf16leSlice(this, start, end)
+
+	      default:
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+	        encoding = (encoding + '').toLowerCase()
+	        loweredCase = true
+	    }
+	  }
+	}
+
+	Buffer.prototype.toString = function toString () {
+	  var length = this.length | 0
+	  if (length === 0) return ''
+	  if (arguments.length === 0) return utf8Slice(this, 0, length)
+	  return slowToString.apply(this, arguments)
+	}
+
+	Buffer.prototype.equals = function equals (b) {
+	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	  if (this === b) return true
+	  return Buffer.compare(this, b) === 0
+	}
+
+	Buffer.prototype.inspect = function inspect () {
+	  var str = ''
+	  var max = exports.INSPECT_MAX_BYTES
+	  if (this.length > 0) {
+	    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
+	    if (this.length > max) str += ' ... '
+	  }
+	  return '<Buffer ' + str + '>'
+	}
+
+	Buffer.prototype.compare = function compare (b) {
+	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	  if (this === b) return 0
+	  return Buffer.compare(this, b)
+	}
+
+	Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
+	  if (byteOffset > 0x7fffffff) byteOffset = 0x7fffffff
+	  else if (byteOffset < -0x80000000) byteOffset = -0x80000000
+	  byteOffset >>= 0
+
+	  if (this.length === 0) return -1
+	  if (byteOffset >= this.length) return -1
+
+	  // Negative offsets start from the end of the buffer
+	  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
+
+	  if (typeof val === 'string') {
+	    if (val.length === 0) return -1 // special case: looking for empty string always fails
+	    return String.prototype.indexOf.call(this, val, byteOffset)
+	  }
+	  if (Buffer.isBuffer(val)) {
+	    return arrayIndexOf(this, val, byteOffset)
+	  }
+	  if (typeof val === 'number') {
+	    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
+	      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
+	    }
+	    return arrayIndexOf(this, [ val ], byteOffset)
+	  }
+
+	  function arrayIndexOf (arr, val, byteOffset) {
+	    var foundIndex = -1
+	    for (var i = 0; byteOffset + i < arr.length; i++) {
+	      if (arr[byteOffset + i] === val[foundIndex === -1 ? 0 : i - foundIndex]) {
+	        if (foundIndex === -1) foundIndex = i
+	        if (i - foundIndex + 1 === val.length) return byteOffset + foundIndex
+	      } else {
+	        foundIndex = -1
+	      }
+	    }
+	    return -1
+	  }
+
+	  throw new TypeError('val must be string, number or Buffer')
+	}
+
+	// `get` is deprecated
+	Buffer.prototype.get = function get (offset) {
+	  console.log('.get() is deprecated. Access using array indexes instead.')
+	  return this.readUInt8(offset)
+	}
+
+	// `set` is deprecated
+	Buffer.prototype.set = function set (v, offset) {
+	  console.log('.set() is deprecated. Access using array indexes instead.')
+	  return this.writeUInt8(v, offset)
+	}
+
+	function hexWrite (buf, string, offset, length) {
+	  offset = Number(offset) || 0
+	  var remaining = buf.length - offset
+	  if (!length) {
+	    length = remaining
+	  } else {
+	    length = Number(length)
+	    if (length > remaining) {
+	      length = remaining
+	    }
+	  }
+
+	  // must be an even number of digits
+	  var strLen = string.length
+	  if (strLen % 2 !== 0) throw new Error('Invalid hex string')
+
+	  if (length > strLen / 2) {
+	    length = strLen / 2
+	  }
+	  for (var i = 0; i < length; i++) {
+	    var parsed = parseInt(string.substr(i * 2, 2), 16)
+	    if (isNaN(parsed)) throw new Error('Invalid hex string')
+	    buf[offset + i] = parsed
+	  }
+	  return i
+	}
+
+	function utf8Write (buf, string, offset, length) {
+	  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
+	}
+
+	function asciiWrite (buf, string, offset, length) {
+	  return blitBuffer(asciiToBytes(string), buf, offset, length)
+	}
+
+	function binaryWrite (buf, string, offset, length) {
+	  return asciiWrite(buf, string, offset, length)
+	}
+
+	function base64Write (buf, string, offset, length) {
+	  return blitBuffer(base64ToBytes(string), buf, offset, length)
+	}
+
+	function ucs2Write (buf, string, offset, length) {
+	  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
+	}
+
+	Buffer.prototype.write = function write (string, offset, length, encoding) {
+	  // Buffer#write(string)
+	  if (offset === undefined) {
+	    encoding = 'utf8'
+	    length = this.length
+	    offset = 0
+	  // Buffer#write(string, encoding)
+	  } else if (length === undefined && typeof offset === 'string') {
+	    encoding = offset
+	    length = this.length
+	    offset = 0
+	  // Buffer#write(string, offset[, length][, encoding])
+	  } else if (isFinite(offset)) {
+	    offset = offset | 0
+	    if (isFinite(length)) {
+	      length = length | 0
+	      if (encoding === undefined) encoding = 'utf8'
+	    } else {
+	      encoding = length
+	      length = undefined
+	    }
+	  // legacy write(string, encoding, offset, length) - remove in v0.13
+	  } else {
+	    var swap = encoding
+	    encoding = offset
+	    offset = length | 0
+	    length = swap
+	  }
+
+	  var remaining = this.length - offset
+	  if (length === undefined || length > remaining) length = remaining
+
+	  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
+	    throw new RangeError('attempt to write outside buffer bounds')
+	  }
+
+	  if (!encoding) encoding = 'utf8'
+
+	  var loweredCase = false
+	  for (;;) {
+	    switch (encoding) {
+	      case 'hex':
+	        return hexWrite(this, string, offset, length)
+
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8Write(this, string, offset, length)
+
+	      case 'ascii':
+	        return asciiWrite(this, string, offset, length)
+
+	      case 'binary':
+	        return binaryWrite(this, string, offset, length)
+
+	      case 'base64':
+	        // Warning: maxLength not taken into account in base64Write
+	        return base64Write(this, string, offset, length)
+
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return ucs2Write(this, string, offset, length)
+
+	      default:
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+	        encoding = ('' + encoding).toLowerCase()
+	        loweredCase = true
+	    }
+	  }
+	}
+
+	Buffer.prototype.toJSON = function toJSON () {
+	  return {
+	    type: 'Buffer',
+	    data: Array.prototype.slice.call(this._arr || this, 0)
+	  }
+	}
+
+	function base64Slice (buf, start, end) {
+	  if (start === 0 && end === buf.length) {
+	    return base64.fromByteArray(buf)
+	  } else {
+	    return base64.fromByteArray(buf.slice(start, end))
+	  }
+	}
+
+	function utf8Slice (buf, start, end) {
+	  end = Math.min(buf.length, end)
+	  var res = []
+
+	  var i = start
+	  while (i < end) {
+	    var firstByte = buf[i]
+	    var codePoint = null
+	    var bytesPerSequence = (firstByte > 0xEF) ? 4
+	      : (firstByte > 0xDF) ? 3
+	      : (firstByte > 0xBF) ? 2
+	      : 1
+
+	    if (i + bytesPerSequence <= end) {
+	      var secondByte, thirdByte, fourthByte, tempCodePoint
+
+	      switch (bytesPerSequence) {
+	        case 1:
+	          if (firstByte < 0x80) {
+	            codePoint = firstByte
+	          }
+	          break
+	        case 2:
+	          secondByte = buf[i + 1]
+	          if ((secondByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+	            if (tempCodePoint > 0x7F) {
+	              codePoint = tempCodePoint
+	            }
+	          }
+	          break
+	        case 3:
+	          secondByte = buf[i + 1]
+	          thirdByte = buf[i + 2]
+	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+	            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+	              codePoint = tempCodePoint
+	            }
+	          }
+	          break
+	        case 4:
+	          secondByte = buf[i + 1]
+	          thirdByte = buf[i + 2]
+	          fourthByte = buf[i + 3]
+	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+	            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+	              codePoint = tempCodePoint
+	            }
+	          }
+	      }
+	    }
+
+	    if (codePoint === null) {
+	      // we did not generate a valid codePoint so insert a
+	      // replacement char (U+FFFD) and advance only 1 byte
+	      codePoint = 0xFFFD
+	      bytesPerSequence = 1
+	    } else if (codePoint > 0xFFFF) {
+	      // encode to utf16 (surrogate pair dance)
+	      codePoint -= 0x10000
+	      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
+	      codePoint = 0xDC00 | codePoint & 0x3FF
+	    }
+
+	    res.push(codePoint)
+	    i += bytesPerSequence
+	  }
+
+	  return decodeCodePointsArray(res)
+	}
+
+	// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+	// the lowest limit is Chrome, with 0x10000 args.
+	// We go 1 magnitude less, for safety
+	var MAX_ARGUMENTS_LENGTH = 0x1000
+
+	function decodeCodePointsArray (codePoints) {
+	  var len = codePoints.length
+	  if (len <= MAX_ARGUMENTS_LENGTH) {
+	    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+	  }
+
+	  // Decode in chunks to avoid "call stack size exceeded".
+	  var res = ''
+	  var i = 0
+	  while (i < len) {
+	    res += String.fromCharCode.apply(
+	      String,
+	      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+	    )
+	  }
+	  return res
+	}
+
+	function asciiSlice (buf, start, end) {
+	  var ret = ''
+	  end = Math.min(buf.length, end)
+
+	  for (var i = start; i < end; i++) {
+	    ret += String.fromCharCode(buf[i] & 0x7F)
+	  }
+	  return ret
+	}
+
+	function binarySlice (buf, start, end) {
+	  var ret = ''
+	  end = Math.min(buf.length, end)
+
+	  for (var i = start; i < end; i++) {
+	    ret += String.fromCharCode(buf[i])
+	  }
+	  return ret
+	}
+
+	function hexSlice (buf, start, end) {
+	  var len = buf.length
+
+	  if (!start || start < 0) start = 0
+	  if (!end || end < 0 || end > len) end = len
+
+	  var out = ''
+	  for (var i = start; i < end; i++) {
+	    out += toHex(buf[i])
+	  }
+	  return out
+	}
+
+	function utf16leSlice (buf, start, end) {
+	  var bytes = buf.slice(start, end)
+	  var res = ''
+	  for (var i = 0; i < bytes.length; i += 2) {
+	    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256)
+	  }
+	  return res
+	}
+
+	Buffer.prototype.slice = function slice (start, end) {
+	  var len = this.length
+	  start = ~~start
+	  end = end === undefined ? len : ~~end
+
+	  if (start < 0) {
+	    start += len
+	    if (start < 0) start = 0
+	  } else if (start > len) {
+	    start = len
+	  }
+
+	  if (end < 0) {
+	    end += len
+	    if (end < 0) end = 0
+	  } else if (end > len) {
+	    end = len
+	  }
+
+	  if (end < start) end = start
+
+	  var newBuf
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    newBuf = Buffer._augment(this.subarray(start, end))
+	  } else {
+	    var sliceLen = end - start
+	    newBuf = new Buffer(sliceLen, undefined)
+	    for (var i = 0; i < sliceLen; i++) {
+	      newBuf[i] = this[i + start]
+	    }
+	  }
+
+	  if (newBuf.length) newBuf.parent = this.parent || this
+
+	  return newBuf
+	}
+
+	/*
+	 * Need to make sure that buffer isn't trying to write out of bounds.
+	 */
+	function checkOffset (offset, ext, length) {
+	  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+	  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
+	}
+
+	Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var val = this[offset]
+	  var mul = 1
+	  var i = 0
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul
+	  }
+
+	  return val
+	}
+
+	Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) {
+	    checkOffset(offset, byteLength, this.length)
+	  }
+
+	  var val = this[offset + --byteLength]
+	  var mul = 1
+	  while (byteLength > 0 && (mul *= 0x100)) {
+	    val += this[offset + --byteLength] * mul
+	  }
+
+	  return val
+	}
+
+	Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 1, this.length)
+	  return this[offset]
+	}
+
+	Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
+	  return this[offset] | (this[offset + 1] << 8)
+	}
+
+	Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
+	  return (this[offset] << 8) | this[offset + 1]
+	}
+
+	Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+
+	  return ((this[offset]) |
+	      (this[offset + 1] << 8) |
+	      (this[offset + 2] << 16)) +
+	      (this[offset + 3] * 0x1000000)
+	}
+
+	Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+
+	  return (this[offset] * 0x1000000) +
+	    ((this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    this[offset + 3])
+	}
+
+	Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var val = this[offset]
+	  var mul = 1
+	  var i = 0
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul
+	  }
+	  mul *= 0x80
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+	  return val
+	}
+
+	Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkOffset(offset, byteLength, this.length)
+
+	  var i = byteLength
+	  var mul = 1
+	  var val = this[offset + --i]
+	  while (i > 0 && (mul *= 0x100)) {
+	    val += this[offset + --i] * mul
+	  }
+	  mul *= 0x80
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
+
+	  return val
+	}
+
+	Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 1, this.length)
+	  if (!(this[offset] & 0x80)) return (this[offset])
+	  return ((0xff - this[offset] + 1) * -1)
+	}
+
+	Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
+	  var val = this[offset] | (this[offset + 1] << 8)
+	  return (val & 0x8000) ? val | 0xFFFF0000 : val
+	}
+
+	Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 2, this.length)
+	  var val = this[offset + 1] | (this[offset] << 8)
+	  return (val & 0x8000) ? val | 0xFFFF0000 : val
+	}
+
+	Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+
+	  return (this[offset]) |
+	    (this[offset + 1] << 8) |
+	    (this[offset + 2] << 16) |
+	    (this[offset + 3] << 24)
+	}
+
+	Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+
+	  return (this[offset] << 24) |
+	    (this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    (this[offset + 3])
+	}
+
+	Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+	  return ieee754.read(this, offset, true, 23, 4)
+	}
+
+	Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 4, this.length)
+	  return ieee754.read(this, offset, false, 23, 4)
+	}
+
+	Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 8, this.length)
+	  return ieee754.read(this, offset, true, 52, 8)
+	}
+
+	Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+	  if (!noAssert) checkOffset(offset, 8, this.length)
+	  return ieee754.read(this, offset, false, 52, 8)
+	}
+
+	function checkInt (buf, value, offset, ext, max, min) {
+	  if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
+	  if (value > max || value < min) throw new RangeError('value is out of bounds')
+	  if (offset + ext > buf.length) throw new RangeError('index out of range')
+	}
+
+	Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+	  var mul = 1
+	  var i = 0
+	  this[offset] = value & 0xFF
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  byteLength = byteLength | 0
+	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+	  var i = byteLength - 1
+	  var mul = 1
+	  this[offset + i] = value & 0xFF
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
+	  this[offset] = (value & 0xff)
+	  return offset + 1
+	}
+
+	function objectWriteUInt16 (buf, value, offset, littleEndian) {
+	  if (value < 0) value = 0xffff + value + 1
+	  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; i++) {
+	    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+	      (littleEndian ? i : 1 - i) * 8
+	  }
+	}
+
+	Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value & 0xff)
+	    this[offset + 1] = (value >>> 8)
+	  } else {
+	    objectWriteUInt16(this, value, offset, true)
+	  }
+	  return offset + 2
+	}
+
+	Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value >>> 8)
+	    this[offset + 1] = (value & 0xff)
+	  } else {
+	    objectWriteUInt16(this, value, offset, false)
+	  }
+	  return offset + 2
+	}
+
+	function objectWriteUInt32 (buf, value, offset, littleEndian) {
+	  if (value < 0) value = 0xffffffff + value + 1
+	  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; i++) {
+	    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
+	  }
+	}
+
+	Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset + 3] = (value >>> 24)
+	    this[offset + 2] = (value >>> 16)
+	    this[offset + 1] = (value >>> 8)
+	    this[offset] = (value & 0xff)
+	  } else {
+	    objectWriteUInt32(this, value, offset, true)
+	  }
+	  return offset + 4
+	}
+
+	Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value >>> 24)
+	    this[offset + 1] = (value >>> 16)
+	    this[offset + 2] = (value >>> 8)
+	    this[offset + 3] = (value & 0xff)
+	  } else {
+	    objectWriteUInt32(this, value, offset, false)
+	  }
+	  return offset + 4
+	}
+
+	Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) {
+	    var limit = Math.pow(2, 8 * byteLength - 1)
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+	  }
+
+	  var i = 0
+	  var mul = 1
+	  var sub = value < 0 ? 1 : 0
+	  this[offset] = value & 0xFF
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) {
+	    var limit = Math.pow(2, 8 * byteLength - 1)
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
+	  }
+
+	  var i = byteLength - 1
+	  var mul = 1
+	  var sub = value < 0 ? 1 : 0
+	  this[offset + i] = value & 0xFF
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+	  }
+
+	  return offset + byteLength
+	}
+
+	Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
+	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
+	  if (value < 0) value = 0xff + value + 1
+	  this[offset] = (value & 0xff)
+	  return offset + 1
+	}
+
+	Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value & 0xff)
+	    this[offset + 1] = (value >>> 8)
+	  } else {
+	    objectWriteUInt16(this, value, offset, true)
+	  }
+	  return offset + 2
+	}
+
+	Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value >>> 8)
+	    this[offset + 1] = (value & 0xff)
+	  } else {
+	    objectWriteUInt16(this, value, offset, false)
+	  }
+	  return offset + 2
+	}
+
+	Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value & 0xff)
+	    this[offset + 1] = (value >>> 8)
+	    this[offset + 2] = (value >>> 16)
+	    this[offset + 3] = (value >>> 24)
+	  } else {
+	    objectWriteUInt32(this, value, offset, true)
+	  }
+	  return offset + 4
+	}
+
+	Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
+	  value = +value
+	  offset = offset | 0
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+	  if (value < 0) value = 0xffffffff + value + 1
+	  if (Buffer.TYPED_ARRAY_SUPPORT) {
+	    this[offset] = (value >>> 24)
+	    this[offset + 1] = (value >>> 16)
+	    this[offset + 2] = (value >>> 8)
+	    this[offset + 3] = (value & 0xff)
+	  } else {
+	    objectWriteUInt32(this, value, offset, false)
+	  }
+	  return offset + 4
+	}
+
+	function checkIEEE754 (buf, value, offset, ext, max, min) {
+	  if (value > max || value < min) throw new RangeError('value is out of bounds')
+	  if (offset + ext > buf.length) throw new RangeError('index out of range')
+	  if (offset < 0) throw new RangeError('index out of range')
+	}
+
+	function writeFloat (buf, value, offset, littleEndian, noAssert) {
+	  if (!noAssert) {
+	    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
+	  }
+	  ieee754.write(buf, value, offset, littleEndian, 23, 4)
+	  return offset + 4
+	}
+
+	Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
+	  return writeFloat(this, value, offset, true, noAssert)
+	}
+
+	Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
+	  return writeFloat(this, value, offset, false, noAssert)
+	}
+
+	function writeDouble (buf, value, offset, littleEndian, noAssert) {
+	  if (!noAssert) {
+	    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
+	  }
+	  ieee754.write(buf, value, offset, littleEndian, 52, 8)
+	  return offset + 8
+	}
+
+	Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
+	  return writeDouble(this, value, offset, true, noAssert)
+	}
+
+	Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
+	  return writeDouble(this, value, offset, false, noAssert)
+	}
+
+	// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+	Buffer.prototype.copy = function copy (target, targetStart, start, end) {
+	  if (!start) start = 0
+	  if (!end && end !== 0) end = this.length
+	  if (targetStart >= target.length) targetStart = target.length
+	  if (!targetStart) targetStart = 0
+	  if (end > 0 && end < start) end = start
+
+	  // Copy 0 bytes; we're done
+	  if (end === start) return 0
+	  if (target.length === 0 || this.length === 0) return 0
+
+	  // Fatal error conditions
+	  if (targetStart < 0) {
+	    throw new RangeError('targetStart out of bounds')
+	  }
+	  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')
+	  if (end < 0) throw new RangeError('sourceEnd out of bounds')
+
+	  // Are we oob?
+	  if (end > this.length) end = this.length
+	  if (target.length - targetStart < end - start) {
+	    end = target.length - targetStart + start
+	  }
+
+	  var len = end - start
+	  var i
+
+	  if (this === target && start < targetStart && targetStart < end) {
+	    // descending copy from end
+	    for (i = len - 1; i >= 0; i--) {
+	      target[i + targetStart] = this[i + start]
+	    }
+	  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+	    // ascending copy from start
+	    for (i = 0; i < len; i++) {
+	      target[i + targetStart] = this[i + start]
+	    }
+	  } else {
+	    target._set(this.subarray(start, start + len), targetStart)
+	  }
+
+	  return len
+	}
+
+	// fill(value, start=0, end=buffer.length)
+	Buffer.prototype.fill = function fill (value, start, end) {
+	  if (!value) value = 0
+	  if (!start) start = 0
+	  if (!end) end = this.length
+
+	  if (end < start) throw new RangeError('end < start')
+
+	  // Fill 0 bytes; we're done
+	  if (end === start) return
+	  if (this.length === 0) return
+
+	  if (start < 0 || start >= this.length) throw new RangeError('start out of bounds')
+	  if (end < 0 || end > this.length) throw new RangeError('end out of bounds')
+
+	  var i
+	  if (typeof value === 'number') {
+	    for (i = start; i < end; i++) {
+	      this[i] = value
+	    }
+	  } else {
+	    var bytes = utf8ToBytes(value.toString())
+	    var len = bytes.length
+	    for (i = start; i < end; i++) {
+	      this[i] = bytes[i % len]
+	    }
+	  }
+
+	  return this
+	}
+
+	/**
+	 * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
+	 * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
+	 */
+	Buffer.prototype.toArrayBuffer = function toArrayBuffer () {
+	  if (typeof Uint8Array !== 'undefined') {
+	    if (Buffer.TYPED_ARRAY_SUPPORT) {
+	      return (new Buffer(this)).buffer
+	    } else {
+	      var buf = new Uint8Array(this.length)
+	      for (var i = 0, len = buf.length; i < len; i += 1) {
+	        buf[i] = this[i]
+	      }
+	      return buf.buffer
+	    }
+	  } else {
+	    throw new TypeError('Buffer.toArrayBuffer not supported in this browser')
+	  }
+	}
+
+	// HELPER FUNCTIONS
+	// ================
+
+	var BP = Buffer.prototype
+
+	/**
+	 * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
+	 */
+	Buffer._augment = function _augment (arr) {
+	  arr.constructor = Buffer
+	  arr._isBuffer = true
+
+	  // save reference to original Uint8Array set method before overwriting
+	  arr._set = arr.set
+
+	  // deprecated
+	  arr.get = BP.get
+	  arr.set = BP.set
+
+	  arr.write = BP.write
+	  arr.toString = BP.toString
+	  arr.toLocaleString = BP.toString
+	  arr.toJSON = BP.toJSON
+	  arr.equals = BP.equals
+	  arr.compare = BP.compare
+	  arr.indexOf = BP.indexOf
+	  arr.copy = BP.copy
+	  arr.slice = BP.slice
+	  arr.readUIntLE = BP.readUIntLE
+	  arr.readUIntBE = BP.readUIntBE
+	  arr.readUInt8 = BP.readUInt8
+	  arr.readUInt16LE = BP.readUInt16LE
+	  arr.readUInt16BE = BP.readUInt16BE
+	  arr.readUInt32LE = BP.readUInt32LE
+	  arr.readUInt32BE = BP.readUInt32BE
+	  arr.readIntLE = BP.readIntLE
+	  arr.readIntBE = BP.readIntBE
+	  arr.readInt8 = BP.readInt8
+	  arr.readInt16LE = BP.readInt16LE
+	  arr.readInt16BE = BP.readInt16BE
+	  arr.readInt32LE = BP.readInt32LE
+	  arr.readInt32BE = BP.readInt32BE
+	  arr.readFloatLE = BP.readFloatLE
+	  arr.readFloatBE = BP.readFloatBE
+	  arr.readDoubleLE = BP.readDoubleLE
+	  arr.readDoubleBE = BP.readDoubleBE
+	  arr.writeUInt8 = BP.writeUInt8
+	  arr.writeUIntLE = BP.writeUIntLE
+	  arr.writeUIntBE = BP.writeUIntBE
+	  arr.writeUInt16LE = BP.writeUInt16LE
+	  arr.writeUInt16BE = BP.writeUInt16BE
+	  arr.writeUInt32LE = BP.writeUInt32LE
+	  arr.writeUInt32BE = BP.writeUInt32BE
+	  arr.writeIntLE = BP.writeIntLE
+	  arr.writeIntBE = BP.writeIntBE
+	  arr.writeInt8 = BP.writeInt8
+	  arr.writeInt16LE = BP.writeInt16LE
+	  arr.writeInt16BE = BP.writeInt16BE
+	  arr.writeInt32LE = BP.writeInt32LE
+	  arr.writeInt32BE = BP.writeInt32BE
+	  arr.writeFloatLE = BP.writeFloatLE
+	  arr.writeFloatBE = BP.writeFloatBE
+	  arr.writeDoubleLE = BP.writeDoubleLE
+	  arr.writeDoubleBE = BP.writeDoubleBE
+	  arr.fill = BP.fill
+	  arr.inspect = BP.inspect
+	  arr.toArrayBuffer = BP.toArrayBuffer
+
+	  return arr
+	}
+
+	var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
+
+	function base64clean (str) {
+	  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+	  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+	  // Node converts strings with length < 2 to ''
+	  if (str.length < 2) return ''
+	  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+	  while (str.length % 4 !== 0) {
+	    str = str + '='
+	  }
+	  return str
+	}
+
+	function stringtrim (str) {
+	  if (str.trim) return str.trim()
+	  return str.replace(/^\s+|\s+$/g, '')
+	}
+
+	function toHex (n) {
+	  if (n < 16) return '0' + n.toString(16)
+	  return n.toString(16)
+	}
+
+	function utf8ToBytes (string, units) {
+	  units = units || Infinity
+	  var codePoint
+	  var length = string.length
+	  var leadSurrogate = null
+	  var bytes = []
+
+	  for (var i = 0; i < length; i++) {
+	    codePoint = string.charCodeAt(i)
+
+	    // is surrogate component
+	    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+	      // last char was a lead
+	      if (!leadSurrogate) {
+	        // no lead yet
+	        if (codePoint > 0xDBFF) {
+	          // unexpected trail
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	          continue
+	        } else if (i + 1 === length) {
+	          // unpaired lead
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	          continue
+	        }
+
+	        // valid lead
+	        leadSurrogate = codePoint
+
+	        continue
+	      }
+
+	      // 2 leads in a row
+	      if (codePoint < 0xDC00) {
+	        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	        leadSurrogate = codePoint
+	        continue
+	      }
+
+	      // valid surrogate pair
+	      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
+	    } else if (leadSurrogate) {
+	      // valid bmp char, but last char was a lead
+	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+	    }
+
+	    leadSurrogate = null
+
+	    // encode utf8
+	    if (codePoint < 0x80) {
+	      if ((units -= 1) < 0) break
+	      bytes.push(codePoint)
+	    } else if (codePoint < 0x800) {
+	      if ((units -= 2) < 0) break
+	      bytes.push(
+	        codePoint >> 0x6 | 0xC0,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else if (codePoint < 0x10000) {
+	      if ((units -= 3) < 0) break
+	      bytes.push(
+	        codePoint >> 0xC | 0xE0,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else if (codePoint < 0x110000) {
+	      if ((units -= 4) < 0) break
+	      bytes.push(
+	        codePoint >> 0x12 | 0xF0,
+	        codePoint >> 0xC & 0x3F | 0x80,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      )
+	    } else {
+	      throw new Error('Invalid code point')
+	    }
+	  }
+
+	  return bytes
+	}
+
+	function asciiToBytes (str) {
+	  var byteArray = []
+	  for (var i = 0; i < str.length; i++) {
+	    // Node's code seems to be doing this and not & 0x7F..
+	    byteArray.push(str.charCodeAt(i) & 0xFF)
+	  }
+	  return byteArray
+	}
+
+	function utf16leToBytes (str, units) {
+	  var c, hi, lo
+	  var byteArray = []
+	  for (var i = 0; i < str.length; i++) {
+	    if ((units -= 2) < 0) break
+
+	    c = str.charCodeAt(i)
+	    hi = c >> 8
+	    lo = c % 256
+	    byteArray.push(lo)
+	    byteArray.push(hi)
+	  }
+
+	  return byteArray
+	}
+
+	function base64ToBytes (str) {
+	  return base64.toByteArray(base64clean(str))
+	}
+
+	function blitBuffer (src, dst, offset, length) {
+	  for (var i = 0; i < length; i++) {
+	    if ((i + offset >= dst.length) || (i >= src.length)) break
+	    dst[i + offset] = src[i]
+	  }
+	  return i
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer, (function() { return this; }())))
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+	;(function (exports) {
+		'use strict';
+
+	  var Arr = (typeof Uint8Array !== 'undefined')
+	    ? Uint8Array
+	    : Array
+
+		var PLUS   = '+'.charCodeAt(0)
+		var SLASH  = '/'.charCodeAt(0)
+		var NUMBER = '0'.charCodeAt(0)
+		var LOWER  = 'a'.charCodeAt(0)
+		var UPPER  = 'A'.charCodeAt(0)
+		var PLUS_URL_SAFE = '-'.charCodeAt(0)
+		var SLASH_URL_SAFE = '_'.charCodeAt(0)
+
+		function decode (elt) {
+			var code = elt.charCodeAt(0)
+			if (code === PLUS ||
+			    code === PLUS_URL_SAFE)
+				return 62 // '+'
+			if (code === SLASH ||
+			    code === SLASH_URL_SAFE)
+				return 63 // '/'
+			if (code < NUMBER)
+				return -1 //no match
+			if (code < NUMBER + 10)
+				return code - NUMBER + 26 + 26
+			if (code < UPPER + 26)
+				return code - UPPER
+			if (code < LOWER + 26)
+				return code - LOWER + 26
+		}
+
+		function b64ToByteArray (b64) {
+			var i, j, l, tmp, placeHolders, arr
+
+			if (b64.length % 4 > 0) {
+				throw new Error('Invalid string. Length must be a multiple of 4')
+			}
+
+			// the number of equal signs (place holders)
+			// if there are two placeholders, than the two characters before it
+			// represent one byte
+			// if there is only one, then the three characters before it represent 2 bytes
+			// this is just a cheap hack to not do indexOf twice
+			var len = b64.length
+			placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
+
+			// base64 is 4/3 + up to two characters of the original data
+			arr = new Arr(b64.length * 3 / 4 - placeHolders)
+
+			// if there are placeholders, only get up to the last complete 4 chars
+			l = placeHolders > 0 ? b64.length - 4 : b64.length
+
+			var L = 0
+
+			function push (v) {
+				arr[L++] = v
+			}
+
+			for (i = 0, j = 0; i < l; i += 4, j += 3) {
+				tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+				push((tmp & 0xFF0000) >> 16)
+				push((tmp & 0xFF00) >> 8)
+				push(tmp & 0xFF)
+			}
+
+			if (placeHolders === 2) {
+				tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+				push(tmp & 0xFF)
+			} else if (placeHolders === 1) {
+				tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+				push((tmp >> 8) & 0xFF)
+				push(tmp & 0xFF)
+			}
+
+			return arr
+		}
+
+		function uint8ToBase64 (uint8) {
+			var i,
+				extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+				output = "",
+				temp, length
+
+			function encode (num) {
+				return lookup.charAt(num)
+			}
+
+			function tripletToBase64 (num) {
+				return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+			}
+
+			// go through the array every three bytes, we'll deal with trailing stuff later
+			for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+				temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+				output += tripletToBase64(temp)
+			}
+
+			// pad the end with zeros, but make sure to not forget the extra bytes
+			switch (extraBytes) {
+				case 1:
+					temp = uint8[uint8.length - 1]
+					output += encode(temp >> 2)
+					output += encode((temp << 4) & 0x3F)
+					output += '=='
+					break
+				case 2:
+					temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+					output += encode(temp >> 10)
+					output += encode((temp >> 4) & 0x3F)
+					output += encode((temp << 2) & 0x3F)
+					output += '='
+					break
+			}
+
+			return output
+		}
+
+		exports.toByteArray = b64ToByteArray
+		exports.fromByteArray = uint8ToBase64
+	}( false ? (this.base64js = {}) : exports))
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+	  var e, m
+	  var eLen = nBytes * 8 - mLen - 1
+	  var eMax = (1 << eLen) - 1
+	  var eBias = eMax >> 1
+	  var nBits = -7
+	  var i = isLE ? (nBytes - 1) : 0
+	  var d = isLE ? -1 : 1
+	  var s = buffer[offset + i]
+
+	  i += d
+
+	  e = s & ((1 << (-nBits)) - 1)
+	  s >>= (-nBits)
+	  nBits += eLen
+	  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+	  m = e & ((1 << (-nBits)) - 1)
+	  e >>= (-nBits)
+	  nBits += mLen
+	  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+	  if (e === 0) {
+	    e = 1 - eBias
+	  } else if (e === eMax) {
+	    return m ? NaN : ((s ? -1 : 1) * Infinity)
+	  } else {
+	    m = m + Math.pow(2, mLen)
+	    e = e - eBias
+	  }
+	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+	}
+
+	exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+	  var e, m, c
+	  var eLen = nBytes * 8 - mLen - 1
+	  var eMax = (1 << eLen) - 1
+	  var eBias = eMax >> 1
+	  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+	  var i = isLE ? 0 : (nBytes - 1)
+	  var d = isLE ? 1 : -1
+	  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+
+	  value = Math.abs(value)
+
+	  if (isNaN(value) || value === Infinity) {
+	    m = isNaN(value) ? 1 : 0
+	    e = eMax
+	  } else {
+	    e = Math.floor(Math.log(value) / Math.LN2)
+	    if (value * (c = Math.pow(2, -e)) < 1) {
+	      e--
+	      c *= 2
+	    }
+	    if (e + eBias >= 1) {
+	      value += rt / c
+	    } else {
+	      value += rt * Math.pow(2, 1 - eBias)
+	    }
+	    if (value * c >= 2) {
+	      e++
+	      c /= 2
+	    }
+
+	    if (e + eBias >= eMax) {
+	      m = 0
+	      e = eMax
+	    } else if (e + eBias >= 1) {
+	      m = (value * c - 1) * Math.pow(2, mLen)
+	      e = e + eBias
+	    } else {
+	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+	      e = 0
+	    }
+	  }
+
+	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+	  e = (e << mLen) | m
+	  eLen += mLen
+	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+	  buffer[offset + i - d] |= s * 128
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	var toString = {}.toString;
+
+	module.exports = Array.isArray || function (arr) {
+	  return toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//     uuid.js
+	//
+	//     Copyright (c) 2010-2012 Robert Kieffer
+	//     MIT License - http://opensource.org/licenses/mit-license.php
+
+	// Unique ID creation requires a high quality random # generator.  We feature
+	// detect to determine the best RNG source, normalizing to a function that
+	// returns 128-bits of randomness, since that's what's usually required
+	var _rng = __webpack_require__(16);
+
+	// Maps for number <-> hex string conversion
+	var _byteToHex = [];
+	var _hexToByte = {};
+	for (var i = 0; i < 256; i++) {
+	  _byteToHex[i] = (i + 0x100).toString(16).substr(1);
+	  _hexToByte[_byteToHex[i]] = i;
+	}
+
+	// **`parse()` - Parse a UUID into it's component bytes**
+	function parse(s, buf, offset) {
+	  var i = (buf && offset) || 0, ii = 0;
+
+	  buf = buf || [];
+	  s.toLowerCase().replace(/[0-9a-f]{2}/g, function(oct) {
+	    if (ii < 16) { // Don't overflow!
+	      buf[i + ii++] = _hexToByte[oct];
+	    }
+	  });
+
+	  // Zero out remaining bytes if string was short
+	  while (ii < 16) {
+	    buf[i + ii++] = 0;
+	  }
+
+	  return buf;
+	}
+
+	// **`unparse()` - Convert UUID byte array (ala parse()) into a string**
+	function unparse(buf, offset) {
+	  var i = offset || 0, bth = _byteToHex;
+	  return  bth[buf[i++]] + bth[buf[i++]] +
+	          bth[buf[i++]] + bth[buf[i++]] + '-' +
+	          bth[buf[i++]] + bth[buf[i++]] + '-' +
+	          bth[buf[i++]] + bth[buf[i++]] + '-' +
+	          bth[buf[i++]] + bth[buf[i++]] + '-' +
+	          bth[buf[i++]] + bth[buf[i++]] +
+	          bth[buf[i++]] + bth[buf[i++]] +
+	          bth[buf[i++]] + bth[buf[i++]];
+	}
+
+	// **`v1()` - Generate time-based UUID**
+	//
+	// Inspired by https://github.com/LiosK/UUID.js
+	// and http://docs.python.org/library/uuid.html
+
+	// random #'s we need to init node and clockseq
+	var _seedBytes = _rng();
+
+	// Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+	var _nodeId = [
+	  _seedBytes[0] | 0x01,
+	  _seedBytes[1], _seedBytes[2], _seedBytes[3], _seedBytes[4], _seedBytes[5]
+	];
+
+	// Per 4.2.2, randomize (14 bit) clockseq
+	var _clockseq = (_seedBytes[6] << 8 | _seedBytes[7]) & 0x3fff;
+
+	// Previous uuid creation time
+	var _lastMSecs = 0, _lastNSecs = 0;
+
+	// See https://github.com/broofa/node-uuid for API details
+	function v1(options, buf, offset) {
+	  var i = buf && offset || 0;
+	  var b = buf || [];
+
+	  options = options || {};
+
+	  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
+
+	  // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+	  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+	  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+	  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+	  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime();
+
+	  // Per 4.2.1.2, use count of uuid's generated during the current clock
+	  // cycle to simulate higher resolution clock
+	  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1;
+
+	  // Time since last uuid creation (in msecs)
+	  var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
+
+	  // Per 4.2.1.2, Bump clockseq on clock regression
+	  if (dt < 0 && options.clockseq === undefined) {
+	    clockseq = clockseq + 1 & 0x3fff;
+	  }
+
+	  // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+	  // time interval
+	  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+	    nsecs = 0;
+	  }
+
+	  // Per 4.2.1.2 Throw error if too many uuids are requested
+	  if (nsecs >= 10000) {
+	    throw new Error('uuid.v1(): Can\'t create more than 10M uuids/sec');
+	  }
+
+	  _lastMSecs = msecs;
+	  _lastNSecs = nsecs;
+	  _clockseq = clockseq;
+
+	  // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+	  msecs += 12219292800000;
+
+	  // `time_low`
+	  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+	  b[i++] = tl >>> 24 & 0xff;
+	  b[i++] = tl >>> 16 & 0xff;
+	  b[i++] = tl >>> 8 & 0xff;
+	  b[i++] = tl & 0xff;
+
+	  // `time_mid`
+	  var tmh = (msecs / 0x100000000 * 10000) & 0xfffffff;
+	  b[i++] = tmh >>> 8 & 0xff;
+	  b[i++] = tmh & 0xff;
+
+	  // `time_high_and_version`
+	  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+	  b[i++] = tmh >>> 16 & 0xff;
+
+	  // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+	  b[i++] = clockseq >>> 8 | 0x80;
+
+	  // `clock_seq_low`
+	  b[i++] = clockseq & 0xff;
+
+	  // `node`
+	  var node = options.node || _nodeId;
+	  for (var n = 0; n < 6; n++) {
+	    b[i + n] = node[n];
+	  }
+
+	  return buf ? buf : unparse(b);
+	}
+
+	// **`v4()` - Generate random UUID**
+
+	// See https://github.com/broofa/node-uuid for API details
+	function v4(options, buf, offset) {
+	  // Deprecated - 'format' argument, as supported in v1.2
+	  var i = buf && offset || 0;
+
+	  if (typeof(options) == 'string') {
+	    buf = options == 'binary' ? new Array(16) : null;
+	    options = null;
+	  }
+	  options = options || {};
+
+	  var rnds = options.random || (options.rng || _rng)();
+
+	  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+	  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+	  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+	  // Copy bytes to buffer, if provided
+	  if (buf) {
+	    for (var ii = 0; ii < 16; ii++) {
+	      buf[i + ii] = rnds[ii];
+	    }
+	  }
+
+	  return buf || unparse(rnds);
+	}
+
+	// Export public API
+	var uuid = v4;
+	uuid.v1 = v1;
+	uuid.v4 = v4;
+	uuid.parse = parse;
+	uuid.unparse = unparse;
+
+	module.exports = uuid;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {
+	var rng;
+
+	if (global.crypto && crypto.getRandomValues) {
+	  // WHATWG crypto-based RNG - http://wiki.whatwg.org/wiki/Crypto
+	  // Moderately fast, high quality
+	  var _rnds8 = new Uint8Array(16);
+	  rng = function whatwgRNG() {
+	    crypto.getRandomValues(_rnds8);
+	    return _rnds8;
+	  };
+	}
+
+	if (!rng) {
+	  // Math.random()-based (RNG)
+	  //
+	  // If all else fails, use Math.random().  It's fast, but is of unspecified
+	  // quality.
+	  var  _rnds = new Array(16);
+	  rng = function() {
+	    for (var i = 0, r; i < 16; i++) {
+	      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+	      _rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+	    }
+
+	    return _rnds;
+	  };
+	}
+
+	module.exports = rng;
+
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.contextMenu = contextMenu;
+
+	__webpack_require__(18);
+
+	var _d = __webpack_require__(8);
+
+	var _d2 = _interopRequireDefault(_d);
+
+	var _slugid = __webpack_require__(9);
+
+	var _slugid2 = _interopRequireDefault(_slugid);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function contextMenu(menu, opts) {
+	    var previouslyMouseUp = false;
+	    var clickAway = {};
+	    var uid = _slugid2.default.nice();
+	    var rootElement = null;
+	    var orientation = 'right'; // display the menu to the right of the mouse click
+	    // or parent elemement
+	    var initialPos = null;
+	    var parentStart = null;
+
+	    var openCallback, closeCallback;
+
+	    if (typeof opts === 'function') {
+	        openCallback = opts;
+	    } else {
+	        opts = opts || {};
+	        openCallback = opts.onOpen;
+	        closeCallback = opts.onClose;
+	    }
+
+	    if ('rootElement' in opts) rootElement = opts['rootElement'];
+
+	    if ('pos' in opts) {
+	        // do we want to place this menu somewhere specific?
+	        initialPos = opts.pos;
+	    }
+
+	    if ('orientation' in opts) {
+	        orientation = opts.orientation;
+	    }
+
+	    if ('parentStart' in opts) {
+	        parentStart = opts.parentStart;
+	    }
+
+	    // create the div element that will hold the context menu
+	    _d2.default.selectAll('.d3-context-menu-' + uid).data([1]).enter().append('div').classed('d3-context-menu', true).classed('d3-context-menu-' + uid, true);
+
+	    // close menu
+	    _d2.default.select('body').on('click.d3-context-menu-' + uid, function () {
+	        /*
+	        if (previouslyMouseUp) {
+	            previouslyMouseUp = false;
+	            return;
+	        }
+	        */
+
+	        _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	        orientation = 'right';
+
+	        if (closeCallback) {
+	            closeCallback();
+	        }
+	    });
+
+	    // this gets executed when a contextmenu event occurs
+	    return function (data, index) {
+	        var pMouseUp = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+	        var clickAwayFunc = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+
+	        var elm = this;
+	        var contextMenuPos = null;
+	        var mousePos = null;
+	        var currentThis = this;
+
+	        if (rootElement == null) mousePos = _d2.default.mouse(this);else mousePos = _d2.default.mouse(rootElement); // for recursive menus, we need the mouse
+	        // position relative to another element
+
+	        clickAway = clickAwayFunc;
+	        var openChildMenuUid = null;
+
+	        previouslyMouseUp = pMouseUp;
+
+	        _d2.default.selectAll('.d3-context-menu-' + uid).html('');
+	        var list = _d2.default.selectAll('.d3-context-menu-' + uid).on('contextmenu', function (d) {
+	            _d2.default.select('.d3-context-menu-' + uid).style('display', 'none');
+	            orientation = 'right';
+
+	            _d2.default.event.preventDefault();
+	            _d2.default.event.stopPropagation();
+	        }).append('ul');
+
+	        list.selectAll('li').data(typeof menu === 'function' ? menu(data) : menu).enter().append('li').attr('class', function (d) {
+	            var ret = '';
+	            if (d.divider) {
+	                ret += ' is-divider';
+	            }
+	            if (d.disabled) {
+	                ret += ' is-disabled';
+	            }
+	            if (!d.action) {
+	                ret += ' is-header';
+	            }
+	            return ret;
+	        }).html(function (d) {
+	            if (d.divider) {
+	                return '<hr>';
+	            }
+	            if (!d.title) {
+	                console.error('No title attribute set. Check the spelling of your options.');
+	            }
+	            return typeof d.title === 'string' ? d.title : d.title(data);
+	        }).on('click', function (d, i) {
+	            if (d.disabled) return; // do nothing if disabled
+	            if (!d.action) return; // headers have no "action"
+	            d.action(elm, data, index, mousePos);
+
+	            // close all context menus
+	            _d2.default.selectAll('.d3-context-menu').style('display', 'none');
+	            orientation = 'right';
+
+	            if (closeCallback) {
+	                closeCallback();
+	            }
+	        }).on('mouseenter', function (d, i) {
+	            _d2.default.select(this).classed('d3-context-menu-selected', true);
+
+	            if (openChildMenuUid != null) {
+	                // there's a child menu open
+
+	                // unselect all items
+	                _d2.default.select('.d3-context-menu-' + uid).selectAll('li').classed('d3-context-menu-selected', false);
+
+	                if (typeof d.children == 'undefined') {
+	                    // no children, so hide any open child menus
+	                    _d2.default.select('.d3-context-menu-' + openChildMenuUid).style('display', 'none');
+
+	                    openChildMenuUid = null;
+	                    return;
+	                }
+
+	                if (d.childUid == openChildMenuUid) {
+	                    // the correct child menu is already open
+	                    return;
+	                } else {
+	                    // need to open a different child menu
+
+	                    // close the already open one
+	                    _d2.default.select('.d3-context-menu-' + openChildMenuUid).style('display', 'none');
+
+	                    openChildMenuUid = null;
+	                }
+	            }
+
+	            // there should be no menu open right now
+	            if (typeof d.children != 'undefined') {
+	                var _boundingRect = this.getBoundingClientRect();
+
+	                var childrenContextMenu = null;
+	                if (orientation == 'left') {
+	                    childrenContextMenu = contextMenu(d.children, { 'rootElement': currentThis,
+	                        'pos': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'orientation': 'left' });
+	                } else {
+	                    childrenContextMenu = contextMenu(d.children, {
+	                        'pos': [_boundingRect.left + _boundingRect.width + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset],
+	                        'rootElement': currentThis,
+	                        'parentStart': [_boundingRect.left + window.pageXOffset, _boundingRect.top - 2 + window.pageYOffset] });
+	                }
+
+	                d.childUid = childrenContextMenu.apply(this, [data, i, true, function () {}]);
+	                openChildMenuUid = d.childUid;
+	            }
+
+	            _d2.default.select(this).classed('d3-context-menu-selected', true);
+	        }).on('mouseleave', function (d, i) {
+
+	            if (openChildMenuUid == null) {
+	                _d2.default.select(this).classed('d3-context-menu-selected', false);
+	            }
+	        });
+
+	        // the openCallback allows an action to fire before the menu is displayed
+	        // an example usage would be closing a tooltip
+	        if (openCallback) {
+	            if (openCallback(data, index) === false) {
+	                return uid;
+	            }
+	        }
+
+	        var contextMenuSelection = _d2.default.select('.d3-context-menu-' + uid).style('display', 'block');
+
+	        if (initialPos == null) {
+	            _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
+	        } else {
+	            _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] + 'px').style('top', initialPos[1] + 'px');
+	        }
+
+	        // check if the menu disappears off the side of the window
+	        var boundingRect = contextMenuSelection.node().getBoundingClientRect();
+
+	        if (boundingRect.left + boundingRect.width > window.innerWidth || orientation == 'left') {
+	            orientation = 'left';
+
+	            // menu goes of the end of the window, position it the other way
+	            if (initialPos == null) {
+	                // place the menu where the user clicked
+	                _d2.default.select('.d3-context-menu-' + uid).style('left', _d2.default.event.pageX - 2 - boundingRect.width + 'px').style('top', _d2.default.event.pageY - 2 + 'px');
+	            } else {
+	                if (parentStart != null) {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', parentStart[0] - boundingRect.width + 'px').style('top', parentStart[1] + 'px');
+	                } else {
+	                    _d2.default.select('.d3-context-menu-' + uid).style('left', initialPos[0] - boundingRect.width + 'px').style('top', initialPos[1] + 'px');
+	                }
+	            }
+	        }
+
+	        // display context menu
+
+	        if (previouslyMouseUp) return uid;
+
+	        _d2.default.event.preventDefault();
+	        _d2.default.event.stopPropagation();
+	        //d3.event.stopImmediatePropagation();
+	        //
+	        return uid;
+	    };
+	};
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(19);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(7)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./d3-context-menu.css", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./d3-context-menu.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(6)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".d3-context-menu {\n\tposition: absolute;\n\tdisplay: none;\n\tbackground-color: #f2f2f2;\n\tborder-radius: 4px;\n\n\tfont-family: Arial, sans-serif;\n\tfont-size: 14px;\n\tmin-width: 150px;\n\tborder: 1px solid #d4d4d4;\n\n\tz-index:1200;\n}\n\n.d3-context-menu ul {\n\tlist-style-type: none;\n\tmargin: 4px 0px;\n\tpadding: 0px;\n\tcursor: default;\n}\n\n.d3-context-menu ul li {\n\tpadding: 4px 16px;\n\n\t-webkit-touch-callout: none; /* iOS Safari */\n\t-webkit-user-select: none;   /* Chrome/Safari/Opera */\n\t-khtml-user-select: none;    /* Konqueror */\n\t-moz-user-select: none;      /* Firefox */\n\t-ms-user-select: none;       /* Internet Explorer/Edge */\n\tuser-select: none;\n}\n\n.d3-context-menu ul li:hover {\n\tbackground-color: #4677f8;\n\tcolor: #fefefe;\n}\n\n.d3-context-menu-selected {\n\tbackground-color: #4677f8;\n\tcolor: #fefefe;\n}\n\n/*\n\tHeader\n*/\n\n.d3-context-menu ul li.is-header,\n.d3-context-menu ul li.is-header:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #444;\n\tfont-weight: bold;\n\tfont-style: italic;\n}\n\n/*\n\tDisabled\n*/\n\n.d3-context-menu ul li.is-disabled,\n.d3-context-menu ul li.is-disabled:hover {\n\tbackground-color: #f2f2f2;\n\tcolor: #888;\n\tcursor: not-allowed;\n}\n\n/*\n\tDivider\n*/\n\n.d3-context-menu ul li.is-divider {\n\tpadding: 0px 0px;\n}\n\n.d3-context-menu ul li.is-divider:hover {\n\tbackground-color: #f2f2f2;\n}\n\n.d3-context-menu ul hr {\n\tborder: 0;\n    height: 0;\n    border-top: 1px solid rgba(0, 0, 0, 0.1);\n    border-bottom: 1px solid rgba(255, 255, 255, 0.3);\n}\n", ""]);
+
+	// exports
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.simpleXyCoordinates = simpleXyCoordinates;
+	function simpleXyCoordinates(pair_table) {
+	    var INIT_ANGLE = 0.; /* initial bending angle */
+	    var INIT_X = 100.; /* coordinate of first digit */
+	    var INIT_Y = 100.; /* see above */
+	    var RADIUS = 15.;
+
+	    var x = [],
+	        y = [];
+
+	    var i, len;
+	    var alpha;
+
+	    len = pair_table[0];
+	    var angle = Array.apply(null, new Array(len + 5)).map(Number.prototype.valueOf, 0);
+	    var loop_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
+	    var stack_size = Array.apply(null, new Array(16 + Math.floor(len / 5))).map(Number.prototype.valueOf, 0);
+
+	    var lp = 0;
+	    var stk = 0;
+	    var PIHALF = Math.PI / 2;
+
+	    var loop = function loop(i, j, pair_table)
+	    /* i, j are the positions AFTER the last pair of a stack; i.e
+	       i-1 and j+1 are paired. */
+	    {
+	        var count = 2; /* counts the VERTICES of a loop polygon; that's
+	                          NOT necessarily the number of unpaired bases!
+	                          Upon entry the loop has already 2 vertices, namely
+	                          the pair i-1/j+1.  */
+
+	        var r = 0,
+	            bubble = 0; /* bubble counts the unpaired digits in loops */
+
+	        var i_old, partner, k, l, start_k, start_l, fill, ladder;
+	        var begin, v, diff;
+	        var polygon;
+
+	        var remember = Array.apply(null, new Array(3 + Math.floor((j - i) / 5) * 2)).map(Number.prototype.valueOf, 0);
+
+	        i_old = i - 1, j++; /* j has now been set to the partner of the
+	                               previous pair for correct while-loop
+	                               termination.  */
+	        while (i != j) {
+	            partner = pair_table[i];
+	            if (!partner || i == 0) i++, count++, bubble++;else {
+	                count += 2;
+	                k = i, l = partner; /* beginning of stack */
+	                remember[++r] = k;
+	                remember[++r] = l;
+	                i = partner + 1; /* next i for the current loop */
+
+	                start_k = k, start_l = l;
+	                ladder = 0;
+	                do {
+	                    k++, l--, ladder++; /* go along the stack region */
+	                } while (pair_table[k] == l && pair_table[k] > k);
+
+	                fill = ladder - 2;
+	                if (ladder >= 2) {
+	                    angle[start_k + 1 + fill] += PIHALF; /*  Loop entries and    */
+	                    angle[start_l - 1 - fill] += PIHALF; /*  exits get an        */
+	                    angle[start_k] += PIHALF; /*  additional PI/2.    */
+	                    angle[start_l] += PIHALF; /*  Why ? (exercise)    */
+	                    if (ladder > 2) {
+	                        for (; fill >= 1; fill--) {
+	                            angle[start_k + fill] = Math.PI; /*  fill in the angles  */
+	                            angle[start_l - fill] = Math.PI; /*  for the backbone    */
+	                        }
+	                    }
+	                }
+	                stack_size[++stk] = ladder;
+	                if (k <= l) loop(k, l, pair_table);
+	            }
+	        }
+
+	        polygon = Math.PI * (count - 2) / count; /* bending angle in loop polygon */
+	        remember[++r] = j;
+	        begin = i_old < 0 ? 0 : i_old;
+	        for (v = 1; v <= r; v++) {
+	            diff = remember[v] - begin;
+	            for (fill = 0; fill <= diff; fill++) {
+	                angle[begin + fill] += polygon;
+	            }if (v > r) break;
+	            begin = remember[++v];
+	        }
+	        loop_size[++lp] = bubble;
+	    };
+
+	    loop(0, len + 1, pair_table);
+	    loop_size[lp] -= 2; /* correct for cheating with function loop */
+
+	    alpha = INIT_ANGLE;
+	    x[0] = INIT_X;
+	    y[0] = INIT_Y;
+
+	    var poss = [];
+
+	    poss.push([x[0], y[0]]);
+	    for (i = 1; i < len; i++) {
+	        x[i] = x[i - 1] + RADIUS * Math.cos(alpha);
+	        y[i] = y[i - 1] + RADIUS * Math.sin(alpha);
+
+	        poss.push([x[i], y[i]]);
+	        alpha += Math.PI - angle[i + 1];
+	    }
+
+	    return poss;
+	}
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.NAView = NAView;
+
+	var _radloop = __webpack_require__(22);
+
+	var _connection = __webpack_require__(23);
+
+	var _region = __webpack_require__(25);
+
+	var _base = __webpack_require__(26);
+
+	var _loop = __webpack_require__(24);
+
+	function NAView() {
+	    this.ANUM = 9999.0;
+	    this.MAXITER = 500;
+
+	    this.bases = [];
+	    this.nbase = null;
+	    this.nregion = null;
+	    this.loop_count = null;
+
+	    this.root = new _loop.Loop();
+	    this.loops = [];
+
+	    this.regions = [];
+
+	    this.rlphead = new _radloop.Radloop();
+
+	    this.lencut = 0.8;
+	    this.RADIUS_REDUCTION_FACTOR = 1.4;
+
+	    // show algorithm step by step
+	    this.angleinc = null;
+
+	    this._h = null;
+
+	    // private boolean noIterationFailureYet = true;
+
+	    this.HELIX_FACTOR = 0.6;
+	    this.BACKBONE_DISTANCE = 27;
+	}
+
+	NAView.prototype.naview_xy_coordinates = function (pair_table) {
+	    var x = [];
+	    var y = [];
+	    if (pair_table.length === 0 || pair_table[0] === 0) {
+	        return 0;
+	    }
+	    var i;
+	    this.nbase = pair_table[0];
+	    this.bases = [];
+	    for (var index = 0; index < this.nbase + 1; index++) {
+	        this.bases.push(new _base.Base());
+	    }
+	    this.regions = [];
+	    for (var index = 0; index < this.nbase + 1; index++) {
+	        this.regions.push(new _region.Region());
+	    }
+	    this.read_in_bases(pair_table);
+	    this.rlphead = null;
+	    this.find_regions();
+	    this.loop_count = 0;
+	    this.loops = [];
+	    for (var index = 0; index < this.nbase + 1; index++) {
+	        this.loops.push(new _loop.Loop());
+	    }
+	    this.construct_loop(0);
+	    this.find_central_loop();
+	    this.traverse_loop(this.root, null);
+
+	    for (i = 0; i < this.nbase; i++) {
+	        x.push(100 + this.BACKBONE_DISTANCE * this.bases[i + 1].getX());
+	        y.push(100 + this.BACKBONE_DISTANCE * this.bases[i + 1].getY());
+	    }
+
+	    return {
+	        nbase: this.nbase,
+	        x: x,
+	        y: y
+	    };
+	};
+
+	NAView.prototype.read_in_bases = function read_in_bases(pair_table) {
+	    var i = null;
+	    var npairs = null;
+
+	    // Set up an origin.
+	    this.bases.push(new _base.Base());
+	    this.bases[0].setMate(0);
+	    this.bases[0].setExtracted(false);
+	    this.bases[0].setX(this.ANUM);
+	    this.bases[0].setY(this.ANUM);
+
+	    for (npairs = 0, i = 1; i <= this.nbase; i++) {
+	        this.bases.push(new _base.Base());
+	        this.bases[i].setExtracted(false);
+	        this.bases[i].setX(this.ANUM);
+	        this.bases[i].setY(this.ANUM);
+	        this.bases[i].setMate(pair_table[i]);
+	        if (pair_table[i] > i) npairs++;
+	    }
+	    // must have at least 1 pair to avoid segfault
+	    if (npairs == 0) {
+	        this.bases[1].setMate(this.nbase);
+	        this.bases[this.nbase].setMate(1);
+	    }
+	};
+
+	NAView.prototype.find_regions = function find_regions() {
+	    var i = null;
+	    var mate = null;
+	    var nb1 = null;
+
+	    nb1 = this.nbase + 1;
+	    var mark = [];
+	    for (i = 0; i < nb1; i++) {
+	        mark.push(false);
+	    }
+	    this.nregion = 0;
+	    for (i = 0; i <= this.nbase; i++) {
+	        if ((mate = this.bases[i].getMate()) != 0 && !mark[i]) {
+	            this.regions[this.nregion].setStart1(i);
+	            this.regions[this.nregion].setEnd2(mate);
+	            mark[i] = true;
+	            mark[mate] = true;
+	            this.bases[i].setRegion(this.regions[this.nregion]);
+	            this.bases[mate].setRegion(this.regions[this.nregion]);
+	            for (i++, mate--; i < mate && this.bases[i].getMate() == mate; i++, mate--) {
+	                mark[mate] = true;
+	                mark[i] = true;
+	                this.bases[i].setRegion(this.regions[this.nregion]);
+	                this.bases[mate].setRegion(this.regions[this.nregion]);
+	            }
+	            this.regions[this.nregion].setEnd1(--i);
+	            this.regions[this.nregion].setStart2(mate + 1);
+
+	            this.nregion++;
+	        }
+	    }
+	};
+
+	NAView.prototype.construct_loop = function construct_loop(ibase) {
+	    var i = null;
+	    var mate = null;
+	    var retloop = new _loop.Loop();
+	    var lp = new _loop.Loop();
+	    var cp = new _connection.Connection();
+	    var rp = new _region.Region();
+	    var rlp = new _radloop.Radloop();
+	    retloop = this.loops[this.loop_count++];
+	    retloop.setNconnection(0);
+	    retloop.setDepth(0);
+	    retloop.setNumber(this.loop_count);
+	    retloop.setRadius(0.0);
+
+	    for (rlp = this.rlphead; rlp != null; rlp = rlp.getNext()) {
+	        if (rlp.getLoopnumber() == this.loop_count) retloop.setRadius(rlp.getRadius());
+	    }i = ibase;
+	    do {
+	        if ((mate = this.bases[i].getMate()) != 0) {
+	            rp = this.bases[i].getRegion();
+	            if (!this.bases[rp.getStart1()].isExtracted()) {
+	                if (i == rp.getStart1()) {
+	                    this.bases[rp.getStart1()].setExtracted(true);
+	                    this.bases[rp.getEnd1()].setExtracted(true);
+	                    this.bases[rp.getStart2()].setExtracted(true);
+	                    this.bases[rp.getEnd2()].setExtracted(true);
+	                    lp = this.construct_loop(rp.getEnd1() < this.nbase ? rp.getEnd1() + 1 : 0);
+	                } else if (i == rp.getStart2()) {
+	                    this.bases[rp.getStart2()].setExtracted(true);
+	                    this.bases[rp.getEnd2()].setExtracted(true);
+	                    this.bases[rp.getStart1()].setExtracted(true);
+	                    this.bases[rp.getEnd1()].setExtracted(true);
+	                    lp = this.construct_loop(rp.getEnd2() < this.nbase ? rp.getEnd2() + 1 : 0);
+	                } else {
+	                    console.log("Something went terribly wrong ....");
+	                }
+	                retloop.setNconnection(retloop.getNconnection() + 1);
+	                cp = new _connection.Connection();
+	                retloop.setConnection(retloop.getNconnection() - 1, cp);
+	                retloop.setConnection(retloop.getNconnection(), null);
+	                cp.setLoop(lp);
+	                cp.setRegion(rp);
+	                if (i == rp.getStart1()) {
+	                    cp.setStart(rp.getStart1());
+	                    cp.setEnd(rp.getEnd2());
+	                } else {
+	                    cp.setStart(rp.getStart2());
+	                    cp.setEnd(rp.getEnd1());
+	                }
+	                cp.setExtruded(false);
+	                cp.setBroken(false);
+	                lp.setNconnection(lp.getNconnection() + 1);
+	                cp = new _connection.Connection();
+	                lp.setConnection(lp.getNconnection() - 1, cp);
+	                lp.setConnection(lp.getNconnection(), null);
+	                cp.setLoop(retloop);
+	                cp.setRegion(rp);
+	                if (i == rp.getStart1()) {
+	                    cp.setStart(rp.getStart2());
+	                    cp.setEnd(rp.getEnd1());
+	                } else {
+	                    cp.setStart(rp.getStart1());
+	                    cp.setEnd(rp.getEnd2());
+	                }
+	                cp.setExtruded(false);
+	                cp.setBroken(false);
+	            }
+	            i = mate;
+	        }
+	        if (++i > this.nbase) i = 0;
+	    } while (i != ibase);
+	    return retloop;
+	};
+
+	NAView.prototype.find_central_loop = function find_central_loop() {
+	    var lp = new _loop.Loop();
+	    var maxconn = null;
+	    var maxdepth = null;
+	    var i = null;
+
+	    determine_depths.bind(this)();
+	    maxconn = 0;
+	    maxdepth = -1;
+	    for (i = 0; i < this.loop_count; i++) {
+	        lp = this.loops[i];
+	        if (lp.getNconnection() > maxconn) {
+	            maxdepth = lp.getDepth();
+	            maxconn = lp.getNconnection();
+	            this.root = lp;
+	        } else if (lp.getDepth() > maxdepth && lp.getNconnection() == maxconn) {
+	            maxdepth = lp.getDepth();
+	            this.root = lp;
+	        }
+	    }
+	};
+
+	function determine_depths() {
+	    var lp = new _loop.Loop();
+	    var i = null;
+	    var j = null;
+
+	    for (i = 0; i < this.loop_count; i++) {
+	        lp = this.loops[i];
+	        for (j = 0; j < this.loop_count; j++) {
+	            this.loops[j].setMark(false);
+	        }
+	        lp.setDepth(depth(lp));
+	    }
+	}
+
+	function depth(lp) {
+	    var count = null;
+	    var ret = null;
+	    var d = null;
+
+	    if (lp.getNconnection() <= 1) {
+	        return 0;
+	    }
+	    if (lp.isMark()) {
+	        return -1;
+	    }
+	    lp.setMark(true);
+	    count = 0;
+	    ret = 0;
+	    for (var i = 0; lp.getConnection(i) != null; i++) {
+	        d = depth(lp.getConnection(i).getLoop());
+	        if (d >= 0) {
+	            if (++count == 1) {
+	                ret = d;
+	            } else if (ret > d) {
+	                ret = d;
+	            }
+	        }
+	    }
+	    lp.setMark(false);
+	    return ret + 1;
+	}
+
+	NAView.prototype.traverse_loop = function traverse_loop(lp, anchor_connection) {
+	    var xs, ys, xe, ye, xn, yn, angleinc, r;
+	    var radius, xc, yc, xo, yo, astart, aend, a;
+	    var cp, cpnext, acp, cpprev;
+	    var i, j, n, ic;
+	    var da, maxang;
+	    var count, icstart, icend, icmiddle, icroot;
+	    var done, done_all_connections, rooted;
+	    var sign;
+	    var midx, midy, nrx, nry, mx, my, vx, vy, dotmv, nmidx, nmidy;
+	    var icstart1, icup, icdown, icnext, direction;
+	    var dan, dx, dy, rr;
+	    var cpx, cpy, cpnextx, cpnexty, cnx, cny, rcn, rc, lnx, lny, rl, ac, acn, sx, sy, dcp;
+	    var imaxloop = 0;
+
+	    angleinc = 2 * Math.PI / (this.nbase + 1);
+	    acp = null;
+	    icroot = -1;
+	    var indice = 0;
+
+	    for (ic = 0; (cp = lp.getConnection(indice)) != null; indice++, ic++) {
+	        xs = -Math.sin(angleinc * cp.getStart());
+	        ys = Math.cos(angleinc * cp.getStart());
+	        xe = -Math.sin(angleinc * cp.getEnd());
+	        ye = Math.cos(angleinc * cp.getEnd());
+	        xn = ye - ys;
+	        yn = xs - xe;
+	        r = Math.sqrt(xn * xn + yn * yn);
+	        cp.setXrad(xn / r);
+	        cp.setYrad(yn / r);
+	        cp.setAngle(Math.atan2(yn, xn));
+	        if (cp.getAngle() < 0.0) {
+	            cp.setAngle(cp.getAngle() + 2 * Math.PI);
+	        }
+	        if (anchor_connection != null && anchor_connection.getRegion() == cp.getRegion()) {
+	            acp = cp;
+	            icroot = ic;
+	        }
+	    }
+	    set_radius: while (true) {
+	        this.determine_radius(lp, this.lencut);
+	        radius = lp.getRadius() / this.RADIUS_REDUCTION_FACTOR;
+	        if (anchor_connection == null) {
+	            xc = yc = 0.0;
+	        } else {
+	            xo = (this.bases[acp.getStart()].getX() + this.bases[acp.getEnd()].getX()) / 2.0;
+	            yo = (this.bases[acp.getStart()].getY() + this.bases[acp.getEnd()].getY()) / 2.0;
+	            xc = xo - radius * acp.getXrad();
+	            yc = yo - radius * acp.getYrad();
+	        }
+
+	        // The construction of the connectors will proceed in blocks of
+	        // connected connectors, where a connected connector pairs means two
+	        // connectors that are forced out of the drawn circle because they
+	        // are too close together in angle.
+
+	        // First, find the start of a block of connected connectors
+
+	        if (icroot == -1) {
+	            icstart = 0;
+	        } else {
+	            icstart = icroot;
+	        }
+	        cp = lp.getConnection(icstart);
+	        count = 0;
+	        done = false;
+	        do {
+	            j = icstart - 1;
+	            if (j < 0) {
+	                j = lp.getNconnection() - 1;
+	            }
+	            cpprev = lp.getConnection(j);
+	            if (!this.connected_connection(cpprev, cp)) {
+	                done = true;
+	            } else {
+	                icstart = j;
+	                cp = cpprev;
+	            }
+	            if (++count > lp.getNconnection()) {
+	                // Here everything is connected. Break on maximum angular
+	                // separation between connections.
+	                maxang = -1.0;
+	                for (ic = 0; ic < lp.getNconnection(); ic++) {
+	                    j = ic + 1;
+	                    if (j >= lp.getNconnection()) {
+	                        j = 0;
+	                    }
+	                    cp = lp.getConnection(ic);
+	                    cpnext = lp.getConnection(j);
+	                    ac = cpnext.getAngle() - cp.getAngle();
+	                    if (ac < 0.0) {
+	                        ac += 2 * Math.PI;
+	                    }
+	                    if (ac > maxang) {
+	                        maxang = ac;
+	                        imaxloop = ic;
+	                    }
+	                }
+	                icend = imaxloop;
+	                icstart = imaxloop + 1;
+	                if (icstart >= lp.getNconnection()) {
+	                    icstart = 0;
+	                }
+	                cp = lp.getConnection(icend);
+	                cp.setBroken(true);
+	                done = true;
+	            }
+	        } while (!done);
+	        done_all_connections = false;
+	        icstart1 = icstart;
+	        while (!done_all_connections) {
+	            count = 0;
+	            done = false;
+	            icend = icstart;
+	            rooted = false;
+	            while (!done) {
+	                cp = lp.getConnection(icend);
+	                if (icend == icroot) {
+	                    rooted = true;
+	                }
+	                j = icend + 1;
+	                if (j >= lp.getNconnection()) {
+	                    j = 0;
+	                }
+	                cpnext = lp.getConnection(j);
+	                if (this.connected_connection(cp, cpnext)) {
+	                    if (++count >= lp.getNconnection()) {
+	                        break;
+	                    }
+	                    icend = j;
+	                } else {
+	                    done = true;
+	                }
+	            }
+	            icmiddle = this.find_ic_middle(icstart, icend, anchor_connection, acp, lp);
+	            ic = icup = icdown = icmiddle;
+	            done = false;
+	            direction = 0;
+	            while (!done) {
+	                if (direction < 0) {
+	                    ic = icup;
+	                } else if (direction == 0) {
+	                    ic = icmiddle;
+	                } else {
+	                    ic = icdown;
+	                }
+	                if (ic >= 0) {
+	                    cp = lp.getConnection(ic);
+	                    if (anchor_connection == null || acp != cp) {
+	                        if (direction == 0) {
+	                            astart = cp.getAngle() - Math.asin(1.0 / 2.0 / radius);
+	                            aend = cp.getAngle() + Math.asin(1.0 / 2.0 / radius);
+	                            this.bases[cp.getStart()].setX(xc + radius * Math.cos(astart));
+	                            this.bases[cp.getStart()].setY(yc + radius * Math.sin(astart));
+	                            this.bases[cp.getEnd()].setX(xc + radius * Math.cos(aend));
+	                            this.bases[cp.getEnd()].setY(yc + radius * Math.sin(aend));
+	                        } else if (direction < 0) {
+	                            j = ic + 1;
+	                            if (j >= lp.getNconnection()) {
+	                                j = 0;
+	                            }
+	                            cp = lp.getConnection(ic);
+	                            cpnext = lp.getConnection(j);
+	                            cpx = cp.getXrad();
+	                            cpy = cp.getYrad();
+	                            ac = (cp.getAngle() + cpnext.getAngle()) / 2.0;
+	                            if (cp.getAngle() > cpnext.getAngle()) {
+	                                ac -= Math.PI;
+	                            }
+	                            cnx = Math.cos(ac);
+	                            cny = Math.sin(ac);
+	                            lnx = cny;
+	                            lny = -cnx;
+	                            da = cpnext.getAngle() - cp.getAngle();
+	                            if (da < 0.0) {
+	                                da += 2 * Math.PI;
+	                            }
+	                            if (cp.isExtruded()) {
+	                                if (da <= Math.PI / 2) {
+	                                    rl = 2.0;
+	                                } else {
+	                                    rl = 1.5;
+	                                }
+	                            } else {
+	                                rl = 1.0;
+	                            }
+	                            this.bases[cp.getEnd()].setX(this.bases[cpnext.getStart()].getX() + rl * lnx);
+	                            this.bases[cp.getEnd()].setY(this.bases[cpnext.getStart()].getY() + rl * lny);
+	                            this.bases[cp.getStart()].setX(this.bases[cp.getEnd()].getX() + cpy);
+	                            this.bases[cp.getStart()].setY(this.bases[cp.getEnd()].getY() - cpx);
+	                        } else {
+	                            j = ic - 1;
+	                            if (j < 0) {
+	                                j = lp.getNconnection() - 1;
+	                            }
+	                            cp = lp.getConnection(j);
+	                            cpnext = lp.getConnection(ic);
+	                            cpnextx = cpnext.getXrad();
+	                            cpnexty = cpnext.getYrad();
+	                            ac = (cp.getAngle() + cpnext.getAngle()) / 2.0;
+	                            if (cp.getAngle() > cpnext.getAngle()) {
+	                                ac -= Math.PI;
+	                            }
+	                            cnx = Math.cos(ac);
+	                            cny = Math.sin(ac);
+	                            lnx = -cny;
+	                            lny = cnx;
+	                            da = cpnext.getAngle() - cp.getAngle();
+	                            if (da < 0.0) {
+	                                da += 2 * Math.PI;
+	                            }
+	                            if (cp.isExtruded()) {
+	                                if (da <= Math.PI / 2) {
+	                                    rl = 2.0;
+	                                } else {
+	                                    rl = 1.5;
+	                                }
+	                            } else {
+	                                rl = 1.0;
+	                            }
+	                            this.bases[cpnext.getStart()].setX(this.bases[cp.getEnd()].getX() + rl * lnx);
+	                            this.bases[cpnext.getStart()].setY(this.bases[cp.getEnd()].getY() + rl * lny);
+	                            this.bases[cpnext.getEnd()].setX(this.bases[cpnext.getStart()].getX() - cpnexty);
+	                            this.bases[cpnext.getEnd()].setY(this.bases[cpnext.getStart()].getY() + cpnextx);
+	                        }
+	                    }
+	                }
+	                if (direction < 0) {
+	                    if (icdown == icend) {
+	                        icdown = -1;
+	                    } else if (icdown >= 0) {
+	                        if (++icdown >= lp.getNconnection()) {
+	                            icdown = 0;
+	                        }
+	                    }
+	                    direction = 1;
+	                } else {
+	                    if (icup == icstart) {
+	                        icup = -1;
+	                    } else if (icup >= 0) {
+	                        if (--icup < 0) {
+	                            icup = lp.getNconnection() - 1;
+	                        }
+	                    }
+	                    direction = -1;
+	                }
+	                done = icup == -1 && icdown == -1;
+	            }
+	            icnext = icend + 1;
+	            if (icnext >= lp.getNconnection()) {
+	                icnext = 0;
+	            }
+	            if (icend != icstart && !(icstart == icstart1 && icnext == icstart1)) {
+
+	                // Move the bases just constructed (or the radius) so that
+	                // the bisector of the end points is radius distance away
+	                // from the loop center.
+
+	                cp = lp.getConnection(icstart);
+	                cpnext = lp.getConnection(icend);
+	                dx = this.bases[cpnext.getEnd()].getX() - this.bases[cp.getStart()].getX();
+	                dy = this.bases[cpnext.getEnd()].getY() - this.bases[cp.getStart()].getY();
+	                midx = this.bases[cp.getStart()].getX() + dx / 2.0;
+	                midy = this.bases[cp.getStart()].getY() + dy / 2.0;
+	                rr = Math.sqrt(dx * dx + dy * dy);
+	                mx = dx / rr;
+	                my = dy / rr;
+	                vx = xc - midx;
+	                vy = yc - midy;
+	                rr = Math.sqrt(dx * dx + dy * dy);
+	                vx /= rr;
+	                vy /= rr;
+	                dotmv = vx * mx + vy * my;
+	                nrx = dotmv * mx - vx;
+	                nry = dotmv * my - vy;
+	                rr = Math.sqrt(nrx * nrx + nry * nry);
+	                nrx /= rr;
+	                nry /= rr;
+
+	                // Determine which side of the bisector the center should
+	                // be.
+
+	                dx = this.bases[cp.getStart()].getX() - xc;
+	                dy = this.bases[cp.getStart()].getY() - yc;
+	                ac = Math.atan2(dy, dx);
+	                if (ac < 0.0) {
+	                    ac += 2 * Math.PI;
+	                }
+	                dx = this.bases[cpnext.getEnd()].getX() - xc;
+	                dy = this.bases[cpnext.getEnd()].getY() - yc;
+	                acn = Math.atan2(dy, dx);
+	                if (acn < 0.0) {
+	                    acn += 2 * Math.PI;
+	                }
+	                if (acn < ac) {
+	                    acn += 2 * Math.PI;
+	                }
+	                if (acn - ac > Math.PI) {
+	                    sign = -1;
+	                } else {
+	                    sign = 1;
+	                }
+	                nmidx = xc + sign * radius * nrx;
+	                nmidy = yc + sign * radius * nry;
+	                if (rooted) {
+	                    xc -= nmidx - midx;
+	                    yc -= nmidy - midy;
+	                } else {
+	                    for (ic = icstart;;) {
+	                        cp = lp.getConnection(ic);
+	                        i = cp.getStart();
+	                        this.bases[i].setX(this.bases[i].getX() + nmidx - midx);
+	                        this.bases[i].setY(this.bases[i].getY() + nmidy - midy);
+	                        i = cp.getEnd();
+	                        this.bases[i].setX(this.bases[i].getX() + nmidx - midx);
+	                        this.bases[i].setY(this.bases[i].getY() + nmidy - midy);
+	                        if (ic == icend) {
+	                            break;
+	                        }
+	                        if (++ic >= lp.getNconnection()) {
+	                            ic = 0;
+	                        }
+	                    }
+	                }
+	            }
+	            icstart = icnext;
+	            done_all_connections = icstart == icstart1;
+	        }
+	        for (ic = 0; ic < lp.getNconnection(); ic++) {
+	            cp = lp.getConnection(ic);
+	            j = ic + 1;
+	            if (j >= lp.getNconnection()) {
+	                j = 0;
+	            }
+	            cpnext = lp.getConnection(j);
+	            dx = this.bases[cp.getEnd()].getX() - xc;
+	            dy = this.bases[cp.getEnd()].getY() - yc;
+	            rc = Math.sqrt(dx * dx + dy * dy);
+	            ac = Math.atan2(dy, dx);
+	            if (ac < 0.0) {
+	                ac += 2 * Math.PI;
+	            }
+	            dx = this.bases[cpnext.getStart()].getX() - xc;
+	            dy = this.bases[cpnext.getStart()].getY() - yc;
+	            rcn = Math.sqrt(dx * dx + dy * dy);
+	            acn = Math.atan2(dy, dx);
+	            if (acn < 0.0) {
+	                acn += 2 * Math.PI;
+	            }
+	            if (acn < ac) {
+	                acn += 2 * Math.PI;
+	            }
+	            dan = acn - ac;
+	            dcp = cpnext.getAngle() - cp.getAngle();
+	            if (dcp <= 0.0) {
+	                dcp += 2 * Math.PI;
+	            }
+	            if (Math.abs(dan - dcp) > Math.PI) {
+	                if (cp.isExtruded()) {
+	                    console.log("Warning from traverse_loop. Loop " + lp.getNumber() + " has crossed regions\n");
+	                } else if (cpnext.getStart() - cp.getEnd() != 1) {
+	                    cp.setExtruded(true);
+	                    continue set_radius; // remplacement du goto
+	                }
+	            }
+	            if (cp.isExtruded()) {
+	                this.construct_extruded_segment(cp, cpnext);
+	            } else {
+	                n = cpnext.getStart() - cp.getEnd();
+	                if (n < 0) {
+	                    n += this.nbase + 1;
+	                }
+	                angleinc = dan / n;
+	                for (j = 1; j < n; j++) {
+	                    i = cp.getEnd() + j;
+	                    if (i > this.nbase) {
+	                        i -= this.nbase + 1;
+	                    }
+	                    a = ac + j * angleinc;
+	                    rr = rc + (rcn - rc) * (a - ac) / dan;
+	                    this.bases[i].setX(xc + rr * Math.cos(a));
+	                    this.bases[i].setY(yc + rr * Math.sin(a));
+	                }
+	            }
+	        }
+	        break;
+	    }
+	    for (ic = 0; ic < lp.getNconnection(); ic++) {
+	        if (icroot != ic) {
+	            cp = lp.getConnection(ic);
+	            //IM HERE
+	            this.generate_region(cp);
+	            this.traverse_loop(cp.getLoop(), cp);
+	        }
+	    }
+	    n = 0;
+	    sx = 0.0;
+	    sy = 0.0;
+	    for (ic = 0; ic < lp.getNconnection(); ic++) {
+	        j = ic + 1;
+	        if (j >= lp.getNconnection()) {
+	            j = 0;
+	        }
+	        cp = lp.getConnection(ic);
+	        cpnext = lp.getConnection(j);
+	        n += 2;
+	        sx += this.bases[cp.getStart()].getX() + this.bases[cp.getEnd()].getX();
+	        sy += this.bases[cp.getStart()].getY() + this.bases[cp.getEnd()].getY();
+	        if (!cp.isExtruded()) {
+	            for (j = cp.getEnd() + 1; j != cpnext.getStart(); j++) {
+	                if (j > this.nbase) {
+	                    j -= this.nbase + 1;
+	                }
+	                n++;
+	                sx += this.bases[j].getX();
+	                sy += this.bases[j].getY();
+	            }
+	        }
+	    }
+	    lp.setX(sx / n);
+	    lp.setY(sy / n);
+	};
+
+	NAView.prototype.determine_radius = function determine_radius(lp, lencut) {
+	    var mindit, ci, dt, sumn, sumd, radius, dit;
+	    var i,
+	        j,
+	        end,
+	        start,
+	        imindit = 0;
+	    var cp = new _connection.Connection(),
+	        cpnext = new _connection.Connection();
+	    var rt2_2 = 0.7071068;
+
+	    do {
+	        mindit = 1.0e10;
+	        for (sumd = 0.0, sumn = 0.0, i = 0; i < lp.getNconnection(); i++) {
+	            cp = lp.getConnection(i);
+	            j = i + 1;
+	            if (j >= lp.getNconnection()) {
+	                j = 0;
+	            }
+	            cpnext = lp.getConnection(j);
+	            end = cp.getEnd();
+	            start = cpnext.getStart();
+	            if (start < end) {
+	                start += this.nbase + 1;
+	            }
+	            dt = cpnext.getAngle() - cp.getAngle();
+	            if (dt <= 0.0) {
+	                dt += 2 * Math.PI;
+	            }
+	            if (!cp.isExtruded()) {
+	                ci = start - end;
+	            } else {
+	                if (dt <= Math.PI / 2) {
+	                    ci = 2.0;
+	                } else {
+	                    ci = 1.5;
+	                }
+	            }
+	            sumn += dt * (1.0 / ci + 1.0);
+	            sumd += dt * dt / ci;
+	            dit = dt / ci;
+	            if (dit < mindit && !cp.isExtruded() && ci > 1.0) {
+	                mindit = dit;
+	                imindit = i;
+	            }
+	        }
+	        radius = sumn / sumd;
+	        if (radius < rt2_2) {
+	            radius = rt2_2;
+	        }
+	        if (mindit * radius < lencut) {
+	            lp.getConnection(imindit).setExtruded(true);
+	        }
+	    } while (mindit * radius < lencut);
+	    if (lp.getRadius() > 0.0) {
+	        radius = lp.getRadius();
+	    } else {
+	        lp.setRadius(radius);
+	    }
+	};
+
+	NAView.prototype.find_ic_middle = function find_ic_middle(icstart, icend, anchor_connection, acp, lp) {
+	    var count, ret, ic, i;
+	    var done;
+
+	    count = 0;
+	    ret = -1;
+	    ic = icstart;
+	    done = false;
+	    while (!done) {
+	        if (count++ > lp.getNconnection() * 2) {
+	            console.log("Infinite loop in 'find_ic_middle'");
+	        }
+	        if (anchor_connection != null && lp.getConnection(ic) == acp) {
+	            ret = ic;
+	        }
+	        done = ic == icend;
+	        if (++ic >= lp.getNconnection()) {
+	            ic = 0;
+	        }
+	    }
+	    if (ret == -1) {
+	        for (i = 1, ic = icstart; i < (count + 1) / 2; i++) {
+	            if (++ic >= lp.getNconnection()) ic = 0;
+	        }
+	        ret = ic;
+	    }
+	    return ret;
+	};
+
+	NAView.prototype.construct_extruded_segment = function construct_extruded_segment(cp, cpnext) {
+	    var astart, aend1, aend2, aave, dx, dy, a1, a2, ac, rr, da, dac;
+	    var start, end, n, nstart, nend;
+	    var collision;
+
+	    astart = cp.getAngle();
+	    aend2 = aend1 = cpnext.getAngle();
+	    if (aend2 < astart) {
+	        aend2 += 2 * Math.PI;
+	    }
+	    aave = (astart + aend2) / 2.0;
+	    start = cp.getEnd();
+	    end = cpnext.getStart();
+	    n = end - start;
+	    if (n < 0) {
+	        n += this.nbase + 1;
+	    }
+	    da = cpnext.getAngle() - cp.getAngle();
+	    if (da < 0.0) {
+	        da += 2 * Math.PI;
+	    }
+	    if (n == 2) {
+	        this.construct_circle_segment(start, end);
+	    } else {
+	        dx = this.bases[end].getX() - this.bases[start].getX();
+	        dy = this.bases[end].getY() - this.bases[start].getY();
+	        rr = Math.sqrt(dx * dx + dy * dy);
+	        dx /= rr;
+	        dy /= rr;
+	        if (rr >= 1.5 && da <= Math.PI / 2) {
+	            nstart = start + 1;
+	            if (nstart > this.nbase) {
+	                nstart -= this.nbase + 1;
+	            }
+	            nend = end - 1;
+	            if (nend < 0) {
+	                nend += this.nbase + 1;
+	            }
+	            this.bases[nstart].setX(this.bases[start].getX() + 0.5 * dx);
+	            this.bases[nstart].setY(this.bases[start].getY() + 0.5 * dy);
+	            this.bases[nend].setX(this.bases[end].getX() - 0.5 * dx);
+	            this.bases[nend].setY(this.bases[end].getY() - 0.5 * dy);
+	            start = nstart;
+	            end = nend;
+	        }
+	        do {
+	            collision = false;
+	            this.construct_circle_segment(start, end);
+	            nstart = start + 1;
+	            if (nstart > this.nbase) {
+	                nstart -= this.nbase + 1;
+	            }
+	            dx = this.bases[nstart].getX() - this.bases[start].getX();
+	            dy = this.bases[nstart].getY() - this.bases[start].getY();
+	            a1 = Math.atan2(dy, dx);
+	            if (a1 < 0.0) {
+	                a1 += 2 * Math.PI;
+	            }
+	            dac = a1 - astart;
+	            if (dac < 0.0) {
+	                dac += 2 * Math.PI;
+	            }
+	            if (dac > Math.PI) {
+	                collision = true;
+	            }
+	            nend = end - 1;
+	            if (nend < 0) {
+	                nend += this.nbase + 1;
+	            }
+	            dx = this.bases[nend].getX() - this.bases[end].getX();
+	            dy = this.bases[nend].getY() - this.bases[end].getY();
+	            a2 = Math.atan2(dy, dx);
+	            if (a2 < 0.0) {
+	                a2 += 2 * Math.PI;
+	            }
+	            dac = aend1 - a2;
+	            if (dac < 0.0) {
+	                dac += 2 * Math.PI;
+	            }
+	            if (dac > Math.PI) {
+	                collision = true;
+	            }
+	            if (collision) {
+	                ac = this.minf2(aave, astart + 0.5);
+	                this.bases[nstart].setX(this.bases[start].getX() + Math.cos(ac));
+	                this.bases[nstart].setY(this.bases[start].getY() + Math.sin(ac));
+	                start = nstart;
+	                ac = this.maxf2(aave, aend2 - 0.5);
+	                this.bases[nend].setX(this.bases[end].getX() + Math.cos(ac));
+	                this.bases[nend].setY(this.bases[end].getY() + Math.sin(ac));
+	                end = nend;
+	                n -= 2;
+	            }
+	        } while (collision && n > 1);
+	    }
+	};
+
+	NAView.prototype.construct_circle_segment = function construct_circle_segment(start, end) {
+	    var dx, dy, rr, midx, midy, xn, yn, nrx, nry, mx, my, a;
+	    var l, j, i;
+
+	    dx = this.bases[end].getX() - this.bases[start].getX();
+	    dy = this.bases[end].getY() - this.bases[start].getY();
+	    rr = Math.sqrt(dx * dx + dy * dy);
+	    l = end - start;
+	    if (l < 0) {
+	        l += this.nbase + 1;
+	    }
+	    if (rr >= l) {
+	        dx /= rr;
+	        dy /= rr;
+	        for (j = 1; j < l; j++) {
+	            i = start + j;
+	            if (i > this.nbase) {
+	                i -= this.nbase + 1;
+	            }
+	            this.bases[i].setX(this.bases[start].getX() + dx * j / l);
+	            this.bases[i].setY(this.bases[start].getY() + dy * j / l);
+	        }
+	    } else {
+	        this.find_center_for_arc(l - 1, rr);
+	        dx /= rr;
+	        dy /= rr;
+	        midx = this.bases[start].getX() + dx * rr / 2.0;
+	        midy = this.bases[start].getY() + dy * rr / 2.0;
+	        xn = dy;
+	        yn = -dx;
+	        nrx = midx + this._h * xn;
+	        nry = midy + this._h * yn;
+	        mx = this.bases[start].getX() - nrx;
+	        my = this.bases[start].getY() - nry;
+	        rr = Math.sqrt(mx * mx + my * my);
+	        a = Math.atan2(my, mx);
+	        for (j = 1; j < l; j++) {
+	            i = start + j;
+	            if (i > this.nbase) {
+	                i -= this.nbase + 1;
+	            }
+	            this.bases[i].setX(nrx + rr * Math.cos(a + j * this.angleinc));
+	            this.bases[i].setY(nry + rr * Math.sin(a + j * this.angleinc));
+	        }
+	    }
+	};
+
+	NAView.prototype.find_center_for_arc = function find_center_for_arc(n, b) {
+	    var h, hhi, hlow, r, disc, theta, e, phi;
+	    var iter;
+
+	    hhi = (n + 1.0) / Math.PI;
+	    // changed to prevent div by zero if (ih)
+	    hlow = -hhi - b / (n + 1.000001 - b);
+	    if (b < 1) {
+	        // otherwise we might fail below (ih)
+	        hlow = 0;
+	    }
+	    iter = 0;
+	    do {
+	        h = (hhi + hlow) / 2.0;
+	        r = Math.sqrt(h * h + b * b / 4.0);
+	        disc = 1.0 - 0.5 / (r * r);
+	        if (Math.abs(disc) > 1.0) {
+	            console.log("Unexpected large magnitude discriminant = " + disc + " " + r);
+	        }
+	        theta = Math.acos(disc);
+	        phi = Math.acos(h / r);
+	        e = theta * (n + 1) + 2 * phi - 2 * Math.PI;
+	        if (e > 0.0) {
+	            hlow = h;
+	        } else {
+	            hhi = h;
+	        }
+	    } while (Math.abs(e) > 0.0001 && ++iter < this.MAXITER);
+	    if (iter >= this.MAXITER) {
+	        if (noIterationFailureYet) {
+	            console.log("Iteration failed in find_center_for_arc");
+	            noIterationFailureYet = false;
+	        }
+	        h = 0.0;
+	        theta = 0.0;
+	    }
+	    this._h = h;
+	    this.angleinc = theta;
+	};
+
+	NAView.prototype.generate_region = function generate_region(cp) {
+	    var l, start, end, i, mate;
+	    var rp;
+
+	    rp = cp.getRegion();
+	    l = 0;
+	    if (cp.getStart() == rp.getStart1()) {
+	        start = rp.getStart1();
+	        end = rp.getEnd1();
+	    } else {
+	        start = rp.getStart2();
+	        end = rp.getEnd2();
+	    }
+	    if (this.bases[cp.getStart()].getX() > this.ANUM - 100.0 || this.bases[cp.getEnd()].getX() > this.ANUM - 100.0) {
+	        console.log("Bad region passed to generate_region. Coordinates not defined.");
+	    }
+	    for (i = start + 1; i <= end; i++) {
+	        l++;
+	        this.bases[i].setX(this.bases[cp.getStart()].getX() + this.HELIX_FACTOR * l * cp.getXrad());
+	        this.bases[i].setY(this.bases[cp.getStart()].getY() + this.HELIX_FACTOR * l * cp.getYrad());
+	        mate = this.bases[i].getMate();
+	        this.bases[mate].setX(this.bases[cp.getEnd()].getX() + this.HELIX_FACTOR * l * cp.getXrad());
+	        this.bases[mate].setY(this.bases[cp.getEnd()].getY() + this.HELIX_FACTOR * l * cp.getYrad());
+	    }
+	};
+
+	NAView.prototype.minf2 = function minf2(x1, x2) {
+	    return x1 < x2 ? x1 : x2;
+	};
+
+	NAView.prototype.maxf2 = function maxf2(x1, x2) {
+	    return x1 > x2 ? x1 : x2;
+	};
+
+	NAView.prototype.connected_connection = function connected_connection(cp, cpnext) {
+	    if (cp.isExtruded()) {
+	        return true;
+	    } else if (cp.getEnd() + 1 == cpnext.getStart()) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	};
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Radloop = Radloop;
+	function Radloop() {
+		this.radius = null;
+		this.loopnumber = null;
+		this.next = null;
+		this.prev = null;
+	}
+
+	Radloop.prototype.getRadius = function () {
+		return this.radius;
+	};
+
+	Radloop.prototype.setRadius = function (radius) {
+		this.radius = radius;
+	};
+
+	Radloop.prototype.getLoopnumber = function () {
+		return this.loopnumber;
+	};
+
+	Radloop.prototype.setLoopnumber = function (loopnumber) {
+		this.loopnumber = loopnumber;
+	};
+
+	Radloop.prototype.getNext = function () {
+		return this.next;
+	};
+
+	Radloop.prototype.setNext = function (next) {
+		this.next = next;
+	};
+
+	Radloop.prototype.getPrev = function () {
+		return this.prev;
+	};
+
+	Radloop.prototype.setPrev = function (prev) {
+		this.prev = prev;
+	};
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Connection = Connection;
+
+	var _loop = __webpack_require__(24);
+
+	var _region = __webpack_require__(25);
+
+	function Connection() {
+		this.loop = new _loop.Loop();
+		this.region = new _region.Region();
+		// Start and end form the 1st base pair of the region.
+		this.start = null;
+		this.end = null;
+		this.xrad = null;
+		this.yrad = null;
+		this.angle = null;
+		// True if segment between this connection and the
+		// next must be extruded out of the circle
+		this.extruded = null;
+		// True if the extruded segment must be drawn long.
+		this.broken = null;
+
+		this._isNull = false;
+	}
+
+	Connection.prototype.isNull = function () {
+		return this._isNull;
+	};
+
+	Connection.prototype.setNull = function (isNull) {
+		this._isNull = isNull;
+	};
+
+	Connection.prototype.getLoop = function () {
+		return this.loop;
+	};
+
+	Connection.prototype.setLoop = function (loop) {
+		this.loop = loop;
+	};
+
+	Connection.prototype.getRegion = function () {
+		return this.region;
+	};
+
+	Connection.prototype.setRegion = function (region) {
+		this.region = region;
+	};
+
+	Connection.prototype.getStart = function () {
+		return this.start;
+	};
+
+	Connection.prototype.setStart = function (start) {
+		this.start = start;
+	};
+
+	Connection.prototype.getEnd = function () {
+		return this.end;
+	};
+
+	Connection.prototype.setEnd = function (end) {
+		this.end = end;
+	};
+
+	Connection.prototype.getXrad = function () {
+		return this.xrad;
+	};
+
+	Connection.prototype.setXrad = function (xrad) {
+		this.xrad = xrad;
+	};
+
+	Connection.prototype.getYrad = function () {
+		return this.yrad;
+	};
+
+	Connection.prototype.setYrad = function (yrad) {
+		this.yrad = yrad;
+	};
+
+	Connection.prototype.getAngle = function () {
+		return this.angle;
+	};
+
+	Connection.prototype.setAngle = function (angle) {
+		this.angle = angle;
+	};
+
+	Connection.prototype.isExtruded = function () {
+		return this.extruded;
+	};
+
+	Connection.prototype.setExtruded = function (extruded) {
+		this.extruded = extruded;
+	};
+
+	Connection.prototype.isBroken = function () {
+		return this.broken;
+	};
+
+	Connection.prototype.setBroken = function (broken) {
+		this.broken = broken;
+	};
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Loop = Loop;
+
+	var _connection = __webpack_require__(23);
+
+	function Loop() {
+		this.nconnection = null;
+		this.connections = [];
+		this._connections = [];
+		this.number = null;
+		this.depth = null;
+		this.mark = null;
+		this.x = null;
+		this.y = null;
+		this.radius = null;
+	}
+
+	Loop.prototype.getNconnection = function () {
+		return this.nconnection;
+	};
+
+	Loop.prototype.setNconnection = function (nconnection) {
+		this.nconnection = nconnection;
+	};
+
+	Loop.prototype.setConnection = function (i, c) {
+		if (c != null) {
+			this._connections[i] = c;
+		} else {
+			if (!this._connections[i]) {
+				this._connections[i] = new _connection.Connection();
+			}
+			this._connections[i].setNull(true);
+		}
+	};
+
+	Loop.prototype.getConnection = function (i) {
+		var Connection = __webpack_require__(23);
+		if (!this._connections[i]) {
+			this._connections[i] = new Connection();
+		}
+		var c = this._connections[i];
+		if (c.isNull()) {
+			return null;
+		} else {
+			return c;
+		}
+	};
+
+	Loop.prototype.addConnection = function (i, c) {
+		this._connections.push(c);
+	};
+
+	Loop.prototype.getNumber = function () {
+		return this.number;
+	};
+
+	Loop.prototype.setNumber = function (number) {
+		this.number = number;
+	};
+
+	Loop.prototype.getDepth = function () {
+		return this.depth;
+	};
+
+	Loop.prototype.setDepth = function (depth) {
+		this.depth = depth;
+	};
+
+	Loop.prototype.isMark = function () {
+		return this.mark;
+	};
+
+	Loop.prototype.setMark = function (mark) {
+		this.mark = mark;
+	};
+
+	Loop.prototype.getX = function () {
+		return this.x;
+	};
+
+	Loop.prototype.setX = function (x) {
+		this.x = x;
+	};
+
+	Loop.prototype.getY = function () {
+		return this.y;
+	};
+
+	Loop.prototype.setY = function (y) {
+		this.y = y;
+	};
+
+	Loop.prototype.getRadius = function () {
+		return this.radius;
+	};
+
+	Loop.prototype.setRadius = function (radius) {
+		this.radius = radius;
+	};
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Region = Region;
+	function Region() {
+		this._start1 = null;
+		this._end1 = null;
+		this._start2 = null;
+		this._end2 = null;
+	}
+
+	Region.prototype.getStart1 = function () {
+		return this._start1;
+	};
+
+	Region.prototype.setStart1 = function (start1) {
+		this._start1 = start1;
+	};
+
+	Region.prototype.getEnd1 = function () {
+		return this._end1;
+	};
+
+	Region.prototype.setEnd1 = function (end1) {
+		this._end1 = end1;
+	};
+
+	Region.prototype.getStart2 = function () {
+		return this._start2;
+	};
+
+	Region.prototype.setStart2 = function (start2) {
+		this._start2 = start2;
+	};
+
+	Region.prototype.getEnd2 = function () {
+		return this._end2;
+	};
+
+	Region.prototype.setEnd2 = function (end2) {
+		this._end2 = end2;
+	};
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Base = Base;
+
+	var _region = __webpack_require__(25);
+
+	function Base() {
+		this.mate = null;
+		this.x = null;
+		this.y = null;
+		this.extracted = null;
+		this.region = new _region.Region();
+	}
+
+	Base.prototype.getMate = function () {
+		return this.mate;
+	};
+
+	Base.prototype.setMate = function (mate) {
+		this.mate = mate;
+	};
+
+	Base.prototype.getX = function () {
+		return this.x;
+	};
+
+	Base.prototype.setX = function (x) {
+		this.x = x;
+	};
+
+	Base.prototype.getY = function () {
+		return this.y;
+	};
+
+	Base.prototype.setY = function (y) {
+		this.y = y;
+	};
+
+	Base.prototype.isExtracted = function () {
+		return this.extracted;
+	};
+
+	Base.prototype.setExtracted = function (extracted) {
+		this.extracted = extracted;
+	};
+
+	Base.prototype.getRegion = function () {
+		return this.region;
+	};
+
+	Base.prototype.setRegion = function (region) {
+		this.region = region;
+	};
 
 /***/ }
 /******/ ])

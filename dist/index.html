@@ -3,98 +3,79 @@
 <head>
 <meta charset="utf-8">
 <title>Fornac Example</title>
+<link href="https://fonts.googleapis.com/css?family=Pavanam" rel="stylesheet">
 </head>
+<style>
+
+body {
+    color: #333333;
+    font-family: 'Pavanam', sans-serif;
+    line-height: 1.3;
+            
+}
+
+</style>
 <body>
 
-This is an RNA container:
+<div style="width: 600px; margin: auto;">
+
+    <h3>Forna RNA Editor</h3>
+
+    The RNA below is editable:
+    <br>
+    <br>
+
+
 <div id='rna_ss'> </div>
 
-This is an RNA container using the NAView layout:
-<div id="naview_ss"></div>
-
-This is an output of an RNA folded using RNAcofold:
-<div id='cofold_ss'></div>
-
-This is a custom-colored RNA:
-<div id="custom_colors"></div>
+<ul>
+    <li> <b>Right click</b> on the canvas and click on 'Add Node' to add a node. </li>
+    <li> <b>Shift click</b> on any link to remove the link </li>
+    <li> <b>Shift click</b> on a node and drag to create new links </li>
+    <ul> Linking unpaired nucleotides creates base pair bonds
+        <li> Linking nodes in different molecules creates a inter-molecule pair </li>
+        <li> Linking the ends of two molecules prompts you whether you want to create 
+            a base pair or a backbone link. </li>
+    </ul>
+    <li> <b>Right click</b> on a node and click: </li>
+    <ul>
+        <li> Delete node to delete that node </li>
+        <li> Change node to change it to another type </li>
+        <li> Insert before to insert a different node before this one </li>
+        <li> Insert after to insert a different node after this one </li>
+    </ul>
+</ul>
 
 <script src="scripts/fornac.js"></script>
 
 <script type='text/javascript'>
 "use strict"
 
-function customColorsContainer() {
-    let container = new fornac.FornaContainer("#custom_colors",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
-
-    let options = {'structure': '..((((....)))).....',
-        'sequence':             'AACGCUUCAUAUAAUCAAA'
-    };
-    container.addRNA(options.structure, options);
-    container.setSize();
-
-    container.addCustomColorsText('1:red         9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8');
-}
-
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[600,300], 
+             'editable': true});
 
+    /*
     let options = {'structure': '..((..((...[)).(((..].))).))..',
         'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
     };
-    container.addRNA(options.structure, options);
-    container.setSize();
-}
-
-function naviewContainer() {
-    let container = new fornac.FornaContainer("#naview_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300],
-            'layout': 'naview'});
-
-    let options = {'structure': '..((..((...[)).(((..].))).))..',
-        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    */
+    let options = {'structure': '.((..)).',
+        'sequence': '12345678',
+        avoidOthers: true
     };
     container.addRNA(options.structure, options);
-    container.setSize();
-}
-
-
-function cofoldContainer() {
-    var container = new fornac.FornaContainer("#cofold_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
-
-    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
-        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
-    };
-    container.addRNA(options.structure, options);
+    //container.addRNA(options.structure, options);
     container.setSize();
 }
 
 normalContainer();
-naviewContainer();
-cofoldContainer();
-customColorsContainer();
-
-
-/*
-var options1 = {'structure': '.((((....)))).',
-    'sequence': 'GCGACGAUUGUCGG'
-};
-
-var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
-    'structure': '..((((((....((((((....))))))....))))))..'}
-
-var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
-    'structure': '..((((((....))))))....((((((....))))))..'}
-var options1 = {'structure': '..............',
-    'sequence': 'GCGGCGAUUGCCGG'
-};
-*/
-
-//container.changeColorScheme('custom')
-//container.transitionRNA(options1.structure);
 
 </script>
+
+<!-- d3-context-menu -->
+<script src="scripts/d3-context-menu.js"></script>
+</div>
 </body>
 </html>

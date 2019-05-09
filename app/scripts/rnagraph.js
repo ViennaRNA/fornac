@@ -93,9 +93,10 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
     self.addUids = function(uids) {
         let nucleotideNodes = self.nodes.filter(function(d) { return d.nodeType == 'nucleotide'; });
 
-        for (let i = 0; i < uids.length && i < nucleotideNodes.length; i++)
+        for (let i = 0; i < uids.length && i < nucleotideNodes.length; i++) {
             nucleotideNodes[i].uid = uids[i];
-
+        }
+        
         return self;
     };
 
@@ -111,7 +112,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
         while ((breakIndex = targetString.indexOf('&')) >= 0) {
             breaks.push(breakIndex);
-            targetString = targetString.substring(0, breakIndex) + 'oo' + targetString.substring(breakIndex+1, targetString.length);
+            targetString = targetString.substring(0, breakIndex) + targetString.substring(breakIndex+1, targetString.length);
 
         }
 
