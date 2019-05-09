@@ -4,7 +4,7 @@ import slugid from 'slugid';
 
 export function contextMenu(menu, opts) {
     let previouslyMouseUp = false;
-    let clickAway = {};
+    let clickAway = () => {};
     let uid = slugid.nice();
     let rootElement = null;
     let orientation = 'right';   // display the menu to the right of the mouse click
