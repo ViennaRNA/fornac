@@ -106,7 +106,7 @@ export function FornaContainer(element, passedOptions) {
         if (this.length != array.length)
             return false;
 
-        for (var i = 0, l=this.length; i < l; i++) {
+        for (let i = 0, l=this.length; i < l; i++) {
             // Check if we have nested arrays
             if (this[i] instanceof Array && array[i] instanceof Array) {
                 // recurse into the nested arrays
@@ -214,7 +214,7 @@ export function FornaContainer(element, passedOptions) {
     self.addExternalLinks = function(rnaJson, externalLinks) {
         var newLinks = [];
 
-        for (var i = 0; i < externalLinks.length; i++) {
+        for (let i = 0; i < externalLinks.length; i++) {
             var newLink = {linkType: 'external', value: 1, uid: slugid.nice(),
                 source: null, target: null};
             // check if the source node is an array
@@ -467,7 +467,7 @@ export function FornaContainer(element, passedOptions) {
         // between different RNAs
         var uidsToNodes = {};
 
-        for (var i = 0; i < self.graph.nodes.length; i++)
+        for (let i = 0; i < self.graph.nodes.length; i++)
             uidsToNodes[self.graph.nodes[i].uid] = self.graph.nodes[i];
 
         self.graph.links.forEach(function(link) {
@@ -475,7 +475,7 @@ export function FornaContainer(element, passedOptions) {
             link.target = uidsToNodes[link.target.uid];
         });
 
-        for (i = 0; i < self.extraLinks.length; i++) {
+        for (let i = 0; i < self.extraLinks.length; i++) {
             // the actual node objects may have changed, so we hae to recreate
             // the extra links based on the uids
 
