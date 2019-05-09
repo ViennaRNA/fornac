@@ -1,5 +1,4 @@
-export function simpleXyCoordinates (pair_table)
-{
+export function simpleXyCoordinates (pair_table) {
   var INIT_ANGLE=0.;     /* initial bending angle */
   var INIT_X = 100.;     /* coordinate of first digit */
   var INIT_Y = 100.;     /* see above */

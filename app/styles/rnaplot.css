@@ -40,14 +40,6 @@ line.rna-link {
     font-size: 8pt;
 }
 
-line.rna-link[link-type="backbone"] {
-    stroke: transparent;
-}
-
-line.rna-link[link-type="basepair"] {
-    stroke: transparent;
-}
-
 line.rna-link[link-type="fake"] {
     stroke: transparent;
 }
