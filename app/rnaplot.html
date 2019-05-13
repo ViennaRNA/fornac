@@ -10,12 +10,16 @@
     stroke-width: 1;
     fill: transparent;
 }
+
+.svg-container {
+    border: 1px solid red;
+}
 </style>
 
 </head>
 <body>
 
-<div id='rna_ss'> </div>
+<div id='rna_ss' class="svg-container"> </div>
 
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.min.js'></script>
 
@@ -28,25 +32,34 @@ var svgWidth = 200;
 var svgHeight = 200;
 
 var rna1 = {'structure': '((..((....)).(((....))).))',
-            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'name': "RNA-Name"
+};
+
+var rna2 = {'structure': '((((....))))',
+            'sequence': 'AGGCUGUAGCUU'
 };
 
 var chart = rnaplot.rnaPlot()
 .width(svgWidth)
 .height(svgHeight)
+.rnaLayout('simple')
+.namePosition('0 0')
+.startNucleotideNumber(10)
+.labelInterval(5)
 
 var svg = d3.select('#rna_ss')
 .append('svg')
-.attr('width', svgWidth)
-.attr('height', svgHeight)
-.append('g')
-
-svg.selectAll('.rna')
+.attr("preserveAspectRatio", "xMinYMin meet")
+.attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+.selectAll()
 .data([rna1])
 .enter()
 .append('g')
 .classed('rna', true)
 .call(chart);
+
+console.log(svg)
 </script>
 
 </body>

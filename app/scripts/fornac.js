@@ -7,15 +7,12 @@ import '../styles/fornac.css';
 import d3 from 'd3';
 import slugid from 'slugid';
 import {contextMenu} from './d3-context-menu.js';
-//let d3contextMenuLib = require('d3-context-menu')
-//let contextMenu = d3contextMenuLib(d3);
 
 import {RNAGraph,moleculesToJson} from './rnagraph.js';
-import {simpleXyCoordinates} from './simplernaplot.js';
 import {ColorScheme, rnaUtilities} from './rnautils.js';
-import {NAView} from './naview/naview.js';
 
-export {RNAGraph} from './rnagraph.js';
+import {simpleXyCoordinates} from './simplernaplot.js';
+import {NAView} from './naview/naview.js';
 
 export function FornaContainer(element, passedOptions) {
     var self = this;

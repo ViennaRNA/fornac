@@ -3,19 +3,11 @@ import slugid from 'slugid';
 
 var numberSort = function(a,b) { return a - b; };
 
-function isNormalInteger(str) {
-    //http://stackoverflow.com/a/10834843/899470
-    return /^\+?(0|[1-9]\d*)$/.test(str);
+if (typeof(String.prototype.trim) === 'undefined') {
+    String.prototype.trim = function() {
+        return String(this).replace(/^\s+|\s+$/g, '');
+    };
 }
-
-if(typeof(String.prototype.trim) === 'undefined')
-    {
-        String.prototype.trim = function() 
-        {
-            return String(this).replace(/^\s+|\s+$/g, '');
-        };
-    }
-
 
 export function ProteinGraph(structName, size, uid) {
     var self = this;
@@ -55,7 +47,7 @@ export function ProteinGraph(structName, size, uid) {
 
 }
 
-export function RNAGraph(seq, dotbracket, structName, startNumber) {
+export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
     var self = this;
 
     self.type = 'rna';
@@ -69,10 +61,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         self.seq = seq;
         self.dotbracket = dotbracket;  //i.e. ..((..))..
         self.structName = structName;
-    }
-
-    if (arguments.length < 4) {
-        startNumber = 1;
     }
 
     self.circular = false;
@@ -126,22 +114,6 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
     ret = self.removeBreaks(self.seq);
     self.seq = ret.targetString;
     self.seqBreaks = ret.breaks;
-
-    self.calculateStartNumberArray = function() {
-        self.startNumberArray = [];
-        var breaks = 0;
-
-        for (var i = 0; i < self.dotbracket.length; i++) {
-            self.startNumberArray.push(startNumber); 
-
-            if (self.dotbracket[i] == 'o') {
-                startNumber = -i;
-            }
-        }
-
-    };
-
-    self.calculateStartNumberArray();
 
     self.rnaLength = self.dotbracket.length;
 
@@ -487,7 +459,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
 
             //create a node for each nucleotide
             self.nodes.push({'name': nodeName,
-                             'num': i + self.startNumberArray[i-1] - 1,
+                             'num': startNumber + i - 1,
                              'radius': 5,
                              'rna': self,
                              'nodeType': 'nucleotide',
@@ -682,31 +654,19 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
         return elements.concat(self.ptToElements(pt, level, i, j));
     };
 
-    self.addLabels = function(startNumber, labelInterval) {
-        if (arguments.length  === 0) {
-            startNumber = 1;
-            labelInterval = 10;
-        }
-
-
-        if (arguments.length === 1) 
-            labelInterval = 10;
-
+    self.addLabels = function(startNumber = 1, labelInterval = 10) {
         if (labelInterval === 0)
             return self;
-
-        if (labelInterval <= 0) 
-            console.log('The label interval entered in invalid:', labelInterval);
-
-        for (var i = 1; i <= self.pairtable[0]; i++) {
+        
+        for (let i = 1; i <= self.rnaLength; i++) {
             // add labels
             if (i % labelInterval === 0) {
                 //create a node for each label
-                var newX, newY;
+                let newX, newY;
 
-                var thisNode = self.nodes[i-1];
-                var prevNode, nextNode;
-                var prevVec, nextVec;
+                let thisNode = self.nodes[i-1];
+                let prevNode, nextNode;
+                let prevVec, nextVec;
 
                 if (self.rnaLength == 1) {
                     nextVec = [thisNode.x - 15, thisNode.y];
@@ -723,19 +683,20 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
                         nextNode = self.nodes[0];
                     else
                         nextNode = self.nodes[i];
-
+                    
                     // this nucleotide and its neighbors are paired
-                    if (self.pairtable[nextNode.num] !== 0 &&
-                        self.pairtable[prevNode.num] !== 0 &&
-                        self.pairtable[thisNode.num] !== 0) {
-                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num]-1];
+                    if (self.pairtable[nextNode.num - startNumber+1] !== 0 &&
+                        self.pairtable[prevNode.num - startNumber+1] !== 0 &&
+                        self.pairtable[thisNode.num - startNumber+1] !== 0) {
+                        
+                        prevNode = nextNode = self.nodes[self.pairtable[thisNode.num - startNumber+1]-1];
                     }
 
                     // this node is paired but at least one of its neighbors is unpaired
                     // place the label in the direction of the two neighbors
-                    if (self.pairtable[thisNode.num] !== 0 && (
-                        self.pairtable[nextNode.num] === 0 ||
-                        self.pairtable[prevNode.num] === 0)) {
+                    if (self.pairtable[thisNode.num - startNumber+1] !== 0 && (
+                        self.pairtable[nextNode.num - startNumber+1] === 0 ||
+                        self.pairtable[prevNode.num - startNumber+1] === 0)) {
                         nextVec = [thisNode.x - nextNode.x, thisNode.y - nextNode.y];
                         prevVec = [thisNode.x - prevNode.x, thisNode.y - prevNode.y];
 
@@ -753,7 +714,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber) {
                 var newX = self.nodes[i-1].x + offsetVec[0];
                 var newY = self.nodes[i-1].y + offsetVec[1];
 
-                var newNode = {'name': i + self.startNumberArray[i-1] - 1,
+                var newNode = {'name': i + startNumber -1,
                                  'num': -1,
                                  'radius': 6,
                                  'rna': self,
