@@ -8,7 +8,7 @@ import d3 from 'd3';
 import slugid from 'slugid';
 import {contextMenu} from './d3-context-menu.js';
 
-import {RNAGraph,moleculesToJson} from './rnagraph.js';
+import {RNAGraph} from './rnagraph.js';
 import {ColorScheme, rnaUtilities} from './rnautils.js';
 
 import {simpleXyCoordinates} from './simplernaplot.js';
@@ -673,7 +673,6 @@ export function FornaContainer(element, passedOptions) {
         var newRNAJson = self.createInitialLayout(newStructure, options);
 
         var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, nodeKey);
-        var duration = self.options.transitionDuration;
 
         if (duration === 0)
             gnodes.attr('transform', function(d) { 

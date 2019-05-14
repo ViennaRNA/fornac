@@ -47,27 +47,19 @@ export function ProteinGraph(structName, size, uid) {
 
 }
 
-export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
+export function RNAGraph(seq = '', dotbracket = '', structName = '', startNumber = 1) {
     var self = this;
 
     self.type = 'rna';
     self.circularizeExternal = false;
-
-    if (arguments.length === 0) {
-        self.seq = '';
-        self.dotbracket = '';
-        self.structName = '';
-    } else {
-        self.seq = seq;
-        self.dotbracket = dotbracket;  //i.e. ..((..))..
-        self.structName = structName;
-    }
-
+    self.seq = seq;
+    self.dotbracket = dotbracket;  //i.e. ..((..))..
+    self.structName = structName;
     self.circular = false;
 
-    if (self.dotbracket.length > 0 && self.dotbracket[self.dotbracket.length-1] == '*') {
+    if (self.dotbracket.slice(-1) == '*') {
         //circular RNA
-        self.dotbracket = self.dotbracket.slice(0, self.dotbracket.length-1);
+        self.dotbracket = self.dotbracket.slice(0, -1);
         self.circular = true;
     }
 
@@ -129,9 +121,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
 
         for  (let i = 0; i < labelNodes.length; i++) {
             labelNodes[i].x = positions[i][0];
-            labelNodes[i].px = positions[i][0];
             labelNodes[i].y = positions[i][1];
-            labelNodes[i].py = positions[i][1];
         }
 
         return self;
@@ -143,8 +133,10 @@ export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
 
         // if a node was an artifical break node, convert it to a middle
         for (let i = 0; i < labelNodes.length; i++) {
-            if (self.dotbracket[i] == 'o')
+            if (self.dotBracketBreaks.indexOf(i) >= 0) {
                 labelNodes[i].nodeType = 'middle';
+                labelNodes[i+1].nodeType = 'middle';
+            }
         }
 
         for (let i = 0; i < self.elements.length; i++) {
@@ -746,7 +738,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
 
         if (self.circular) {
             //check to see if the external loop is a hairpin or a multiloop
-            externalLoop = self.elements.filter(function(d) { if (d[0] == 'e') return true; });
+            let externalLoop = self.elements.filter(function(d) { if (d[0] == 'e') return true; });
 
             if (externalLoop.length > 0) {
                 eloop = externalLoop[0];
@@ -828,7 +820,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
         /* Get a node given a nucleotide number or an array of nucleotide
          * numbers indicating an element node */
         if (Object.prototype.toString.call(nucs) === '[object Array]') {
-            for (var j = 0; j < self.nodes.length; j++) {
+            for (let j = 0; j < self.nodes.length; j++) {
                 if ('nucs' in self.nodes[j]) {
                     if (self.nodes[j].nucs.equals(nucs)) {
                         return self.nodes[j];
@@ -836,7 +828,7 @@ export function RNAGraph(seq, dotbracket, structName, startNumber = 1) {
                 }
             }
         } else {
-            for (var j = 0; j < self.nodes.length; j++) {
+            for (let j = 0; j < self.nodes.length; j++) {
                 if (self.nodes[j].num == nucs) {
                     return self.nodes[j];
                 }

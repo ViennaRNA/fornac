@@ -5,61 +5,144 @@
 <title>RNAPlot Example</title>
 
 <style>
-.structure-background-rect {
-    stroke: black;
-    stroke-width: 1;
-    fill: transparent;
+svg {
+    width: 100%;
+    height: 100%;
+    max-width: 200px;
+    border: 1px solid red;
 }
 
 .svg-container {
-    border: 1px solid red;
+    max-width: 200px;
+    margin-right: 10px;
+    float: left;
 }
+
+.svg-container-grid:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
 </style>
 
 </head>
 <body>
 
-<div id='rna_ss' class="svg-container"> </div>
+RNAplot Examples:
+<div id='rna_ss' class="svg-container-grid"> </div>
 
-<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.min.js'></script>
+RNAplot Grid Example:
+<div id='rna_rgl' class="svg-container-grid"> </div>
+
+<!-- d3 -->
+<!-- build:js scripts/d3.js -->
+<!-- bower:js -->
+<script src='/bower_components/jquery/dist/jquery.js'></script>
+<script src='/bower_components/d3/d3.js'></script>
+<script src='/bower_components/d3-grid/d3-grid.js'></script>
+<!-- endbower -->
+<!-- endbuild -->
 
 <!-- build:js scripts/rnaplot.js -->
 <script type='text/javascript' src='scripts/rnaplot.js'></script>
 <!-- endbuild -->
 
 <script type='text/javascript'>
-var svgWidth = 200;
-var svgHeight = 200;
+    var svgWidth = 200;
+    var svgHeight = 200;
 
-var rna1 = {'structure': '((..((....)).(((....))).))',
+    var rna1 = {'structure': '((..((....)).(((....))).))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'name': 'RNA1'
+    };
+
+    var rna2 = {'structure': '((((....))))',
+                'sequence': 'AGGCUGUAGCUU',
+                'name': 'RNA2'
+    };
+
+    var chart = rnaplot.rnaPlot()
+    .width(svgWidth)
+    .height(svgHeight)
+    .rnaLayout('simple')
+    .namePosition('0 0')
+    .startNucleotideNumber(10)
+    .labelInterval(5)
+    .zoom(true)
+
+    var svg = d3.select('#rna_ss')
+    .selectAll('svg')
+    .data([rna1, rna2])
+    .enter()
+    .append('div')
+    .classed('svg-container', true)
+    .append('svg')
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+    .call(chart);
+
+
+    var gridData = [
+        {'structure': '((..((....)).(((....))).))',
             'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
-            'name': "RNA-Name"
-};
-
-var rna2 = {'structure': '((((....))))',
-            'sequence': 'AGGCUGUAGCUU'
-};
-
-var chart = rnaplot.rnaPlot()
-.width(svgWidth)
-.height(svgHeight)
-.rnaLayout('simple')
-.namePosition('0 0')
-.startNucleotideNumber(10)
-.labelInterval(5)
-
-var svg = d3.select('#rna_ss')
-.append('svg')
-.attr("preserveAspectRatio", "xMinYMin meet")
-.attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
-.selectAll()
-.data([rna1])
-.enter()
-.append('g')
-.classed('rna', true)
-.call(chart);
-
-console.log(svg)
+            'size': 50,
+            'extraLinks': [[3,10],[1,17]],
+            'name': 'blah'},
+        {'structure': '((...........(((....))).))',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 40,
+            'name': 'blub'},
+        {'structure': '..........................',
+            'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+            'size': 10,
+            'name': 'doh'}
+    ]
+    // set all of the parameters
+    var padding = [10,10];   //the padding between the grid rectangles
+    var margin = {top: 4, left: 4, bottom: 4, right: 4};
+    var svgWidth = 418 - margin.left - margin.right;  //the width of the svg
+    var cellWidth = 200; //the width of each cell
+    var cellHeight = 200;  //the height of each cell
+    // calculate the number of columns and the height of the SVG,
+    // which is dependent on the on the number of data points
+    var numCols = Math.floor((svgWidth + padding[0]) / (cellWidth + padding[0]));
+    var svgHeight = Math.ceil(gridData.length / numCols) * (cellHeight + padding[1]) - padding[1] + margin.bottom;
+    var chart = rnaplot.rnaPlot()
+    .width(cellWidth)
+    .height(cellHeight)
+     var rectGrid = d3.layout.grid()
+              .bands()
+              .size([svgWidth, svgHeight])
+              .cols(numCols)
+              .padding(padding)
+              .nodeSize([cellWidth, cellHeight]);
+    var rectData = rectGrid(gridData)
+    // create an svg as a child of the #rna_ss div
+    // and then a g for each grid cell
+    var svg = d3.select('#rna_rgl')
+    .append('svg')
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr('viewBox', "0 0 " + (svgWidth + margin.left + margin.right) + " " + (svgHeight + margin.top + margin.bottom))
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + "," + margin.top + ")")
+    var gZoom = svg.append('g')
+    .call(d3.behavior.zoom().scaleExtent([1, gridData.length ]).on("zoom", zoom))
+    gZoom.append("rect")
+    .attr("class", "overlay")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
+    svg = svg.append('g')
+    function zoom() {
+        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+    svg.selectAll('.rna-cell')
+    .data(rectData)
+    .enter()
+    .append('g')
+    .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+    .classed('rna-cell', true)
+    .call(chart);
 </script>
 
 </body>
