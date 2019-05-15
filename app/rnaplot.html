@@ -4,17 +4,20 @@
 <meta charset="utf-8">
 <title>RNAPlot Example</title>
 
+<link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css">
+
 <style>
 svg {
     width: 100%;
     height: 100%;
     max-width: 200px;
-    border: 1px solid red;
+    border: 1px solid gray;
 }
 
 .svg-container {
     max-width: 200px;
     margin-right: 10px;
+    margin-top: 5px;
     float: left;
 }
 
@@ -24,6 +27,14 @@ svg {
   clear: both;
 }
 
+.slider {
+    max-width: 100px;
+    margin: 10px;
+}
+
+.stacked {
+    position: absolute;
+}
 </style>
 
 </head>
@@ -35,10 +46,21 @@ RNAplot Examples:
 RNAplot Grid Example:
 <div id='rna_rgl' class="svg-container-grid"> </div>
 
+RNAplot Timeseries Example:
+<div id="timeSlider" class="slider"></div>
+<div id='rna_rpt' class="svg-container-grid"> </div>
+
+<!-- jquery -->
+<!-- build:js scripts/jquery.js -->
+<!-- bower:js -->
+<script src='/bower_components/jquery/dist/jquery.js'></script>
+<script src='/bower_components/jquery-ui/jquery-ui.js'></script>
+<!-- endbower -->
+<!-- endbuild -->
+
 <!-- d3 -->
 <!-- build:js scripts/d3.js -->
 <!-- bower:js -->
-<script src='/bower_components/jquery/dist/jquery.js'></script>
 <script src='/bower_components/d3/d3.js'></script>
 <script src='/bower_components/d3-grid/d3-grid.js'></script>
 <!-- endbower -->
@@ -69,7 +91,6 @@ RNAplot Grid Example:
     .namePosition('0 0')
     .startNucleotideNumber(10)
     .labelInterval(5)
-    .zoom(true)
 
     var svg = d3.select('#rna_ss')
     .selectAll('svg')
@@ -143,6 +164,64 @@ RNAplot Grid Example:
     .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
     .classed('rna-cell', true)
     .call(chart);
+    
+    var svgWidth = 200;
+    var svgHeight = 200;
+
+    var timeData = [{'structure': '((((....))))..',
+       'sequence': 'AGCUUUGAAGCUUA',
+       'name': 't0'},
+        {'structure': '.(((....)))...',
+       'sequence': 'AGCUUUGAAGCUUA',
+       'name': 't1'},
+        {'structure': '..((....))....',
+       'sequence': 'AGCUUUGAAGCUUA',
+       'name': 't2'},
+       {'structure': '...(....).....',
+       'sequence': 'AGCUUUGAAGCUUA',
+       'name': 't3'},
+       {'structure': '..............',
+       'sequence': 'AGCUUUGAAGCUUA',
+       'name': 't4'}
+    ];
+
+    var chart = rnaplot.rnaPlot()
+    .width(svgWidth)
+    .height(svgHeight)
+    .rnaLayout('simple')
+    .namePosition('0 0')
+    .startNucleotideNumber(10)
+    .labelInterval(0)
+
+    var svg = d3.select('#rna_rpt')
+    .selectAll('svg')
+    .data(timeData)
+    .enter()
+    .append('div')
+    .classed('svg-container stacked', true)
+    .classed('transparent', true)
+    .attr('id', (d) => {return d.name})
+    .append('svg')
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+    .call(chart);
+    
+    let slider = $("#timeSlider").slider({
+      min: 0,
+      max: timeData.length-1,
+      value: 0,
+      step: 1,
+      slide: (event, ui) => {
+          let plotid = "#" + timeData[ui.value].name
+          $(currentSlide).addClass('transparent')
+          $(plotid).removeClass('transparent')
+          currentSlide = plotid
+      }
+    });
+    
+    var currentSlide = '#' + timeData[slider.slider('value')].name;
+    console.log(currentSlide)
+    $(currentSlide).removeClass('transparent')
 </script>
 
 </body>

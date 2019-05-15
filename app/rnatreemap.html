@@ -8,12 +8,13 @@
 svg {
     width: 100%;
     height: 100%;
-    border: 1px solid red;
+    border: 1px solid gray;
 }
 
 .svg-container {
     max-width: 200px;
     margin-right: 10px;
+    margin-top: 5px;
     float: left;
 }
 
@@ -36,33 +37,15 @@ RNA Treemap Grid:
 <!-- bower:js -->
 <script src='/bower_components/jquery/dist/jquery.js'></script>
 <script src='/bower_components/d3/d3.js'></script>
-<script src='/bower_components/d3-grid/d3-grid.js'></script>
 <!-- endbower -->
-<!-- endbuild -->
-
-<!-- build:js scripts/fornac.js -->
-<script type='text/javascript' src='scripts/fornac.js'></script>
-<!-- endbuild -->
-
-<!-- build:js scripts/rnaplot.js -->
-<script type='text/javascript' src='scripts/rnaplot.js'></script>
 <!-- endbuild -->
 
 <!-- build:js scripts/rnatreemap.js -->
 <script type='text/javascript' src='scripts/rnatreemap.js'></script>
 <!-- endbuild -->
 
-<!-- d3-grid -->
-<!-- build:js scripts/d3-grid.js -->
-<!-- bower:js -->
-<script src='/bower_components/jquery/dist/jquery.js'></script>
-<script src='/bower_components/d3/d3.js'></script>
-<script src='/bower_components/d3-grid/d3-grid.js'></script>
-<!-- endbower -->
-<!-- endbuild -->
-
 <script type='text/javascript'>
-    var testData = [{'name': 'graph',
+    let testData = [{'name': 'graph',
                 'children': [{'structure': '((..((....)).(((....))).))',
                 'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
                 'name': '1)',
@@ -146,6 +129,62 @@ RNA Treemap Grid:
     var svg = d3.select('#rna_tmg')
     .selectAll('.div')
     .data(multiData)
+    .enter()
+    .append('div')
+    .classed('svg-container', true)
+    .append('svg')
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+    .call(chart);
+    
+    
+    var timeData = [
+    {'name': 'graph', 
+                 'children': [{'structure': '((((....))))..',
+                'sequence': 'AGCUUUGAAGCUUA',
+                'size': 50},
+                 {'structure': '..............',
+                'sequence': 'AGCUUUGAAGCUUA',
+                'size': 40},
+                 {'structure': '..((....))....',
+                'sequence': 'AGCUUUGAAGCUUA',
+                'size': 10}
+                 ]
+    },
+    {'name': 'graph', 
+                 'children': [{'structure': '...........(((((.....)))))..',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 50},
+                 {'structure': '(((((((......)))).))).......',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 50}
+                 ]
+    },
+    {'name': 'graph', 
+                 'children': [{'structure': '(((.....)))(((((.....)))))..',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 30},
+                 {'structure': '(((((((......)))).)))((...))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 70}
+                 ]
+    }]
+    
+    var svgWidth = 200
+    var svgHeight = 200
+
+    var chart = rnatreemap.rnaTreemap()
+    .rnaLayout('simple')
+    .rnaEdgePadding(5)
+    .namePosition('0 0')
+    .startNucleotideNumber(10)
+    .labelInterval(5)
+    .width(svgWidth)
+    .height(svgHeight)
+    
+    var svg = d3.select('#rna_tmg')
+    .selectAll('.div')
+    .data(timeData)
     .enter()
     .append('div')
     .classed('svg-container', true)

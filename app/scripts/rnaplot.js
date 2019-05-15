@@ -18,8 +18,7 @@ export function rnaPlot(passedOptions = {}) {
         'bundleExternalLinks': false,
         
         'rnaLayout': 'simple', // simple or naview
-        'namePosition': '0 0', // for x and y either 0, 0.5 or 1
-        'zoom': false
+        'namePosition': '0 0' // for x and y either 0, 0.5 or 1
     };
     var options = Object.assign(options, passedOptions);
 
@@ -229,26 +228,8 @@ export function rnaPlot(passedOptions = {}) {
     }
 
     function chart(selection) {
-        selection.each(function(data) {
-            let svg = d3.select(this)
-            let zoomPlot = svg.append('g')
-            .classed('zoom', true)
-            
-            if (options.zoom) {
-                let overlayPlot = svg.append('g')
-                .classed('overlay', true)
-                .call(d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoom))
-                overlayPlot.append("rect")
-                .attr("class", "")
-                .attr("width", options.width)
-                .attr("height", options.height)
-                
-                function zoom() {
-                    zoomPlot.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-                }
-            }
-            
-            let plot = zoomPlot.append('g')
+        selection.each(function(data) {            
+            let plot = d3.select(this).append('g')
             .classed('rnaplot', true)
             
             // data should be a dictionary containing at least a structure
@@ -374,12 +355,6 @@ export function rnaPlot(passedOptions = {}) {
     chart.namePosition = function(_) {
         if (!arguments.length) return options.namePosition;
         options.namePosition = _;
-        return chart;
-    };
-    
-    chart.zoom = function(_) {
-        if (!arguments.length) return options.zoom;
-        options.zoom = _;
         return chart;
     };
     
