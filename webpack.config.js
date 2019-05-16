@@ -5,6 +5,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
   context: __dirname + '/app',
+  mode: 'development',
   entry: {
       fornac: './scripts/fornac.js',
       rnaplot: ['./scripts/rnaplot.js'],
