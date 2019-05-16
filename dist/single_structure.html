@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
-<meta charset="utf-8">
-<title>Fornac Example</title>
+    <meta charset="utf-8">
+    <title>Fornac Example</title>
+    <link rel="stylesheet" href="styles/fornac.css">
 </head>
 <body>
 
@@ -14,7 +15,7 @@ This is an RNA container. Try this:
     <li> Shift click and drag to create new links </li>
     <ul> Linking unpaired nucleotides creates base pair bonds
         <li> Linking nodes in different molecules creates a inter-molecule pair </li>
-        <li> Linking the ends of two molecules prompts you whether you want to create 
+        <li> Linking the ends of two molecules prompts you whether you want to create
             a base pair or a backbone link. </li>
     </ul>
     <li> Right click on a node and click: </li>
@@ -36,7 +37,7 @@ This is an RNA container. Try this:
 
 function normalContainer() {
     let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[1000,300], 
+            {'applyForce': true, 'allowPanningAndZooming': true, 'initialSize':[1000,300],
              'editable': true});
 
     /*
