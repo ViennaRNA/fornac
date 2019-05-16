@@ -1,0 +1,115 @@
+.structure-background-rect {
+    stroke: black;
+    stroke-width: 5;
+    fill: transparent;
+}
+
+circle.rna-base {
+  stroke: #ccc;
+  stroke-width: 1px;
+  opacity: 1;
+  fill: white;
+}
+
+circle.rna-base.label {
+    stroke: transparent;
+    stroke-width: 0;
+    fill: white;
+}
+
+line.rna-link {
+  stroke: #999;
+  stroke-opacity: 0.8;
+  stroke-width: 2;
+}
+
+.overlay {
+    fill: transparent;
+}
+
+.rna-name {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bolder;
+    font-size: 1.2em;
+    fill: rgba(200, 200, 200, 0.5);
+}
+
+line.rna-link[link-type="fake"] {
+    stroke: transparent;
+}
+
+line.rna-link[link-type="extra"] {
+    stroke: grey;
+}
+
+line.rna-link[extra-link-type="correct"] {
+    stroke: green;
+}
+
+line.rna-link[extra-link-type="incorrect"] {
+    stroke: green;
+}
+
+path {
+    stroke: grey;
+    stroke-width: 2;
+}
+
+path[extra-link-type="correct"] {
+    stroke: green;
+}
+
+path[extra-link-type="incorrect"] {
+    stroke: red;
+}
+
+
+line.basepair {
+  stroke: red;
+}
+
+line.intermolecule {
+  stroke: blue;
+}
+
+line.chain_chain {
+  stroke-dasharray: 3,3;
+}
+
+line.fake {
+  stroke: green;
+}
+
+.transparent {
+    fill: transparent;
+    stroke-width: 0;
+    stroke-opacity: 0;
+    opacity: 0;
+}
+
+.d3-tip {
+    line-height: 1;
+    font-weight: bold;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-radius: 4px;
+    pointer-events: none;
+          }
+
+text.nucleotide-label {
+    font-size: 5.5pt;
+    font-weight: bold;
+    font-family: Tahoma, Geneva, sans-serif;
+    color: rgb(100,100,100);
+    pointer-events: none;
+}
+
+text.number-label {
+    font-size: 5.5pt;
+    font-weight: bold;
+    font-family: Tahoma, Geneva, sans-serif;
+    color: rgb(100,100,100);
+    pointer-events: none;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInJuYXBsb3QuY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0lBQ0ksYUFBYTtJQUNiLGVBQWU7SUFDZixpQkFBaUI7QUFDckI7O0FBRUE7RUFDRSxZQUFZO0VBQ1osaUJBQWlCO0VBQ2pCLFVBQVU7RUFDVixXQUFXO0FBQ2I7O0FBRUE7SUFDSSxtQkFBbUI7SUFDbkIsZUFBZTtJQUNmLFdBQVc7QUFDZjs7QUFFQTtFQUNFLFlBQVk7RUFDWixtQkFBbUI7RUFDbkIsZUFBZTtBQUNqQjs7QUFFQTtJQUNJLGlCQUFpQjtBQUNyQjs7QUFFQTtJQUNJLHVDQUF1QztJQUN2QyxtQkFBbUI7SUFDbkIsZ0JBQWdCO0lBQ2hCLDhCQUE4QjtBQUNsQzs7QUFFQTtJQUNJLG1CQUFtQjtBQUN2Qjs7QUFFQTtJQUNJLFlBQVk7QUFDaEI7O0FBRUE7SUFDSSxhQUFhO0FBQ2pCOztBQUVBO0lBQ0ksYUFBYTtBQUNqQjs7QUFFQTtJQUNJLFlBQVk7SUFDWixlQUFlO0FBQ25COztBQUVBO0lBQ0ksYUFBYTtBQUNqQjs7QUFFQTtJQUNJLFdBQVc7QUFDZjs7O0FBR0E7RUFDRSxXQUFXO0FBQ2I7O0FBRUE7RUFDRSxZQUFZO0FBQ2Q7O0FBRUE7RUFDRSxxQkFBcUI7QUFDdkI7O0FBRUE7RUFDRSxhQUFhO0FBQ2Y7O0FBRUE7SUFDSSxpQkFBaUI7SUFDakIsZUFBZTtJQUNmLGlCQUFpQjtJQUNqQixVQUFVO0FBQ2Q7O0FBRUE7SUFDSSxjQUFjO0lBQ2QsaUJBQWlCO0lBQ2pCLFlBQVk7SUFDWiw4QkFBOEI7SUFDOUIsV0FBVztJQUNYLGtCQUFrQjtJQUNsQixvQkFBb0I7VUFDZDs7QUFFVjtJQUNJLGdCQUFnQjtJQUNoQixpQkFBaUI7SUFDakIsdUNBQXVDO0lBQ3ZDLHVCQUF1QjtJQUN2QixvQkFBb0I7QUFDeEI7O0FBRUE7SUFDSSxnQkFBZ0I7SUFDaEIsaUJBQWlCO0lBQ2pCLHVDQUF1QztJQUN2Qyx1QkFBdUI7SUFDdkIsb0JBQW9CO0FBQ3hCIiwiZmlsZSI6InJuYXBsb3QuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnN0cnVjdHVyZS1iYWNrZ3JvdW5kLXJlY3Qge1xuICAgIHN0cm9rZTogYmxhY2s7XG4gICAgc3Ryb2tlLXdpZHRoOiA1O1xuICAgIGZpbGw6IHRyYW5zcGFyZW50O1xufVxuXG5jaXJjbGUucm5hLWJhc2Uge1xuICBzdHJva2U6ICNjY2M7XG4gIHN0cm9rZS13aWR0aDogMXB4O1xuICBvcGFjaXR5OiAxO1xuICBmaWxsOiB3aGl0ZTtcbn1cblxuY2lyY2xlLnJuYS1iYXNlLmxhYmVsIHtcbiAgICBzdHJva2U6IHRyYW5zcGFyZW50O1xuICAgIHN0cm9rZS13aWR0aDogMDtcbiAgICBmaWxsOiB3aGl0ZTtcbn1cblxubGluZS5ybmEtbGluayB7XG4gIHN0cm9rZTogIzk5OTtcbiAgc3Ryb2tlLW9wYWNpdHk6IDAuODtcbiAgc3Ryb2tlLXdpZHRoOiAyO1xufVxuXG4ub3ZlcmxheSB7XG4gICAgZmlsbDogdHJhbnNwYXJlbnQ7XG59XG5cbi5ybmEtbmFtZSB7XG4gICAgZm9udC1mYW1pbHk6IFRhaG9tYSwgR2VuZXZhLCBzYW5zLXNlcmlmO1xuICAgIGZvbnQtd2VpZ2h0OiBib2xkZXI7XG4gICAgZm9udC1zaXplOiAxLjJlbTtcbiAgICBmaWxsOiByZ2JhKDIwMCwgMjAwLCAyMDAsIDAuNSk7XG59XG5cbmxpbmUucm5hLWxpbmtbbGluay10eXBlPVwiZmFrZVwiXSB7XG4gICAgc3Ryb2tlOiB0cmFuc3BhcmVudDtcbn1cblxubGluZS5ybmEtbGlua1tsaW5rLXR5cGU9XCJleHRyYVwiXSB7XG4gICAgc3Ryb2tlOiBncmV5O1xufVxuXG5saW5lLnJuYS1saW5rW2V4dHJhLWxpbmstdHlwZT1cImNvcnJlY3RcIl0ge1xuICAgIHN0cm9rZTogZ3JlZW47XG59XG5cbmxpbmUucm5hLWxpbmtbZXh0cmEtbGluay10eXBlPVwiaW5jb3JyZWN0XCJdIHtcbiAgICBzdHJva2U6IGdyZWVuO1xufVxuXG5wYXRoIHtcbiAgICBzdHJva2U6IGdyZXk7XG4gICAgc3Ryb2tlLXdpZHRoOiAyO1xufVxuXG5wYXRoW2V4dHJhLWxpbmstdHlwZT1cImNvcnJlY3RcIl0ge1xuICAgIHN0cm9rZTogZ3JlZW47XG59XG5cbnBhdGhbZXh0cmEtbGluay10eXBlPVwiaW5jb3JyZWN0XCJdIHtcbiAgICBzdHJva2U6IHJlZDtcbn1cblxuXG5saW5lLmJhc2VwYWlyIHtcbiAgc3Ryb2tlOiByZWQ7XG59XG5cbmxpbmUuaW50ZXJtb2xlY3VsZSB7XG4gIHN0cm9rZTogYmx1ZTtcbn1cblxubGluZS5jaGFpbl9jaGFpbiB7XG4gIHN0cm9rZS1kYXNoYXJyYXk6IDMsMztcbn1cblxubGluZS5mYWtlIHtcbiAgc3Ryb2tlOiBncmVlbjtcbn1cblxuLnRyYW5zcGFyZW50IHtcbiAgICBmaWxsOiB0cmFuc3BhcmVudDtcbiAgICBzdHJva2Utd2lkdGg6IDA7XG4gICAgc3Ryb2tlLW9wYWNpdHk6IDA7XG4gICAgb3BhY2l0eTogMDtcbn1cblxuLmQzLXRpcCB7XG4gICAgbGluZS1oZWlnaHQ6IDE7XG4gICAgZm9udC13ZWlnaHQ6IGJvbGQ7XG4gICAgcGFkZGluZzogNnB4O1xuICAgIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC42KTtcbiAgICBjb2xvcjogI2ZmZjtcbiAgICBib3JkZXItcmFkaXVzOiA0cHg7XG4gICAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG4gICAgICAgICAgfVxuXG50ZXh0Lm51Y2xlb3RpZGUtbGFiZWwge1xuICAgIGZvbnQtc2l6ZTogNS41cHQ7XG4gICAgZm9udC13ZWlnaHQ6IGJvbGQ7XG4gICAgZm9udC1mYW1pbHk6IFRhaG9tYSwgR2VuZXZhLCBzYW5zLXNlcmlmO1xuICAgIGNvbG9yOiByZ2IoMTAwLDEwMCwxMDApO1xuICAgIHBvaW50ZXItZXZlbnRzOiBub25lO1xufVxuXG50ZXh0Lm51bWJlci1sYWJlbCB7XG4gICAgZm9udC1zaXplOiA1LjVwdDtcbiAgICBmb250LXdlaWdodDogYm9sZDtcbiAgICBmb250LWZhbWlseTogVGFob21hLCBHZW5ldmEsIHNhbnMtc2VyaWY7XG4gICAgY29sb3I6IHJnYigxMDAsMTAwLDEwMCk7XG4gICAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG59Il19 */
