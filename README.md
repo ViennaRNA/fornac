@@ -171,19 +171,19 @@ First:
 
 ```
 npm install
-bower install
+npx bower install
 ```
 
 To debug:
 
 ```
-gulp serve
+npx gulp serve
 ```
 
 To build:
 
 ```
-gulp build
+npx gulp build
 ```
 
 The output will be placed in the `dist` directory. To use `fornac` in a web page, simply include `dist/scripts/fornac.js` in your web page.
