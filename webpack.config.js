@@ -1,36 +1,46 @@
-var path = require('path');
+var path = require("path");
 var webpack = require('webpack');
-console.log('process.env.NODE_PATH:', process.env.NODE_PATH);
+var BundleTracker = require('webpack-bundle-tracker');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
   context: __dirname + '/app',
-  entry: {fornac: './scripts/fornac.js',
+  mode: 'development',
+  entry: {
+      fornac: './scripts/fornac.js',
       rnaplot: ['./scripts/rnaplot.js'],
-      rnatreemap: './scripts/rnatreemap.js'},
+      rnatreemap: './scripts/rnatreemap.js'
+  },
   output: {
-    path: __dirname + '/build',
+    path: __dirname + '.tmp/scripts',
     filename: '[name].js',
     libraryTarget: 'umd',
     library: '[name]'
   },
+  plugins: [
+    new BundleTracker({filename: './webpack-stats.json'}),
+    new ExtractTextPlugin({
+      filename: ".tmp/styles/[name].css",
+    }),
+  ],
   module: {
-    loaders: [
-      { 
-        test: /\.js$/,
+    rules: [
+      {
+        test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015']
-        }
-      }, {
+        use: ['babel-loader'],
+      },
+      {
         test: /\.css$/,
-        loader: 'style!css'
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader']
+        })
       }
-    ],
-    resolve: {
-        fallback: process.env.NODE_PATH,
-        modulesDirectories: [ process.env.NODE_PATH || "node_modules" ],
-      extensions: ['.js', '.jsx']
-    }
+    ]
+  },
+  resolve: {
+    extensions: ['*', '.js', '.jsx'],
   }
+
 };

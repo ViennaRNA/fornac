@@ -3,9 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>RNAtreemap Example</title>
-    <!-- build:css styles/rnaplot.css -->
-    <link rel="stylesheet" href="styles/rnaplot.css" />
-    <!-- endbuild -->
+    <link rel="stylesheet" href="styles/rnatreemap.css">
     <style>
     svg {
         width: 100%;
@@ -35,16 +33,9 @@ RNA Treemap Grid:
 <div id='rna_tmg' class="svg-container-grid"> </div>
 
 <!-- d3 -->
-<!-- build:js scripts/d3.js -->
-<!-- bower:js -->
-<script src='/bower_components/jquery/dist/jquery.js'></script>
-<script src='/bower_components/d3/d3.js'></script>
-<!-- endbower -->
-<!-- endbuild -->
+<script src="scripts/d3.js"></script>
 
-<!-- build:js scripts/rnatreemap.js -->
-<script type='text/javascript' src='scripts/rnatreemap.js'></script>
-<!-- endbuild -->
+<script src="scripts/rnatreemap.js"></script>
 
 <script type='text/javascript'>
     let testData = [{'name': 'graph',

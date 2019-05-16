@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
-<meta charset="utf-8">
-<title>Fornac Example</title>
+    <meta charset="utf-8">
+    <title>Fornac Example</title>
+    <!-- build:css styles/fornac.css -->
+    <link rel="stylesheet" href="styles/fornac.css" />
+    <!-- endbuild -->
 </head>
 <body>
-
 This is an RNA container:
 <div id='rna_ss'> </div>
 
@@ -35,7 +37,7 @@ This is a custom-colored RNA:
     let options = {'structure': '.(((.((((...)))).)))(((.(((........))).))).......',
         'sequence':             'UGUCGGGUAGCUUAUCAGACUGAUGUUGACUGUUGAAUCUCAUGGCAAC'
     };
-    
+
     container.addRNA(options.structure, options);
     container.setSize();
 
