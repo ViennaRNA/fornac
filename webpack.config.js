@@ -4,23 +4,28 @@ var BundleTracker = require('webpack-bundle-tracker');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
-  context: __dirname + '/app',
   mode: 'development',
   entry: {
-      fornac: './scripts/fornac.js',
-      rnaplot: ['./scripts/rnaplot.js'],
-      rnatreemap: './scripts/rnatreemap.js'
+      fornac: './src/index.js',
   },
   output: {
-    path: __dirname + '.tmp/scripts',
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'umd',
     library: '[name]'
   },
+  devtool: 'inline-source-map',
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    watchContentBase: true,
+    compress: true,
+    port: 9000,
+    hot: true
+  },
   plugins: [
     new BundleTracker({filename: './webpack-stats.json'}),
     new ExtractTextPlugin({
-      filename: ".tmp/styles/[name].css",
+      filename: "[name].css",
     }),
   ],
   module: {
@@ -41,6 +46,8 @@ module.exports = {
   },
   resolve: {
     extensions: ['*', '.js', '.jsx'],
+  },
+  externals: {
+    d3: "d3"
   }
-
 };

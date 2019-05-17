@@ -2,7 +2,13 @@
   "name": "fornac",
   "version": "1.1.8",
   "description": "An RNA secondary structure display component",
-  "main": "dist/scripts/fornac.js",
+  "license": "Apache-2.0",
+  "author": "Peter Kerpedjiev <pkerp@tbi.univie.ac.at>",
+  "contributors": [
+    "Stefan Hammer <shammer@univie.ac.at>"
+  ],
+  "main": "dist/fornac.js",
+  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/pkerpedjiev/fornac"
@@ -10,44 +16,25 @@
   "engines": {
     "node": ">=12.0.0"
   },
+  "scripts": {
+    "watch": "webpack --watch",
+    "build": "webpack --config webpack.config.js",
+    "dev": "webpack-dev-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/register": "^7.4.4",
-    "babel-eslint": "~10.0.1",
     "babel-loader": "^8.0.6",
-    "babel-preset-env": "^1.7.0",
-    "browser-sync": "^2.26.5",
     "css-loader": "^2.1.1",
-    "del": "^4.1.1",
-    "es6-promise": "^4.2.6",
-    "eslint-plugin-react": "~7.13.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
-    "gulp": "^4.0.2",
-    "gulp-autoprefixer": "^6.1.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-cache": "^1.1.1",
-    "gulp-cssnano": "^2.1.3",
-    "gulp-debug": "~4.0.0",
-    "gulp-eslint": "^5.0.0",
-    "gulp-htmlmin": "^5.0.1",
-    "gulp-if": "^2.0.2",
-    "gulp-imagemin": "^5.0.3",
-    "gulp-jasmine": "^4.0.0",
-    "gulp-load-plugins": "^1.5.0",
-    "gulp-plumber": "^1.2.1",
-    "gulp-size": "^3.0.0",
-    "gulp-sourcemaps": "^2.6.5",
-    "gulp-uglify": "~3.0.2",
-    "gulp-useref": "^3.1.6",
-    "gulp-util": "^3.0.8",
-    "main-bower-files": "^2.13.1",
     "style-loader": "^0.23.1",
     "webpack": "^4.31.0",
     "webpack-bundle-tracker": "^0.4.2-beta",
     "webpack-cli": "^3.3.2",
-    "webpack-stream": "^5.2.1",
-    "wiredep": "^4.0.0"
+    "webpack-dev-server": "^3.4.0",
+    "webpack-stream": "^5.2.1"
   },
   "eslintConfig": {
     "env": {
@@ -64,7 +51,6 @@
   },
   "dependencies": {
     "d3": "~3.5.13",
-    "jquery": "~2.2.0",
     "slugid": "^1.1.0"
   }
 }
