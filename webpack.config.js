@@ -1,26 +1,29 @@
 var path = require("path");
 var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = {
-  context: __dirname + '/app',
-  mode: 'development',
+var config = {
   entry: {
-      fornac: './scripts/fornac.js',
-      rnaplot: ['./scripts/rnaplot.js'],
-      rnatreemap: './scripts/rnatreemap.js'
+      fornac: './src/index.js',
   },
   output: {
-    path: __dirname + '.tmp/scripts',
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'umd',
     library: '[name]'
   },
+  devServer: {
+    contentBase: path.join(__dirname, 'examples'),
+    watchContentBase: true,
+    compress: true,
+    port: 9000,
+    hot: true
+  },
   plugins: [
-    new BundleTracker({filename: './webpack-stats.json'}),
-    new ExtractTextPlugin({
-      filename: ".tmp/styles/[name].css",
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].css',
     }),
   ],
   module: {
@@ -32,15 +35,38 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader']
-        })
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+        ],
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          'file-loader'
+        ]
       }
     ]
   },
   resolve: {
     extensions: ['*', '.js', '.jsx'],
+  },
+  externals: {
+    d3: "d3"
+  }
+};
+
+module.exports = (env, argv) => {
+  console.log('Running mode: ', argv.mode)
+
+  if (argv.mode === 'development') {
+    config.devtool = 'source-map';
   }
 
+  return config;
 };

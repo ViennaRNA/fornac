@@ -2,34 +2,17 @@
 <html lang="">
 <head>
     <meta charset="utf-8">
-    <title>Fornac Example</title>
-    <link href="https://fonts.googleapis.com/css?family=Pavanam" rel="stylesheet">
-    <!-- build:css styles/fornac.css -->
-    <link rel="stylesheet" href="styles/fornac.css" />
-    <!-- endbuild -->
-
-    <!-- build:css styles/d3-context-menu.css -->
-    <link rel="stylesheet" href="styles/d3-context-menu.css" />
-    <!-- endbuild -->
-    <style>
-        body {
-            color: #333333;
-            font-family: 'Pavanam', sans-serif;
-            line-height: 1.3;
-
-        }
-    </style>
+    <title>Fornac Edditing Example</title>
+    <link rel="stylesheet" href="fornac.css" />
 </head>
 <body>
-    <div style="width: 600px; margin: auto;">
+    <div style="width: 800px; margin: auto;">
 
-        <h3>Forna RNA Editor</h3>
+    <h3>Forna RNA Editor</h3>
 
-        The RNA below is editable:
-        <br>
-        <br>
-
-
+    The RNA below is editable:
+    <br>
+    
     <div id='rna_ss'> </div>
 
     <ul>
@@ -50,9 +33,8 @@
         </ul>
     </ul>
 
-    <!-- build:js scripts/fornac.js -->
-    <script src='scripts/fornac.js'></script>
-    <!-- endbuild -->
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script src='fornac.js'></script>
 
     <script type='text/javascript'>
     "use strict"
@@ -82,15 +64,6 @@
     normalContainer();
 
     </script>
-
-    <!-- d3-context-menu -->
-    <!-- build:js scripts/d3-context-menu.js -->
-    <!-- bower:js -->
-    <script src='/bower_components/jquery/dist/jquery.js'></script>
-    <script src='/bower_components/d3/d3.js'></script>
-    <script src='/bower_components/d3-grid/d3-grid.js'></script>
-    <!-- endbower -->
-    <!-- endbuild -->
     </div>
 </body>
 </html>

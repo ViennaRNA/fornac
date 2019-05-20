@@ -1,65 +1,61 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
-<meta charset="utf-8">
-<title>RNAPlot Example</title>
-<!-- jquery -->
-<link rel="stylesheet" href="styles/jquery-ui.min.css">
+  <meta charset="utf-8">
+  <title>RNAPlot Examples</title>
+  <link rel="stylesheet" href="fornac.css" />
+  <style>
+    svg {
+        width: 100%;
+        height: 100%;
+        max-width: 200px;
+        border: 1px solid gray;
+    }
 
-<link rel="stylesheet" href="styles/rnaplot.css">
-<style>
-svg {
-    width: 100%;
-    height: 100%;
-    max-width: 200px;
-    border: 1px solid gray;
-}
+    .svg-container {
+        max-width: 200px;
+        margin-right: 10px;
+        margin-top: 5px;
+        float: left;
+    }
 
-.svg-container {
-    max-width: 200px;
-    margin-right: 10px;
-    margin-top: 5px;
-    float: left;
-}
+    .svg-container-grid:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
 
-.svg-container-grid:after {
-  content: "";
-  display: table;
-  clear: both;
-}
+    .slider {
+        max-width: 100px;
+        margin: 10px;
+    }
 
-.slider {
-    max-width: 100px;
-    margin: 10px;
-}
-
-.stacked {
-    position: absolute;
-}
-</style>
-
+    .stacked {
+        position: absolute;
+    }
+  </style>
 </head>
 <body>
+    <div style="width: 800px; margin: auto;">
+    <h3>RNAPlot Examples</h3>
+    RNAplot Examples:
+    <div id='rna_ss' class="svg-container-grid"> </div>
 
-RNAplot Examples:
-<div id='rna_ss' class="svg-container-grid"> </div>
+    RNAplot Grid Example:
+    <div id='rna_rgl' class="svg-container-grid"> </div>
 
-RNAplot Grid Example:
-<div id='rna_rgl' class="svg-container-grid"> </div>
+    RNAplot Timeseries Example:
+    <div class="slidecontainer">
+      <input type="range" min="0" max="4" value="0" class="slider" id="timeSlider" onChange="sliderChange(this.value)">
+    </div>
+    <div id='rna_rpt' class="svg-container-grid"> </div>
 
-RNAplot Timeseries Example:
-<div id="timeSlider" class="slider"></div>
-<div id='rna_rpt' class="svg-container-grid"> </div>
+    <script src="https://unpkg.com/jquery"></script>
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script src="https://unpkg.com/d3-grid"></script>
+    <script src='fornac.js'></script>
 
-<!-- jquery -->
-<script src="scripts/jquery.js"></script>
-
-<!-- d3 -->
-<script src="scripts/d3.js"></script>
-
-<script src="scripts/rnaplot.js"></script>
-
-<script type='text/javascript'>
+    <script type='text/javascript'>
     var svgWidth = 200;
     var svgHeight = 200;
 
@@ -73,7 +69,7 @@ RNAplot Timeseries Example:
                 'name': 'RNA2'
     };
 
-    var chart = rnaplot.rnaPlot()
+    var chart = fornac.rnaPlot()
     .width(svgWidth)
     .height(svgHeight)
     .rnaLayout('simple')
@@ -118,7 +114,7 @@ RNAplot Timeseries Example:
     // which is dependent on the on the number of data points
     var numCols = Math.floor((svgWidth + padding[0]) / (cellWidth + padding[0]));
     var svgHeight = Math.ceil(gridData.length / numCols) * (cellHeight + padding[1]) - padding[1] + margin.bottom;
-    var chart = rnaplot.rnaPlot()
+    var chart = fornac.rnaPlot()
     .width(cellWidth)
     .height(cellHeight)
      var rectGrid = d3.layout.grid()
@@ -174,7 +170,7 @@ RNAplot Timeseries Example:
        'name': 't4'}
     ];
 
-    var chart = rnaplot.rnaPlot()
+    var chart = fornac.rnaPlot()
     .width(svgWidth)
     .height(svgHeight)
     .rnaLayout('simple')
@@ -195,23 +191,16 @@ RNAplot Timeseries Example:
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
     .call(chart);
 
-    let slider = $("#timeSlider").slider({
-      min: 0,
-      max: timeData.length-1,
-      value: 0,
-      step: 1,
-      slide: (event, ui) => {
-          let plotid = "#" + timeData[ui.value].name
-          $(currentSlide).addClass('transparent')
-          $(plotid).removeClass('transparent')
-          currentSlide = plotid
-      }
-    });
+    var sliderChange = (value) => {
+      let plotid = "#" + timeData[value].name
+      $(currentSlide).addClass('transparent')
+      $(plotid).removeClass('transparent')
+      currentSlide = plotid
+  };
 
-    var currentSlide = '#' + timeData[slider.slider('value')].name;
-    console.log(currentSlide)
+    var currentSlide = '#' + timeData[0].name;
     $(currentSlide).removeClass('transparent')
-</script>
-
+    </script>
+    </div>
 </body>
 </html>

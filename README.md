@@ -27,8 +27,8 @@ This is an RNA container.
 <div id='rna_ss'> </div>
 This after the RNA container.
 
-    <link rel='stylesheet' type='text/css' href='styles/fornac.css' />
-    <script type='text/javascript' src='scripts/fornac.js'></script>
+    <link rel='stylesheet' type='text/css' href='fornac.css' />
+    <script type='text/javascript' src='fornac.js'></script>
     <script type='text/javascript'>
         var container = new FornaContainer("#rna_ss", {'applyForce': false});
 
@@ -171,22 +171,21 @@ First:
 
 ```
 npm install
-npx bower install
 ```
 
 To debug:
 
 ```
-npx gulp serve
+npm run dev
 ```
 
 To build:
 
 ```
-npx gulp build
+npm run build
 ```
 
-The output will be placed in the `dist` directory. To use `fornac` in a web page, simply include `dist/scripts/fornac.js` in your web page.
+The output will be placed in the `dist` directory. To use `fornac` in a web page, simply include `dist/fornac.js` and the css style `dist/fornac.css` in your web page.
 
 ## Acknowledgements
 
