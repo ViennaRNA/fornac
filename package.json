@@ -19,7 +19,7 @@
   "scripts": {
     "watch": "webpack --config webpack.config.js --mode development --watch",
     "build": "webpack --config webpack.config.js --mode production --optimize-minimize",
-    "dev": "webpack-dev-server --mode development",
+    "dev": "webpack-dev-server --mode development --open",
     "lint": "eslint src/**/*.js test/**/*.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

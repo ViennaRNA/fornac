@@ -173,13 +173,13 @@ First:
 npm install
 ```
 
-To debug:
+To debug and to show examples:
 
 ```
 npm run dev
 ```
 
-To build:
+To build minified distribution:
 
 ```
 npm run build
