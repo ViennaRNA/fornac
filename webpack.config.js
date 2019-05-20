@@ -13,7 +13,7 @@ var config = {
     library: '[name]'
   },
   devServer: {
-    contentBase: [ path.join(__dirname, 'dist'), path.join(__dirname, 'examples') ],
+    contentBase: path.join(__dirname, 'examples'),
     watchContentBase: true,
     compress: true,
     port: 9000,
@@ -63,10 +63,10 @@ var config = {
 
 module.exports = (env, argv) => {
   console.log('Running mode: ', argv.mode)
-  
+
   if (argv.mode === 'development') {
     config.devtool = 'source-map';
   }
-  
+
   return config;
 };

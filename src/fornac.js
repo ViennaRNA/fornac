@@ -70,7 +70,7 @@ export function FornaContainer(element, passedOptions) {
 
                         self.addRNA('.', {'sequence': 'A', 'centerPos': canvasMousePos});
                     }
-                }, 
+                },
                 {
                     'title': 'C',
                     action: function(elm, d, i, mousePos) {
@@ -155,7 +155,7 @@ export function FornaContainer(element, passedOptions) {
                     },
                 ]
             },
-            { 
+            {
                 title: 'Insert Before',
                 action: function(elm, d, i) {
 
@@ -250,7 +250,7 @@ export function FornaContainer(element, passedOptions) {
         'nodes':[],
         'links':[]
     };
-    
+
     self.linkStrengths = {
         'pseudoknot': 0.00,
         'proteinChain': 0.00,
@@ -259,7 +259,7 @@ export function FornaContainer(element, passedOptions) {
         'external': 0.00,
         'other': 10.00
     };
-    
+
     self.displayParameters = {
         'displayBackground': 'true',
         'displayNumbering': 'true',
@@ -283,7 +283,7 @@ export function FornaContainer(element, passedOptions) {
         if (!array)
             return false;
 
-        // compare lengths - can save a lot of time 
+        // compare lengths - can save a lot of time
         if (this.length != array.length)
             return false;
 
@@ -292,20 +292,20 @@ export function FornaContainer(element, passedOptions) {
             if (this[i] instanceof Array && array[i] instanceof Array) {
                 // recurse into the nested arrays
                 if (!this[i].equals(array[i]))
-                    return false;       
-            }           
-            else if (this[i] != array[i]) { 
+                    return false;
+            }
+            else if (this[i] != array[i]) {
                 // Warning - two different object instances will never be equal: {x:20} != {x:20}
-                return false;   
-            }           
-        }       
+                return false;
+            }
+        }
         return true;
     };
 
 
     self.createInitialLayout = function(structure, passedOptions) {
         // the default options
-        var options = { 
+        var options = {
                         'sequence': '',
                         'name': 'empty',
                         'positions': [],
@@ -381,7 +381,7 @@ export function FornaContainer(element, passedOptions) {
         if ('extraLinks' in passedOptions) {
             // presumably the passed in links are within the passed molecule
             var newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
-            
+
             self.extraLinks = self.extraLinks.concat(newLinks);
         }
 
@@ -492,25 +492,25 @@ export function FornaContainer(element, passedOptions) {
 
         console.log('new dotbracket:', newDotbracket);
         //self.recalculateGraph();
-        
+
         //remove backbone links associated with this node
-        
+
         //remove this node
-        
+
     }
 
     self.addExternalLinks = function(rnaJson, externalLinks) {
         var newLinks = [];
 
         for (var i = 0; i < externalLinks.length; i++) {
-            var newLink = {linkType: 'external', value: 1, uid: generateUUID(),
+            var newLink = {linkType: 'external', value: 1, uid: slugid.nice(),
                 source: null, target: null};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][0])) {
-                            newLink.source = rnaJson.nodes[j]; 
+                            newLink.source = rnaJson.nodes[j];
                             break;
                         }
                     }
@@ -518,7 +518,7 @@ export function FornaContainer(element, passedOptions) {
             } else {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][0]) {
-                        newLink.source = rnaJson.nodes[j]; 
+                        newLink.source = rnaJson.nodes[j];
                     }
                 }
             }
@@ -528,18 +528,18 @@ export function FornaContainer(element, passedOptions) {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][1])) {
-                            newLink.target = rnaJson.nodes[j]; 
+                            newLink.target = rnaJson.nodes[j];
                         }
                     }
                 }
             } else {
                 for (var j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][1]) {
-                        newLink.target = rnaJson.nodes[j]; 
+                        newLink.target = rnaJson.nodes[j];
                     }
                 }
             }
-            
+
             if (newLink.source == null || newLink.target == null) {
                 console.log('ERROR: source or target of new link not found:', newLink, externalLinks[i]);
                 continue;
@@ -551,7 +551,7 @@ export function FornaContainer(element, passedOptions) {
         return newLinks;
     };
 
-    self.addRNAJSON = function(rnaGraph, 
+    self.addRNAJSON = function(rnaGraph,
                                { avoidOthers = false,
                                 centerPos = null,
                                 centerView = true} ) {
@@ -594,7 +594,7 @@ export function FornaContainer(element, passedOptions) {
             else
                 maxX = 0;
 
-            minX = d3.min(rnaGraph.nodes.map(function(d) { return d.x; })); 
+            minX = d3.min(rnaGraph.nodes.map(function(d) { return d.x; }));
 
             rnaGraph.nodes.forEach(function(node) {
                 node.x += (maxX - minX) + 20;
@@ -644,7 +644,7 @@ export function FornaContainer(element, passedOptions) {
 
         var arrowTip = [d.radius * u[0], d.radius * u[1]];
 
-        var path = 'M' + 
+        var path = 'M' +
                     (arrowTip[0] + lengthMult * (u[0] + v[0]) / 2) + ',' + (arrowTip[1] + lengthMult * (u[1] + v[1]) / 2) + 'L' +
                     (arrowTip[0]) + ',' + (arrowTip[1]) + 'L' +
                     (arrowTip[0] + lengthMult * (u[0] - v[0]) / 2) + ',' + (arrowTip[1] + lengthMult * (u[1] - v[1]) / 2);
@@ -676,20 +676,20 @@ export function FornaContainer(element, passedOptions) {
         var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, nodeKey);
 
         if (duration === 0)
-            gnodes.attr('transform', function(d) { 
-                return 'translate(' + [d.x, d.y] + ')'; 
+            gnodes.attr('transform', function(d) {
+                return 'translate(' + [d.x, d.y] + ')';
             });
         else {
-            gnodes.transition().attr('transform', function(d) { 
+            gnodes.transition().attr('transform', function(d) {
                 return 'translate(' + [d.x, d.y] + ')'; }).duration(duration);
         }
 
         var links = visLinks.selectAll('line.link')
         .data(newRNAJson.links.filter(realLinkFilter), linkKey);
         var newNodes = self.createNewNodes(gnodes.enter())
-        .attr('transform', function(d) { 
+        .attr('transform', function(d) {
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
-                return 'translate(' + [0, 0] + ')'; 
+                return 'translate(' + [0, 0] + ')';
             else
                 return '';
         });
@@ -699,9 +699,9 @@ export function FornaContainer(element, passedOptions) {
             gnodes.exit().remove();
         else
             gnodes.exit().transition()
-            .attr('transform', function(d) { 
+            .attr('transform', function(d) {
                 if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
-                    return 'translate(' + [0, 0] + ')'; 
+                    return 'translate(' + [0, 0] + ')';
                 else
                     return '';
             });
@@ -713,13 +713,13 @@ export function FornaContainer(element, passedOptions) {
         self.updateStyle();
         self.centerView(duration);
 
-        function endall(transition, callback) { 
+        function endall(transition, callback) {
             if (transition.size() === 0) { setTimeout(callback, duration); }
-            var n = 0; 
-            transition 
-            .each(function() { ++n; }) 
-            .each('end', function() { if (!--n) callback.apply(this, arguments); }); 
-        } 
+            var n = 0;
+            transition
+            .each(function() { ++n; })
+            .each('end', function() { if (!--n) callback.apply(this, arguments); });
+        }
 
         function addNewLinks() {
             var newLinks = self.createNewLinks(links.enter());
@@ -757,17 +757,17 @@ export function FornaContainer(element, passedOptions) {
 
         if (duration === 0) {
             newNodes
-            .attr('transform', function(d) { 
+            .attr('transform', function(d) {
                 if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
-                    return 'translate(' + [d.x, d.y] + ')'; 
+                    return 'translate(' + [d.x, d.y] + ')';
                 else
                     return '';
             });
         } else {
             newNodes.transition()
-            .attr('transform', function(d) { 
+            .attr('transform', function(d) {
                 if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
-                    return 'translate(' + [d.x, d.y] + ')'; 
+                    return 'translate(' + [d.x, d.y] + ')';
                 else
                     return '';
             });
@@ -808,17 +808,17 @@ export function FornaContainer(element, passedOptions) {
 
             self.extraLinks[i].source = uidsToNodes[self.extraLinks[i].source.uid];
             self.extraLinks[i].target = uidsToNodes[self.extraLinks[i].target.uid];
-            
+
             if (self.extraLinks[i].linkType == 'intermolecule') {
                 //remove links to middle nodes
-                let fakeLinks = self.graph.links.filter(function(d) { 
+                let fakeLinks = self.graph.links.filter(function(d) {
                     return ((d.source == self.extraLinks[i].source || d.source == self.extraLinks[i].target ||
                             d.target == self.extraLinks[i].source || d.target == self.extraLinks[i].source) &&
                             d.linkType == 'fake');
                 });
 
                 for (var j = 0; j < fakeLinks.length; j++) {
-                    var linkIndex = self.graph.links.indexOf(fakeLinks[j]); 
+                    var linkIndex = self.graph.links.indexOf(fakeLinks[j]);
                     self.graph.links.splice(linkIndex, 1);
                 }
             }
@@ -891,7 +891,7 @@ export function FornaContainer(element, passedOptions) {
 
         self.update();
     };
-    
+
     self.toJSON = function toJSON() {
        var data = {'rnas': self.rnas, 'extraLinks': self.extraLinks};
             var dataString = JSON.stringify(data, function(key, value) {
@@ -956,7 +956,7 @@ export function FornaContainer(element, passedOptions) {
 
         var svgH = d3.select(element).node().offsetHeight;
         var svgW = d3.select(element).node().offsetWidth;
-        
+
         self.options.svgW = svgW;
         self.options.svgH = svgH;
 
@@ -992,7 +992,7 @@ export function FornaContainer(element, passedOptions) {
             let val = parseFloat(moleculeColors[d.num]);
 
             if (isNaN(val)) {
-                // passed in color is not a scalar, so 
+                // passed in color is not a scalar, so
                 // treat it as a color
                 return moleculeColors[d.num];
             } else {
@@ -1026,7 +1026,7 @@ export function FornaContainer(element, passedOptions) {
             var scale = d3.scale.ordinal()
             .range(['#dbdb8d', '#98df8a', '#ff9896', '#aec7e8', '#aec7e8'])
             .domain(['A','C','G','U','T']);
-            nodes.style('fill', function(d) { 
+            nodes.style('fill', function(d) {
                 return scale(d.name);
             });
 
@@ -1036,12 +1036,12 @@ export function FornaContainer(element, passedOptions) {
             .range(['lightgreen', '#ff9896', '#dbdb8d', 'lightsalmon',
                    'lightcyan', 'lightblue', 'transparent']);
 
-                   nodes.style('fill', function(d) { 
+                   nodes.style('fill', function(d) {
                        return scale(d.elemType);
                    });
 
         } else if (newColorScheme == 'positions') {
-            nodes.style('fill', function(d) { 
+            nodes.style('fill', function(d) {
                 var scale = d3.scale.linear()
                 .range(['#98df8a', '#dbdb8d', '#ff9896'])
                 .interpolate(d3.interpolateLab)
@@ -1066,7 +1066,7 @@ export function FornaContainer(element, passedOptions) {
                    !self.customColors.hasOwnProperty('colorValues')) {
                     return 'white';
                 }
-                
+
                 if (self.customColors.colorValues.hasOwnProperty(d.structName) &&
                     self.customColors.colorValues[d.structName].hasOwnProperty(d.num)) {
                     // if a molecule name is specified, it supercedes the default colors
@@ -1102,7 +1102,7 @@ export function FornaContainer(element, passedOptions) {
 
     function mouseup() {
         if (mousedownNode) {
-           
+
             if (!linkContextMenuShown)
                 dragLine
                 .attr('class', 'drag_line_hidden');
@@ -1190,7 +1190,7 @@ export function FornaContainer(element, passedOptions) {
 
       brush.call(self.brusher)
           .on('mousedown.brush', null)
-          .on('touchstart.brush', null) 
+          .on('touchstart.brush', null)
           .on('touchmove.brush', null)
           .on('touchend.brush', null);
       brush.select('.background').style('cursor', 'auto');
@@ -1236,7 +1236,7 @@ export function FornaContainer(element, passedOptions) {
 
         // we need to fit it in both directions, so we scale according to
         // the direction in which we need to shrink the most
-        var minRatio = Math.min(widthRatio, heightRatio, 
+        var minRatio = Math.min(widthRatio, heightRatio,
                                 self.options.maxNodeRadius / maxRadius) * 0.8;
 
         // the new dimensions of the molecule
@@ -1271,9 +1271,9 @@ export function FornaContainer(element, passedOptions) {
 
     self.force = d3.layout.force()
     .charge(function(d) { if (d.nodeType == 'middle')  {
-            return self.options.middleCharge; 
+            return self.options.middleCharge;
     }
-        else 
+        else
             return self.options.otherCharge;})
     .friction(self.options.friction)
     .linkDistance(function(d) { return self.options.linkDistanceMultiplier * d.value; })
@@ -1445,9 +1445,9 @@ export function FornaContainer(element, passedOptions) {
 
         brush.call(self.brusher)
         .on('mousedown.brush', null)
-        .on('touchstart.brush', null)                                                                      
-        .on('touchmove.brush', null)                                                                       
-        .on('touchend.brush', null);                                                                       
+        .on('touchstart.brush', null)
+        .on('touchmove.brush', null)
+        .on('touchend.brush', null);
 
         brush.select('.background').style('cursor', 'auto');
         svgGraph.call(self.zoomer);
@@ -1460,7 +1460,7 @@ export function FornaContainer(element, passedOptions) {
     .on('keydown', keydown)
     .on('keyup', keyup)
     .on('contextmenu', function() {
-            d3.event.preventDefault(); 
+            d3.event.preventDefault();
     });
 
     var linkKey = function(d) {
@@ -1472,7 +1472,7 @@ export function FornaContainer(element, passedOptions) {
         return key;
     };
 
-    
+
     var updateRnaGraph = function(r) {
         var nucleotidePositions = r.getPositions('nucleotide');
         var labelPositions = r.getPositions('label');
@@ -1493,7 +1493,7 @@ export function FornaContainer(element, passedOptions) {
 
     var removeBackBoneLink = function(d) {
         if (d.target.num - d.source.num != 1) {
-            console.log('ERROR: non adjacent nodes. Target:', d.target, 
+            console.log('ERROR: non adjacent nodes. Target:', d.target,
                         'Source:', d.source, 'Link:', d);
             return;
         }
@@ -1508,7 +1508,7 @@ export function FornaContainer(element, passedOptions) {
                 continue;
 
             if (link.source.num <= d.source.num && link.target.num >= d.target.num) {
-                console.log('crossing basepair', link); 
+                console.log('crossing basepair', link);
                 toRemove.push(link);
             }
         }
@@ -1517,7 +1517,7 @@ export function FornaContainer(element, passedOptions) {
         // Remove all base pairs that are between these two nodes and add them as extra
         // links
         console.log('toRemove:', toRemove);
-        
+
         for (let i = 0; i < toRemove.length; i++) {
             rna.pairtable[toRemove[i].source.num] = 0;
             rna.pairtable[toRemove[i].target.num] = 0;
@@ -1525,7 +1525,7 @@ export function FornaContainer(element, passedOptions) {
             toRemove[i].from = toRemove[i].source.num;
             toRemove[i].to = toRemove[i].target.num - d.source.num;
         }
-        
+
         // extract the dotbracket string of the rna
         // cut it at the position of this backbone bond
         let sequence = rna.seq;
@@ -1573,7 +1573,7 @@ export function FornaContainer(element, passedOptions) {
         }
         console.log('self.extraLinks:', self.extraLinks);
         //self.extraLinks.push({'source': rna1.nodes[
-        
+
         // create two new rnas
         // add their positions
         // add them back to the plot
@@ -1635,7 +1635,7 @@ export function FornaContainer(element, passedOptions) {
                              'label_link': true};
 
         console.log('d.linkType:', d.linkType);
-        if (d.linkType in invalidLinks ) 
+        if (d.linkType in invalidLinks )
             return;
 
         removeLink(d);
@@ -1751,7 +1751,7 @@ export function FornaContainer(element, passedOptions) {
                 } else {
                     // only one end of the extra link is within what will become the newly
                     // created molecule, needs to remain an extra link
-                    // source will always be the unchanged molecule, whereas target will be 
+                    // source will always be the unchanged molecule, whereas target will be
                     // the newly created one
                     toAddExternal.push({
                         'source': self.extraLinks[i].target,
@@ -1777,7 +1777,7 @@ export function FornaContainer(element, passedOptions) {
                     toDelete[self.extraLinks[i].uid] = true;
                 }
             }
-            
+
             if (self.extraLinks[i].target.rna == rna1) {
                 if (self.extraLinks[i].source.rna == rna2) {
                     // covered in previous if statement
@@ -1802,7 +1802,7 @@ export function FornaContainer(element, passedOptions) {
                 }
             }
         }
-    
+
 
         self.extraLinks = self.extraLinks.filter((e) => { return !(e.uid in toDelete) });
 
@@ -1816,7 +1816,7 @@ export function FornaContainer(element, passedOptions) {
                                 'positions': newPositions,
                                 'centerView': false});
         else
-            newRna = self.addRNA(newDotbracket, { 'sequence': newSeq, 
+            newRna = self.addRNA(newDotbracket, { 'sequence': newSeq,
                         'centerView': false });
 
 
@@ -1890,7 +1890,7 @@ export function FornaContainer(element, passedOptions) {
             var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: slugid.nice()};
 
             for (let i = 0; i < self.graph.links.length; i++) {
-                if ((self.graph.links[i].source == mousedownNode)  || 
+                if ((self.graph.links[i].source == mousedownNode)  ||
                     (self.graph.links[i].target == mousedownNode) ||
                     (self.graph.links[i].source == mouseupNode) ||
                     (self.graph.links[i].target == mouseupNode)) {
@@ -1898,7 +1898,7 @@ export function FornaContainer(element, passedOptions) {
 
                     // if any of the nodes are already involved in a basepair or a pseudoknot
                     // then we can't make a basepair link
-                    if (self.graph.links[i].linkType == 'basepair' || 
+                    if (self.graph.links[i].linkType == 'basepair' ||
                         self.graph.links[i].linkType == 'pseudoknot' ||
                         self.graph.links[i].linkType == 'intermolecule') {
                         // although should be able to make a backbone link
@@ -1907,9 +1907,9 @@ export function FornaContainer(element, passedOptions) {
                     }
                 }
 
-                if (((self.graph.links[i].source == mouseupNode)  && 
+                if (((self.graph.links[i].source == mouseupNode)  &&
                      (self.graph.links[i].target == mousedownNode)) ||
-                         ((self.graph.links[i].source == mousedownNode)  && 
+                         ((self.graph.links[i].source == mousedownNode)  &&
                           (self.graph.links[i].target == mouseupNode))) {
 
                     // if we're trying to make a link between two nodes which already have
@@ -1924,7 +1924,7 @@ export function FornaContainer(element, passedOptions) {
             if (newLink.source.rna != newLink.target.rna) {
                     // could be either a backbone link or an intermolecule link
 
-                if ((newLink.source.num == 1 && 
+                if ((newLink.source.num == 1 &&
                      newLink.target.num == newLink.target.rna.rnaLength) ||
                      (newLink.target.num == 1 &&
                       newLink.source.num == newLink.source.rna.rnaLength)) {
@@ -1955,7 +1955,7 @@ export function FornaContainer(element, passedOptions) {
                           linkContextMenuShown = true;
                           let linkContextMenu = contextMenu(linkMenu);
                           console.log('newLinkMenu');
-                          linkContextMenu.apply(this, [d,i,true, 
+                          linkContextMenu.apply(this, [d,i,true,
                                                 function() { dragLine.attr('class', 'drag_line_hidden') }]);
                       } else {
                           // between end points but can't make a backbone
@@ -2003,14 +2003,14 @@ export function FornaContainer(element, passedOptions) {
         .call(drag);
       self.force.start();
     };
-    
+
     self.stopAnimation = function() {
       self.animation = false;
       vis.selectAll('g.gnode')
            .on('mousedown.drag', null);
       self.force.stop();
     };
-    
+
     self.setFriction = function(value) {
       self.force.friction(value);
       self.resumeForce();
@@ -2020,22 +2020,22 @@ export function FornaContainer(element, passedOptions) {
       self.force.charge(value);
       self.resumeForce();
     };
-    
+
     self.setGravity = function(value) {
       self.force.gravity(value);
       self.resumeForce();
     };
-    
+
     self.setPseudoknotStrength = function(value) {
       self.linkStrengths.pseudoknot = value;
       self.update();
     };
-    
+
     self.displayBackground = function(value) {
       self.displayParameters.displayBackground = value;
       self.updateStyle();
     };
-    
+
     self.displayNumbering = function(value) {
       self.displayParameters.displayNumbering = value;
       self.updateStyle();
@@ -2045,12 +2045,12 @@ export function FornaContainer(element, passedOptions) {
       self.displayParameters.displayNodeOutline = value;
       self.updateStyle();
     };
-    
+
     self.displayNodeLabel = function(value) {
       self.displayParameters.displayNodeLabel = value;
       self.updateStyle();
     };
-    
+
     self.displayLinks = function(value) {
       self.displayParameters.displayLinks = value;
       self.updateStyle();
@@ -2065,7 +2065,7 @@ export function FornaContainer(element, passedOptions) {
       self.displayParameters.displayProteinLinks = value;
       self.updateStyle();
     };
-    
+
     self.updateStyle = function() {
         // Background
         //rect.classed('transparent', !self.displayParameters.displayBackground);
@@ -2143,9 +2143,9 @@ export function FornaContainer(element, passedOptions) {
         .classed('noselect', true)
         .classed('gnode', true)
         .attr('struct_name', function(d) { return d.structName; })
-        .attr('transform', function(d) { 
+        .attr('transform', function(d) {
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
-                return 'translate(' + [d.x, d.y] + ')'; 
+                return 'translate(' + [d.x, d.y] + ')';
             else
                 return '';
         })
@@ -2157,7 +2157,7 @@ export function FornaContainer(element, passedOptions) {
         .on('mousedrag', function(d) {})
         .on('mouseup', nodeMouseup)
         .attr('num', function(d) { return 'n' + d.num; })
-        .attr('rnum', function(d) { 
+        .attr('rnum', function(d) {
             return 'n' + (d.rna.rnaLength - d.num + 1); })
         .on('click', nodeMouseclick)
         .on('contextmenu', self.nodeContextMenu)
@@ -2166,11 +2166,11 @@ export function FornaContainer(element, passedOptions) {
         .ease('elastic');
 
         // create nodes behind the circles which will serve to highlight them
-        var labelAndProteinNodes = gnodesEnter.filter(function(d) { 
+        var labelAndProteinNodes = gnodesEnter.filter(function(d) {
             return d.nodeType == 'label' || d.nodeType == 'protein';
         });
 
-        var nucleotideNodes = gnodesEnter.filter(function(d) { 
+        var nucleotideNodes = gnodesEnter.filter(function(d) {
             return d.nodeType == 'nucleotide';
         });
 
@@ -2185,10 +2185,10 @@ export function FornaContainer(element, passedOptions) {
         labelAndProteinNodes.append('svg:circle')
         .attr('class', 'node')
         .classed('label', function(d) { return d.nodeType == 'label'; })
-        .attr('r', function(d) { 
-            if (d.nodeType == 'middle') return 0; 
+        .attr('r', function(d) {
+            if (d.nodeType == 'middle') return 0;
             else {
-                return d.radius; 
+                return d.radius;
             }
         })
         .attr('node_type', function(d) { return d.nodeType; })
@@ -2200,7 +2200,7 @@ export function FornaContainer(element, passedOptions) {
         .attr('node_num', function(d) { return d.num; })
         .attr('r', function(d) { return d.radius; })
         .append('svg:title')
-        .text(function(d) { 
+        .text(function(d) {
             if (d.nodeType == 'nucleotide') {
                 return d.structName + ':' + d.num;
             } else {
@@ -2213,7 +2213,7 @@ export function FornaContainer(element, passedOptions) {
         .attr('node_type', function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
         .append('svg:title')
-        .text(function(d) { 
+        .text(function(d) {
             if (d.nodeType == 'nucleotide') {
                 return d.structName + ':' + d.num;
             } else {
@@ -2238,7 +2238,7 @@ export function FornaContainer(element, passedOptions) {
         */
 
         labelsEnter.append('svg:title')
-        .text(function(d) { 
+        .text(function(d) {
             if (d.nodeType == 'nucleotide') {
                 return d.structName + ':' + d.num;
             } else {
@@ -2265,12 +2265,12 @@ export function FornaContainer(element, passedOptions) {
     self.update = function () {
         self.force.nodes(self.graph.nodes)
         .links(self.graph.links);
-        
+
         if (self.animation) {
           self.force.start();
         }
 
-        var allLinks = visLinks.selectAll('line.link') 
+        var allLinks = visLinks.selectAll('line.link')
         .data(self.graph.links.filter(realLinkFilter), linkKey);
 
         allLinks.attr('class', '')
@@ -2327,8 +2327,8 @@ export function FornaContainer(element, passedOptions) {
                 .attr('y2', function(d) { return d.target.y; });
 
                 // Translate the groups
-                gnodes.attr('transform', function(d) { 
-                    return 'translate(' + [d.x, d.y] + ')'; 
+                gnodes.attr('transform', function(d) {
+                    return 'translate(' + [d.x, d.y] + ')';
                 });
 
                 gnodes.select('path')
@@ -2350,16 +2350,16 @@ export function FornaContainer(element, passedOptions) {
                 }
 
             });
-            
+
         self.changeColorScheme(self.colorScheme);
 
         if (self.animation) {
           self.force.start();
         }
-        
+
         self.updateStyle();
     };
-    
+
     self.setSize();
 }
 
