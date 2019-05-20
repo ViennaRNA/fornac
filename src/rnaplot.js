@@ -3,7 +3,7 @@ import {RNAGraph} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {NAView} from './naview/naview.js'
 
-import '../styles/rnaplot.css';
+import './rnaplot.css';
 
 export function rnaPlot(passedOptions = {}) {
     var options = {

@@ -1,10 +1,8 @@
 var path = require("path");
 var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = {
-  mode: 'development',
+var config = {
   entry: {
       fornac: './src/index.js',
   },
@@ -14,7 +12,6 @@ module.exports = {
     libraryTarget: 'umd',
     library: '[name]'
   },
-  devtool: 'inline-source-map',
   devServer: {
     contentBase: [ path.join(__dirname, 'dist'), path.join(__dirname, 'examples') ],
     watchContentBase: true,
@@ -23,9 +20,10 @@ module.exports = {
     hot: true
   },
   plugins: [
-    new BundleTracker({filename: './webpack-stats.json'}),
-    new ExtractTextPlugin({
-      filename: "[name].css",
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].css',
     }),
   ],
   module: {
@@ -37,10 +35,21 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader']
-        })
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+        ],
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          'file-loader'
+        ]
       }
     ]
   },
@@ -50,4 +59,14 @@ module.exports = {
   externals: {
     d3: "d3"
   }
+};
+
+module.exports = (env, argv) => {
+  console.log('Running mode: ', argv.mode)
+  
+  if (argv.mode === 'development') {
+    config.devtool = 'source-map';
+  }
+  
+  return config;
 };

@@ -135,6 +135,7 @@ circle.outline_node {
     -ms-user-select: none;
     user-select: none;
 }
+
 .d3-context-menu {
 	position: absolute;
 	display: none;
@@ -218,6 +219,7 @@ circle.outline_node {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
+
 circle.rna-base {
   stroke: #ccc;
   stroke-width: 1px;
@@ -310,4 +312,3 @@ text.nucleotide-label, text.number-label {
     pointer-events: none;
     fill: #333;
 }
-/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJmb3JuYWMuY3NzIiwic291cmNlUm9vdCI6IiJ9*/

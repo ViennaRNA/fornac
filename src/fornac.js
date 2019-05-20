@@ -2,8 +2,8 @@
 * Date: 2015-03-15
 */
 
-import '../styles/fornac.css';
-import '../styles/d3-context-menu.css';
+import './fornac.css';
+import './d3-context-menu.css';
 
 import d3 from 'd3';
 import slugid from 'slugid';

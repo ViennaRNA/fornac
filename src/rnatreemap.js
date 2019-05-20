@@ -1,6 +1,6 @@
 import {rnaPlot} from './rnaplot.js';
 
-import '../styles/rnaplot.css';
+import './rnaplot.css';
 
 export function rnaTreemap(passedOptions) {
     var options = {

@@ -1,4 +1,5 @@
-import '../styles/d3-context-menu.css';
+import './d3-context-menu.css';
+import ArrowIcon from './img/play.svg';
 
 import d3 from 'd3';
 import slugid from 'slugid';
@@ -215,7 +216,7 @@ export function contextMenu(menu, opts) {
 
             list.selectAll('.d3-context-menu-recursive')
             .append('img')
-            .attr('src', 'images/play.svg')
+            .attr('src', ArrowIcon)
             .attr('width', '14px')
             .attr('height', '14px')
             .style('position', 'absolute')
