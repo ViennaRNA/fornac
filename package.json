@@ -19,8 +19,9 @@
   "scripts": {
     "watch": "webpack --watch",
     "build": "webpack --config webpack.config.js",
-    "dev": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev":   "webpack-dev-server",
+    "lint":  "eslint src/**/*.js test/**/*.js",
+    "test":  "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
@@ -29,7 +30,6 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^2.1.1",
     "eslint": "^5.16.0",
-    "eslint-loader": "^2.1.2",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.31.0",
@@ -37,19 +37,6 @@
     "webpack-cli": "^3.3.2",
     "webpack-dev-server": "^3.4.0",
     "webpack-stream": "^5.2.1"
-  },
-  "eslintConfig": {
-    "env": {
-      "es6": true,
-      "node": true,
-      "browser": true
-    },
-    "rules": {
-      "quotes": [
-        2,
-        "single"
-      ]
-    }
   },
   "dependencies": {
     "d3": "~3.5.13",
