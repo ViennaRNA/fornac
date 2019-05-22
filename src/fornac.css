@@ -5,6 +5,20 @@ svg {
   min-height: 100%;
 }
 
+:global(.d3-tip) {
+    line-height: 1;
+    font-weight: bold;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+text {
+    pointer-events: none;
+}
+
 circle.node {
   stroke: #ccc;
   stroke-width: 1px;
@@ -26,7 +40,7 @@ circle.node.label {
     display: inline;
 }
 
-circle.outline_node {
+circle.outlineNode {
     stroke-width: 1px;
     fill: red;
 }
@@ -37,7 +51,7 @@ circle.protein {
     stroke-width: 4;
 }
 
-circle.hidden_outline {
+circle.hiddenOutline {
     stroke-width: 0px;
 }
 
@@ -48,23 +62,22 @@ line.link {
   stroke-width: 2;
 }
 
-line.pseudoknot {
+line.link[link_type="pseudoknot"] {
     stroke: red;
 }
 
-line.basepair {
+line.link[link_type="basepair"] {
   stroke: red;
 }
 
-line.intermolecule {
+line.link[link_type="intermolecule"] {
   stroke: blue;
 }
 
-line.chain_chain {
+line.link[link_type="chain_chain"] {
   stroke-dasharray: 3,3;
 }
-
-line.fake {
+line.link[link_type="fake"] {
   stroke: green;
 }
 
@@ -76,52 +89,34 @@ line.fake {
     visibility: hidden;
 }
 
-.drag_line {
+.dragLine {
   stroke: #999;
   stroke-width: 2;
   pointer-events: none;
 }
 
-.drag_line_hidden {
+.dragLineHidden {
   stroke: #999;
   stroke-width: 0;
   pointer-events: none;
 }
 
-.d3-tip {
-    line-height: 1;
-    font-weight: bold;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    border-radius: 4px;
-    pointer-events: none;
-          }
-
-text.node-label {
+text.nodeLabel {
     font-weight: bold;
     font-family: Tahoma, Geneva, sans-serif;
     color: rgb(100,100,100);
     pointer-events: none;
 }
 
-text {
-    pointer-events: none;
+:global(.selected) {
+    visibility: visible !important;
 }
 
-g.gnode {
-
-}
-
-circle.outline_node.selected {
-    visibility: visible;
-}
-
-circle.outline_node {
+circle.outlineNode {
     visibility: hidden;
 }
 
-.brush .extent {
+.brush {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;
