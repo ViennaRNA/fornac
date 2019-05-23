@@ -1169,11 +1169,11 @@ export function FornaContainer(element, passedOptions) {
                 .x(xScale)
                 .y(yScale)
                .on('brushstart', function(d) {
-                   var gnodes = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+                   var gnodes = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
                    gnodes.each(function(d) { d.previouslySelected = ctrlKeydown && d.selected; });
                })
                .on('brush', function() {
-                   var gnodes = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+                   var gnodes = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
                    var extent = d3.event.target.extent()
                    .classed(fstyle.brush, true);
 
@@ -1196,7 +1196,7 @@ export function FornaContainer(element, passedOptions) {
       brush.select('.background').style('cursor', 'auto');
 
     function zoomstart() {
-        var node = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+        var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
         node.each(function(d) {
                 d.selected = false;
                 d.previouslySelected = false;
@@ -1323,11 +1323,11 @@ export function FornaContainer(element, passedOptions) {
 
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
-            var node = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+            var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
             node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
           }
 
-        d3.select(this).select(fstyle.outlineNode).classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
+        d3.select(this).select('.outlineNode').classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         var toDrag = selectedNodes(d);
         toDrag.each(function(d1) {
@@ -1867,7 +1867,8 @@ export function FornaContainer(element, passedOptions) {
 
         if (!ctrlKeydown) {
             //if the shift key isn't down, unselect everything
-            var node = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+            var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
+            console.log(node)
             node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
         }
 
@@ -1973,7 +1974,7 @@ export function FornaContainer(element, passedOptions) {
     var nodeMousedown = function(d) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
-            var node = visNodes.selectAll('g.gnode').selectAll(fstyle.outlineNode);
+            var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
             node.classed('selected', function(p) { return p.selected = p.previouslySelected = false; })
           }
 
@@ -2175,11 +2176,13 @@ export function FornaContainer(element, passedOptions) {
         });
 
         labelAndProteinNodes.append('svg:circle')
-        .attr('class', fstyle.outlineNode)
+        .attr('class', 'outlineNode')
+        .classed(fstyle.outlineNode, true)
         .attr('r', function(d) { return d.radius+1; });
 
         nucleotideNodes.append('svg:circle')
-        .attr('class', fstyle.outlineNode)
+        .attr('class', 'outlineNode')
+        .classed(fstyle.outlineNode, true)
         .attr('r', function(d) { return d.radius+1; });
 
         labelAndProteinNodes.append('svg:circle')
