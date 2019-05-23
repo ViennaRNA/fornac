@@ -1,6 +1,6 @@
 var path = require("path");
 var webpack = require('webpack');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ExtractCssChunks = require("extract-css-chunks-webpack-plugin")
 
 module.exports = {
   entry: {
@@ -21,11 +21,13 @@ module.exports = {
     hot: true
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: '[name].css',
-    }),
+      new ExtractCssChunks(
+          {
+            filename: "[name].css",
+            chunkFilename: "[id].css",
+            orderWarning: true,
+          }
+      ),
   ],
   module: {
     rules: [
@@ -37,11 +39,12 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              hmr: true,
-            },
+         {
+           loader:ExtractCssChunks.loader,
+           options: {
+              hot: true,
+              //reloadAll: true,
+            }
           },
           {
             loader: 'css-loader',

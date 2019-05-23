@@ -10,7 +10,6 @@
         height: 100%;
         max-width: 300px;
         border: 1px solid gray;
-        background: white;
     }
 
     .svg-container {
@@ -30,7 +29,7 @@
         max-width: 100px;
         margin: 10px;
     }
-    
+
     .transparent {
         visibility: collapse;
     }
@@ -38,7 +37,7 @@
     .stacked {
         position: absolute;
     }
-    
+
     .overlay {
         fill: transparent;
     }
@@ -96,7 +95,7 @@
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
     .call(chart);
-    
+
     </script>
     <script type='text/javascript'>
 
@@ -160,7 +159,7 @@
     .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
     .classed('rna-cell', true)
     .call(chart);
-    
+
     </script>
     <script type='text/javascript'>
 

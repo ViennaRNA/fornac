@@ -1,57 +1,66 @@
-.fornac-fornacPlot > text {
-    pointer-events: none;
-}
-
-circle.fornac-node {
+circle.fornac-node, polygon.fornac-node {
   stroke: #ccc;
   stroke-width: 1px;
   opacity: 1;
   fill: white;
 }
 
-circle.fornac-node[nucleotide="a"] {
+g.fornac-plot {
+    /* outline: 1px solid red; */
+}
+
+circle.fornac-node[base_type="a"] {
   fill: #dbdb8d;
 }
 
-circle.fornac-node[nucleotide="c"] {
+circle.fornac-node[base_type="c"] {
   fill: #98df8a;
 }
 
-circle.fornac-node[nucleotide="g"] {
+circle.fornac-node[base_type="g"] {
   fill: #ff9896;
 }
 
-circle.fornac-node[nucleotide="u"], circle.fornac-node[nucleotide="t"] {
+circle.fornac-node[base_type="u"], circle.fornac-node[base_type="t"] {
   fill: #aec7e8;
 }
 
-polygon.fornac-node {
-  stroke: #ccc;
-  stroke-width: 1px;
-  opacity: 1;
-  fill: white;
-}
+.fornac-node > text {
+     pointer-events: none;
+ }
 
-circle.fornac-node.fornac-label {
+circle.fornac-node[node_type="label"] {
     stroke: transparent;
     stroke-width: 0;
     fill: white;
     display: inline;
 }
 
-circle.fornac-outlineNode {
-    stroke-width: 1px;
-    fill: red;
-}
-
-circle.fornac-protein {
+circle.fornac-node[node_type="protein"] {
     fill: gray;
     fill-opacity: 0.5;
     stroke-width: 4;
 }
 
-circle.fornac-hiddenOutline {
-    stroke-width: 0px;
+.fornac-selectedNode > circle.fornac-node {
+    stroke: red;
+}
+
+text.fornac-nodeLabel {
+    font-weight: bold;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 0.4em;
+    color: rgb(100,100,100);
+    text-anchor: middle;
+    alignment-baseline: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 line.fornac-link {
@@ -79,7 +88,7 @@ line.fornac-link[link_type="fake"] {
   stroke: green;
 }
 
-.fornac-rnaName {
+text.fornac-plotLabel {
     font-family: Tahoma, Geneva, sans-serif;
     font-weight: bolder;
     font-size: 1.2em;
@@ -94,6 +103,7 @@ line.fornac-link[link_type="fake"] {
     stroke-opacity: 0;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 .fornac-dragLine {
@@ -102,45 +112,12 @@ line.fornac-link[link_type="fake"] {
   pointer-events: none;
 }
 
-.fornac-dragLineHidden {
-  stroke: #999;
-  stroke-width: 0;
-  pointer-events: none;
-}
-
-.fornac-nodeLabel {
-    font-weight: bold;
-    font-family: Tahoma, Geneva, sans-serif;
-    font-size: 0.4em;
-    color: rgb(100,100,100);
-    text-anchor: middle;
-    alignment-baseline: middle;
-    dominant-baseline: central;
-    pointer-events: none;
-}
-
-.fornac-selected {
-    visibility: visible !important;
-}
-
-circle.fornac-outlineNode {
-    visibility: hidden;
-}
-
 .fornac-brush {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;
 }
 
-.fornac-noselect {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
 .d3-context-menu {
 	position: absolute;
 	display: none;

@@ -1,57 +1,66 @@
-.fornacPlot > text {
-    pointer-events: none;
-}
-
-circle.node {
+circle.node, polygon.node {
   stroke: #ccc;
   stroke-width: 1px;
   opacity: 1;
   fill: white;
 }
 
-circle.node[nucleotide="a"] {
+g.plot {
+    /* outline: 1px solid red; */
+}
+
+circle.node[base_type="a"] {
   fill: #dbdb8d;
 }
 
-circle.node[nucleotide="c"] {
+circle.node[base_type="c"] {
   fill: #98df8a;
 }
 
-circle.node[nucleotide="g"] {
+circle.node[base_type="g"] {
   fill: #ff9896;
 }
 
-circle.node[nucleotide="u"], circle.node[nucleotide="t"] {
+circle.node[base_type="u"], circle.node[base_type="t"] {
   fill: #aec7e8;
 }
 
-polygon.node {
-  stroke: #ccc;
-  stroke-width: 1px;
-  opacity: 1;
-  fill: white;
-}
+.node > text {
+     pointer-events: none;
+ }
 
-circle.node.label {
+circle.node[node_type="label"] {
     stroke: transparent;
     stroke-width: 0;
     fill: white;
     display: inline;
 }
 
-circle.outlineNode {
-    stroke-width: 1px;
-    fill: red;
-}
-
-circle.protein {
+circle.node[node_type="protein"] {
     fill: gray;
     fill-opacity: 0.5;
     stroke-width: 4;
 }
 
-circle.hiddenOutline {
-    stroke-width: 0px;
+.selectedNode > circle.node {
+    stroke: red;
+}
+
+text.nodeLabel {
+    font-weight: bold;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 0.4em;
+    color: rgb(100,100,100);
+    text-anchor: middle;
+    alignment-baseline: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 line.link {
@@ -79,7 +88,7 @@ line.link[link_type="fake"] {
   stroke: green;
 }
 
-.rnaName {
+text.plotLabel {
     font-family: Tahoma, Geneva, sans-serif;
     font-weight: bolder;
     font-size: 1.2em;
@@ -94,6 +103,7 @@ line.link[link_type="fake"] {
     stroke-opacity: 0;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
 }
 
 .dragLine {
@@ -102,42 +112,8 @@ line.link[link_type="fake"] {
   pointer-events: none;
 }
 
-.dragLineHidden {
-  stroke: #999;
-  stroke-width: 0;
-  pointer-events: none;
-}
-
-.nodeLabel {
-    font-weight: bold;
-    font-family: Tahoma, Geneva, sans-serif;
-    font-size: 0.4em;
-    color: rgb(100,100,100);
-    text-anchor: middle;
-    alignment-baseline: middle;
-    dominant-baseline: central;
-    pointer-events: none;
-}
-
-.selected {
-    visibility: visible !important;
-}
-
-circle.outlineNode {
-    visibility: hidden;
-}
-
 .brush {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;
-}
-
-.noselect {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
