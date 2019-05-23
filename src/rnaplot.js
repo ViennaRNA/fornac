@@ -3,7 +3,7 @@ import {RNAGraph} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {NAView} from './naview/naview.js'
 
-import './rnaplot.css';
+import fstyle from './fornac.css';
 
 export function rnaPlot(passedOptions = {}) {
     var options = {
@@ -16,14 +16,14 @@ export function rnaPlot(passedOptions = {}) {
         'showNucleotideLabels': true,
         'startNucleotideNumber': 1,
         'bundleExternalLinks': false,
-        
+
         'rnaLayout': 'simple', // simple or naview
         'namePosition': '0 0' // for x and y either 0, 0.5 or 1
     };
     var options = Object.assign(options, passedOptions);
 
     var xScale, yScale;
-    
+
     function createTransformToFillViewport(xValues, yValues) {
         // create transform that will scale the x and y values so that
         // they fill the available viewport
@@ -90,26 +90,26 @@ export function rnaPlot(passedOptions = {}) {
     function createNucleotides(selection, nucleotideNodes) {
         // create groupings for each nucleotide and label
         var gs = selection
-        .selectAll('.rna-base')
+        .selectAll('.gnode')
         .data(nucleotideNodes)
         .enter()
         .append('svg:g')
+        .classed('gnode', true)
         .attr('transform', function(d) {
             return 'translate(' + d.x + ',' + d.y + ')';
         });
 
         var circles = gs.append('svg:circle')
-        .attr('data-base', (d) => { if (d.name) { return d.name.toLowerCase(); }})
+        .classed(fstyle.node, true)
+        .attr('node_type', 'nucleotide')
+        .attr('base_type', (d) => { if (d.name) { return d.name.toLowerCase(); }})
         .attr('r', options.nucleotideRadius)
-        .classed('rna-base', true)
-        
+
 
         if (options.showNucleotideLabels) {
             var nucleotideLabels = gs.append('svg:text')
             .text(function(d) { return d.name; })
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central')
-            .classed('nucleotide-label', true)
+            .classed(fstyle.nodeLabel, true)
             .append('svg:title')
             .text(function(d) { return d.struct_name + ':' + d.num; });
         }
@@ -119,41 +119,37 @@ export function rnaPlot(passedOptions = {}) {
         // create groupings for each nucleotide and label
 
         var gs = selection
-        .selectAll('.rnaLabel')
+        .selectAll()
         .data(labelNodes)
         .enter()
         .append('svg:g')
+        .classed('gnode', true)
         .attr('transform', function(d) {
             return 'translate(' + d.x + ',' + d.y + ')';
         });
-        
+
         var circles = gs.append('svg:circle')
+        .classed(fstyle.node, true)
+        .attr('node_type', 'label')
         .attr('r', options.nucleotideRadius)
-        .classed('rna-base', true)
-        .classed('label', true)
 
         var numberLabels = gs.append('svg:text')
+        .classed(fstyle.nodeLabel, true)
         .text(function(d) { return d.name; })
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', 'bold')
-        .attr('dominant-baseline', 'central')
-        .classed('number-label', true);
     }
 
     function createName(selection, name) {
         let nameLabel = selection.append('svg:text')
         //.attr('dy', -10)
-        .classed('rna-name', true)
-        .attr('text-anchor', 'middle')
-        .attr('alignment-baseline', 'central')
+        .classed(fstyle.plotLabel, true)
         .text(name);
-    
+
         let xyPos = options.namePosition.split(" ", 2) // 0 0.5 1
         let xy = []
         let textBBox = nameLabel.node().getBBox()
         let textSize = [textBBox.width, textBBox.height]
         let plotSize = [options.width, options.height]
-        
+
         for (let p in [0, 1]) {
             switch (xyPos[p]) {
                 case '0':
@@ -174,7 +170,7 @@ export function rnaPlot(passedOptions = {}) {
         var nodesDict = {};
         var linksList = [];
         links = links.filter(function(d) { return d.linkType == 'correct' || d.linkType == 'incorrect' || d.linkType == 'extra'; });
-        
+
         selection.selectAll('[link-type=extra]')
         .remove();
 
@@ -214,7 +210,7 @@ export function rnaPlot(passedOptions = {}) {
 
     function createLinks(selection, links) {
         links = links.filter(function(d) { return d.source !== null && d.target !== null; });
-        var gs = selection.selectAll('.rna-link')
+        var gs = selection.selectAll('.link')
         .data(links)
         .enter()
         .append('svg:line')
@@ -224,14 +220,15 @@ export function rnaPlot(passedOptions = {}) {
         .attr('y2', function(d) { return d.target.y; })
         .attr('link-type', function(d) { return d.linkType; })
         .attr('extra-link-type', function(d) { return d.extraLinkType; })
-        .classed('rna-link', true);
+        .classed('link', true)
+        .classed(fstyle.link, true)
     }
 
     function chart(selection) {
-        selection.each(function(data) {            
+        selection.each(function(data) {
             let plot = d3.select(this).append('g')
-            .classed('rnaplot', true)
-            
+            .classed(fstyle.plot, true)
+
             // data should be a dictionary containing at least a structure
             // and possibly a sequence
             let rg = new RNAGraph(data.sequence, data.structure, data.name, options.startNucleotideNumber)
@@ -244,18 +241,18 @@ export function rnaPlot(passedOptions = {}) {
             // the positions of the labels will be calculated in
             // the addLabels function
             let positions = [];
-            
+
             if (options.rnaLayout === 'naview') {
                 var naview = new NAView();
                 var naViewPositions = naview.naview_xy_coordinates(rg.pairtable);
-                
+
                 for (var i = 0; i < naViewPositions.nbase; i++) {
                     positions.push([naViewPositions.x[i], naViewPositions.y[i]]);
                 }
             } else {
                 positions = simpleXyCoordinates(rg.pairtable);
             }
-            
+
             rg.addPositions('nucleotide', positions)
             //.reinforceStems()
             //.reinforceLoops()
@@ -263,13 +260,13 @@ export function rnaPlot(passedOptions = {}) {
             .addLabels(options.startNucleotideNumber, options.labelInterval);
 
             // create a transform that will fit the molecule to the
-            // size of the viewport (canvas, svg, whatever)            
+            // size of the viewport (canvas, svg, whatever)
             let fillViewportTransform = createTransformToFillViewport(
                 rg.nodes.map(function(d) { return d.x; }),
                 rg.nodes.map(function(d) { return d.y; })
             );
             plot.attr('transform', fillViewportTransform);
-            
+
             let nucleotideNodes = rg.nodes.filter(function(d) {
                 return d.nodeType == 'nucleotide';
             });
@@ -277,7 +274,7 @@ export function rnaPlot(passedOptions = {}) {
             let labelNodes = rg.nodes.filter(function(d) {
                 return d.nodeType == 'label';
             });
-            
+
             let links = rg.links;
 
             createLinks(plot, links);
@@ -345,18 +342,18 @@ export function rnaPlot(passedOptions = {}) {
         options.bundleExternalLinks = _;
         return chart;
     };
-    
+
     chart.rnaLayout = function(_) {
         if (!arguments.length) return options.rnaLayout;
         options.rnaLayout = _;
         return chart;
     };
-    
+
     chart.namePosition = function(_) {
         if (!arguments.length) return options.namePosition;
         options.namePosition = _;
         return chart;
     };
-    
+
     return chart;
 }

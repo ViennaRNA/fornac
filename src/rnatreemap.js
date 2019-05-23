@@ -1,8 +1,6 @@
 import {rnaPlot} from './rnaplot.js';
 
-import './rnaplot.css';
-
-export function rnaTreemap(passedOptions) {
+export function rnaTreemap(passedOptions = {}) {
     var options = {
         'width': 300,
         'height': 300,
@@ -13,11 +11,11 @@ export function rnaTreemap(passedOptions) {
         'showNucleotideLabels': true,
         'startNucleotideNumber': 1,
         'bundleExternalLinks': false,
-        
+
         'rnaLayout': 'simple', // simple or naview
         'namePosition': '0 0', // for x and y either 0, 0.5 or 1
     };
-    
+
     var options = Object.assign(options, passedOptions);
 
     function rnaTreemapNode(selection) {
@@ -26,6 +24,7 @@ export function rnaTreemap(passedOptions) {
             d3.select(this)
             .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')' })
             .append('rect')
+            .attr('fill', 'transparent')
             .attr('width', function(d) { return Math.max(0, d.dx); })
             .attr('height', function(d) { return Math.max(0, d.dy); })
 
@@ -79,7 +78,7 @@ export function rnaTreemap(passedOptions) {
         options.height = _;
         return chart;
     };
-    
+
     chart.showNucleotideLabels = function(_) {
         if (!arguments.length) return options.showNucleotideLabels;
         options.showNucleotideLabels = _;
@@ -121,19 +120,19 @@ export function rnaTreemap(passedOptions) {
         options.bundleExternalLinks = _;
         return chart;
     };
-    
+
     chart.rnaLayout = function(_) {
         if (!arguments.length) return options.rnaLayout;
         options.rnaLayout = _;
         return chart;
     };
-    
+
     chart.namePosition = function(_) {
         if (!arguments.length) return options.namePosition;
         options.namePosition = _;
         return chart;
     };
-    
+
     chart.zoom = function(_) {
         if (!arguments.length) return options.zoom;
         options.zoom = _;

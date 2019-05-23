@@ -2,8 +2,7 @@
 * Date: 2015-03-15
 */
 
-import './fornac.css';
-import './d3-context-menu.css';
+import fstyle from './fornac.css';
 
 import d3 from 'd3';
 import slugid from 'slugid';
@@ -15,10 +14,10 @@ import {ColorScheme, rnaUtilities} from './rnautils.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {NAView} from './naview/naview.js';
 
-export function FornaContainer(element, passedOptions) {
+export function FornaContainer(element, passedOptions = {}) {
     var self = this;
 
-    self.options = {
+    let options = {
         'editable': false,
         'displayAllLinks': false,
         'labelInterval': 10,
@@ -38,12 +37,7 @@ export function FornaContainer(element, passedOptions) {
                                     //performance is an issue
     };
 
-    if (arguments.length > 1) {
-        for (var option in passedOptions) {
-            if (self.options.hasOwnProperty(option))
-                self.options[option] = passedOptions[option];
-        }
-    }
+    self.options = Object.assign(options, passedOptions);
 
     if (self.options.initialSize !== null) {
         self.options.svgW = self.options.initialSize[0];
@@ -303,7 +297,7 @@ export function FornaContainer(element, passedOptions) {
     };
 
 
-    self.createInitialLayout = function(structure, passedOptions) {
+    self.createInitialLayout = function(structure, passedOptions = {}) {
         // the default options
         var options = {
                         'sequence': '',
@@ -315,12 +309,7 @@ export function FornaContainer(element, passedOptions) {
                         'circularizeExternal': true
                       };
 
-        if (arguments.length == 2) {
-            for (var option in passedOptions) {
-                if (options.hasOwnProperty(option))
-                    options[option] = passedOptions[option];
-            }
-        }
+        options = Object.assign(options, passedOptions);
 
         console.log('options.uids:', options.uids);
         var rg = new RNAGraph(options.sequence, structure, options.name);
@@ -356,7 +345,7 @@ export function FornaContainer(element, passedOptions) {
         return rnaJson;
     };
 
-    self.addRNA = function(structure, passedOptions) {
+    self.addRNA = function(structure, passedOptions = {}) {
         var rnaJson = self.createInitialLayout(structure, passedOptions);
         let centerView = false;
 
@@ -374,9 +363,6 @@ export function FornaContainer(element, passedOptions) {
         console.log(JSON.stringify(rnaJson.nodes[0],null,2));
         console.log(JSON.stringify(rnaJson.links[0],null,2));
         */
-
-        if (arguments.length === 1)
-            passedOptions = {};
 
         if ('extraLinks' in passedOptions) {
             // presumably the passed in links are within the passed molecule
@@ -1013,7 +999,7 @@ export function FornaContainer(element, passedOptions) {
     self.changeColorScheme = function(newColorScheme) {
         var proteinNodes = visNodes.selectAll('[node_type=protein]');
 
-        proteinNodes.classed('protein', true)
+        proteinNodes.classed(fstyle.node, true)
                     .attr('r', function(d) { return d.radius; });
 
         var gnodes = visNodes.selectAll('g.gnode');
@@ -1088,16 +1074,20 @@ export function FornaContainer(element, passedOptions) {
     }
 
     function mousemove() {
+        // only if we are dragging
         if (!mousedownNode) return;
 
-        let mpos = d3.mouse(vis.node());
+        // if mouse starts to move, deselect all
+        let node = visNodes.selectAll('g.gnode');
+        node.classed(fstyle.selectedNode, function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
+
         // update drag line
+        let mpos = d3.mouse(vis.node());
         dragLine
         .attr('x1', mousedownNode.x)
         .attr('y1', mousedownNode.y)
         .attr('x2', mpos[0])
         .attr('y2', mpos[1]);
-
     }
 
     function mouseup() {
@@ -1105,7 +1095,7 @@ export function FornaContainer(element, passedOptions) {
 
             if (!linkContextMenuShown)
                 dragLine
-                .attr('class', 'drag_line_hidden');
+                .attr('class', fstyle.transparent);
         }
 
         // clear mouse event vars
@@ -1132,14 +1122,14 @@ export function FornaContainer(element, passedOptions) {
     .append('svg:svg')
     .attr('width', self.options.svgW)
     .attr('height', self.options.svgH)
-    .attr('id', 'plotting-area');
 
     self.options.svg = svg;
 
     var svgGraph = svg.append('svg:g')
     .on('mousemove', mousemove)
     .on('mousedown', mousedown)
-    .on('mouseup', mouseup);
+    .on('mouseup', mouseup)
+    .classed('mouseEventHelper', true)
 
     if (self.options.allowPanningAndZooming)
         svgGraph.call(self.zoomer);
@@ -1160,9 +1150,10 @@ export function FornaContainer(element, passedOptions) {
 
     var brush = svgGraph.append('g')
     .datum(function() { return {selected: false, previouslySelected: false}; })
-    .attr('class', 'brush');
+    .attr('class', fstyle.brush);
 
-    var vis = svgGraph.append('svg:g');
+    var vis = svgGraph.append('svg:g')
+    .classed(fstyle.plot, true)
     var visLinks = vis.append('svg:g');
     var visNodes = vis.append('svg:g');
 
@@ -1170,14 +1161,14 @@ export function FornaContainer(element, passedOptions) {
                 .x(xScale)
                 .y(yScale)
                .on('brushstart', function(d) {
-                   var gnodes = visNodes.selectAll('g.gnode').selectAll('.outline_node');
+                   var gnodes = visNodes.selectAll('g.gnode');
                    gnodes.each(function(d) { d.previouslySelected = ctrlKeydown && d.selected; });
                })
                .on('brush', function() {
-                   var gnodes = visNodes.selectAll('g.gnode').selectAll('.outline_node');
+                   var gnodes = visNodes.selectAll('g.gnode');
                    var extent = d3.event.target.extent();
 
-                   gnodes.classed('selected', function(d) {
+                   gnodes.classed(fstyle.selectedNode, function(d) {
                        return d.selected = self.options.applyForce && d.previouslySelected ^
                        (extent[0][0] <= d.x && d.x < extent[1][0]
                         && extent[0][1] <= d.y && d.y < extent[1][1]);
@@ -1196,12 +1187,12 @@ export function FornaContainer(element, passedOptions) {
       brush.select('.background').style('cursor', 'auto');
 
     function zoomstart() {
-        var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
+        var node = visNodes.selectAll('g.gnode');
         node.each(function(d) {
                 d.selected = false;
                 d.previouslySelected = false;
                 });
-        node.classed('selected', false);
+        node.classed(fstyle.selectedNode, false);
     }
 
     function redraw() {
@@ -1290,7 +1281,7 @@ export function FornaContainer(element, passedOptions) {
 
     // line displayed when dragging new nodes
     var dragLine = vis.append('line')
-    .attr('class', 'drag_line')
+    .attr('class', fstyle.dragLine)
     .attr('x1', 0)
     .attr('y1', 0)
     .attr('x2', 0)
@@ -1323,11 +1314,11 @@ export function FornaContainer(element, passedOptions) {
 
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
-            var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
+            var node = visNodes.selectAll('g.gnode');
+            node.classed(fstyle.selectedNode, function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
           }
 
-        d3.select(this).select('.outline_node').classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
+        d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         var toDrag = selectedNodes(d);
         toDrag.each(function(d1) {
@@ -1867,12 +1858,12 @@ export function FornaContainer(element, passedOptions) {
 
         if (!ctrlKeydown) {
             //if the shift key isn't down, unselect everything
-            var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
+            var node = visNodes.selectAll('g.gnode');
+            node.classed(fstyle.selectedNode, function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
         }
 
         // always select this node
-        d3.select(this).select('circle').classed('selected', d.selected = self.options.applyForce && !d.previouslySelected);
+        d3.select(this).classed(fstyle.selectedNode, d.selected = self.options.applyForce && !d.previouslySelected);
         d3.event.stopPropagation();
     };
 
@@ -1936,7 +1927,7 @@ export function FornaContainer(element, passedOptions) {
                                       linkContextMenuShown = false;
                                       console.log('Item #1 clicked!');
                                       console.log('The data for this circle is: ' + d);
-                                      dragLine.attr('class', 'drag_line_hidden');
+                                      dragLine.attr('class', fstyle.transparent);
                                       self.addBackBoneLink(newLink);
                                   },
                                   disabled: false // optional, defaults to false
@@ -1947,7 +1938,7 @@ export function FornaContainer(element, passedOptions) {
                                       linkContextMenuShown = false;
                                       console.log('You have clicked the second item!');
                                       console.log('The data for this circle is: ' + d);
-                                      dragLine.attr('class', 'drag_line_hidden');
+                                      dragLine.attr('class', fstyle.transparent);
                                       self.addLink(newLink);
                                   }
                               }
@@ -1956,7 +1947,7 @@ export function FornaContainer(element, passedOptions) {
                           let linkContextMenu = contextMenu(linkMenu);
                           console.log('newLinkMenu');
                           linkContextMenu.apply(this, [d,i,true,
-                                                function() { dragLine.attr('class', 'drag_line_hidden') }]);
+                                                function() { dragLine.attr('class', fstyle.transparent) }]);
                       } else {
                           // between end points but can't make a backbone
                           if (basepairPossible)
@@ -1973,12 +1964,12 @@ export function FornaContainer(element, passedOptions) {
     var nodeMousedown = function(d) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
-            var node = visNodes.selectAll('g.gnode').selectAll('.outline_node');
-            node.classed('selected', function(p) { return p.selected =  p.previouslySelected = false; })
+            var node = visNodes.selectAll('g.gnode');
+            node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; })
           }
 
 
-          d3.select(this).classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
+          d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         if (!shiftKeydown) {
             return;
@@ -1987,14 +1978,11 @@ export function FornaContainer(element, passedOptions) {
         mousedownNode = d;
 
         dragLine
-        .attr('class', 'drag_line')
+        .attr('class', fstyle.dragLine)
         .attr('x1', mousedownNode.x)
         .attr('y1', mousedownNode.y)
         .attr('x2', mousedownNode.x)
         .attr('y2', mousedownNode.y);
-
-        //gnodes.attr('pointer-events',  'none');
-
     };
 
     self.startAnimation = function() {
@@ -2070,22 +2058,22 @@ export function FornaContainer(element, passedOptions) {
         // Background
         //rect.classed('transparent', !self.displayParameters.displayBackground);
         // Numbering
-        visNodes.selectAll('[node_type=label]').classed('transparent', !self.displayParameters.displayNumbering);
-        visNodes.selectAll('[label_type=label]').classed('transparent', !self.displayParameters.displayNumbering);
-        visLinks.selectAll('[linkType=label_link]').classed('transparent', !self.displayParameters.displayNumbering);
+        visNodes.selectAll('[node_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
+        visNodes.selectAll('[label_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
+        visLinks.selectAll('[linkType=label_link]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
         // Node Outline
-        svg.selectAll('circle').classed('hidden_outline', !self.displayParameters.displayNodeOutline);
+        svg.selectAll('circle').classed(fstyle.transparent, !self.displayParameters.displayNodeOutline);
         // Node Labels
-        visNodes.selectAll('[label_type=nucleotide]').classed('transparent', !self.displayParameters.displayNodeLabel);
+        visNodes.selectAll('[label_type=nucleotide]').classed(fstyle.transparent, !self.displayParameters.displayNodeLabel);
         // Links
-        svg.selectAll('[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=external]').classed('transparent', !self.displayParameters.displayLinks);
+        svg.selectAll('[link_type=real],[link_type=basepair],[link_type=backbone],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=external]').classed(fstyle.transparent, !self.displayParameters.displayLinks);
         // Pseudoknot Links
-        svg.selectAll('[link_type=pseudoknot]').classed('transparent', !self.displayParameters.displayPseudoknotLinks);
+        svg.selectAll('[link_type=pseudoknot]').classed(fstyle.transparent, !self.displayParameters.displayPseudoknotLinks);
         // Protein Links
-        svg.selectAll('[link_type=protein_chain]').classed('transparent', !self.displayParameters.displayProteinLinks);
+        svg.selectAll('[link_type=protein_chain]').classed(fstyle.transparent, !self.displayParameters.displayProteinLinks);
         // Fake Links
-        visLinks.selectAll('[link_type=fake]').classed('transparent', !self.options.displayAllLinks);
-        visLinks.selectAll('[link_type=fake_fake]').classed('transparent', !self.options.displayAllLinks);
+        visLinks.selectAll('[link_type=fake]').classed(fstyle.transparent, !self.options.displayAllLinks);
+        visLinks.selectAll('[link_type=fake_fake]').classed(fstyle.transparent, !self.options.displayAllLinks);
     };
 
     function nudge(dx, dy) {
@@ -2112,12 +2100,12 @@ export function FornaContainer(element, passedOptions) {
 
         linkLines
         .classed('link', true)
+        .classed(fstyle.link, true)
         .attr('x1', function(d) { return d.source.x; })
         .attr('y1', function(d) { return d.source.y; })
         .attr('x2', function(d) { return d.target.x; })
         .attr('y2', function(d) { return d.target.y; })
         .attr('link_type', function(d) { return d.linkType; } )
-        .attr('class', function(d) { return d3.select(this).attr('class') + ' ' + d.linkType; })
         .attr('pointer-events', function(d) { if (d.linkType == 'fake') return 'none'; else return 'all';});
 
         /* We don't need to update the positions of the stabilizing links */
@@ -2140,7 +2128,6 @@ export function FornaContainer(element, passedOptions) {
 
     self.createNewNodes = function(gnodesEnter) {
         gnodesEnter = gnodesEnter.append('g')
-        .classed('noselect', true)
         .classed('gnode', true)
         .attr('struct_name', function(d) { return d.structName; })
         .attr('transform', function(d) {
@@ -2175,16 +2162,7 @@ export function FornaContainer(element, passedOptions) {
         });
 
         labelAndProteinNodes.append('svg:circle')
-        .attr('class', 'outline_node')
-        .attr('r', function(d) { return d.radius+1; });
-
-        nucleotideNodes.append('svg:circle')
-        .attr('class', 'outline_node')
-        .attr('r', function(d) { return d.radius+1; });
-
-        labelAndProteinNodes.append('svg:circle')
-        .attr('class', 'node')
-        .classed('label', function(d) { return d.nodeType == 'label'; })
+        .classed(fstyle.node, function(d) { return d.nodeType == 'label'; })
         .attr('r', function(d) {
             if (d.nodeType == 'middle') return 0;
             else {
@@ -2195,7 +2173,7 @@ export function FornaContainer(element, passedOptions) {
         .attr('node_num', function(d) { return d.num; });
 
         nucleotideNodes.append('svg:circle')
-        .attr('class', 'node')
+        .attr('class', fstyle.node)
         .attr('node_type', function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
         .attr('r', function(d) { return d.radius; })
@@ -2209,7 +2187,7 @@ export function FornaContainer(element, passedOptions) {
         });
 
         nucleotideNodes.append('svg:path')
-        .attr('class', 'node')
+        .attr('class', fstyle.node)
         .attr('node_type', function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; })
         .append('svg:title')
@@ -2224,11 +2202,7 @@ export function FornaContainer(element, passedOptions) {
 
         var labelsEnter = gnodesEnter.append('text')
         .text(function(d) { return d.name; })
-        .attr('text-anchor', 'middle')
-        .attr('font-size', 8.0)
-        .attr('font-weight', 'bold')
-        .attr('y', 2.5)
-        .attr('class', 'node-label')
+        .attr('class', fstyle.nodeLabel)
         .attr('label_type', function(d) { return d.nodeType; })
 
         /*
@@ -2275,8 +2249,8 @@ export function FornaContainer(element, passedOptions) {
 
         allLinks.attr('class', '')
         .classed('link', true)
+        .classed(fstyle.link, true)
         .attr('link_type', function(d) { return d.linkType; } )
-        .attr('class', function(d) { return d3.select(this).attr('class') + ' ' + d.linkType; });
 
         var linksEnter = allLinks.enter();
         self.createNewLinks(linksEnter);

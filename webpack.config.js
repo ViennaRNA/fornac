@@ -1,8 +1,8 @@
 var path = require("path");
 var webpack = require('webpack');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ExtractCssChunks = require("extract-css-chunks-webpack-plugin")
 
-var config = {
+module.exports = {
   entry: {
       fornac: './src/index.js',
   },
@@ -12,6 +12,7 @@ var config = {
     libraryTarget: 'umd',
     library: '[name]'
   },
+  devtool: 'source-map',
   devServer: {
     contentBase: path.join(__dirname, 'examples'),
     watchContentBase: true,
@@ -20,11 +21,13 @@ var config = {
     hot: true
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: '[name].css',
-    }),
+      new ExtractCssChunks(
+          {
+            filename: "[name].css",
+            chunkFilename: "[id].css",
+            orderWarning: true,
+          }
+      ),
   ],
   module: {
     rules: [
@@ -36,13 +39,21 @@ var config = {
       {
         test: /\.css$/,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              hmr: process.env.NODE_ENV === 'development',
-            },
+         {
+           loader:ExtractCssChunks.loader,
+           options: {
+              hot: true,
+              //reloadAll: true,
+            }
           },
-          'css-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: '[name]-[local]',
+              sourceMap: true,
+            }
+          }
         ],
       },
       {
@@ -59,14 +70,4 @@ var config = {
   externals: {
     d3: "d3"
   }
-};
-
-module.exports = (env, argv) => {
-  console.log('Running mode: ', argv.mode)
-
-  if (argv.mode === 'development') {
-    config.devtool = 'source-map';
-  }
-
-  return config;
 };

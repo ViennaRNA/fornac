@@ -1,4 +1,4 @@
-.d3-context-menu {
+:global(.d3-context-menu) {
 	position: absolute;
 	display: none;
 	background-color: #f2f2f2;
@@ -12,14 +12,14 @@
 	z-index:1200;
 }
 
-.d3-context-menu ul {
+:global(.d3-context-menu ul) {
 	list-style-type: none;
 	margin: 4px 0px;
 	padding: 0px;
 	cursor: default;
 }
 
-.d3-context-menu ul li {
+:global(.d3-context-menu ul li) {
 	padding: 4px 16px;
 
 	-webkit-touch-callout: none; /* iOS Safari */
@@ -30,12 +30,12 @@
 	user-select: none;
 }
 
-.d3-context-menu ul li:hover {
+:global(.d3-context-menu ul li:hover) {
 	background-color: #4677f8;
 	color: #fefefe;
 }
 
-.d3-context-menu-selected {
+:global(.d3-context-menu-selected) {
 	background-color: #4677f8;
 	color: #fefefe;
 }
@@ -44,8 +44,8 @@
 	Header
 */
 
-.d3-context-menu ul li.is-header,
-.d3-context-menu ul li.is-header:hover {
+:global(.d3-context-menu ul li.is-header,
+.d3-context-menu ul li.is-header:hover) {
 	background-color: #f2f2f2;
 	color: #444;
 	font-weight: bold;
@@ -56,8 +56,8 @@
 	Disabled
 */
 
-.d3-context-menu ul li.is-disabled,
-.d3-context-menu ul li.is-disabled:hover {
+:global(.d3-context-menu ul li.is-disabled,
+.d3-context-menu ul li.is-disabled:hover) {
 	background-color: #f2f2f2;
 	color: #888;
 	cursor: not-allowed;
@@ -67,15 +67,15 @@
 	Divider
 */
 
-.d3-context-menu ul li.is-divider {
+:global(.d3-context-menu ul li.is-divider) {
 	padding: 0px 0px;
 }
 
-.d3-context-menu ul li.is-divider:hover {
+:global(.d3-context-menu ul li.is-divider:hover) {
 	background-color: #f2f2f2;
 }
 
-.d3-context-menu ul hr {
+:global(.d3-context-menu ul hr) {
 	border: 0;
     height: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);

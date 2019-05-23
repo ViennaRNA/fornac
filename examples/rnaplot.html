@@ -8,7 +8,7 @@
     svg {
         width: 100%;
         height: 100%;
-        max-width: 200px;
+        max-width: 300px;
         border: 1px solid gray;
     }
 
@@ -30,13 +30,21 @@
         margin: 10px;
     }
 
+    .transparent {
+        visibility: collapse;
+    }
+
     .stacked {
         position: absolute;
+    }
+
+    .overlay {
+        fill: transparent;
     }
   </style>
 </head>
 <body>
-    <div style="width: 800px; margin: auto;">
+    <div style="max-width: 800px; margin: auto;">
     <h3>RNAPlot Examples</h3>
     RNAplot Examples:
     <div id='rna_ss' class="svg-container-grid"> </div>
@@ -88,6 +96,8 @@
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
     .call(chart);
 
+    </script>
+    <script type='text/javascript'>
 
     var gridData = [
         {'structure': '((..((....)).(((....))).))',
@@ -150,6 +160,9 @@
     .classed('rna-cell', true)
     .call(chart);
 
+    </script>
+    <script type='text/javascript'>
+
     var svgWidth = 200;
     var svgHeight = 200;
 
@@ -170,7 +183,7 @@
        'name': 't4'}
     ];
 
-    var chart = fornac.rnaPlot()
+    var timeChart = fornac.rnaPlot()
     .width(svgWidth)
     .height(svgHeight)
     .rnaLayout('simple')
@@ -178,7 +191,7 @@
     .startNucleotideNumber(10)
     .labelInterval(0)
 
-    var svg = d3.select('#rna_rpt')
+    var timeSVG = d3.select('#rna_rpt')
     .selectAll('svg')
     .data(timeData)
     .enter()
@@ -189,7 +202,7 @@
     .append('svg')
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
-    .call(chart);
+    .call(timeChart);
 
     var sliderChange = (value) => {
       let plotid = "#" + timeData[value].name

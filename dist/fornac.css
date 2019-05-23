@@ -1,139 +1,121 @@
-svg {
-  display: block;
-  //min-width: 100%;
-  //width: 100%;
-  min-height: 100%;
-}
-
-circle.node {
+circle.fornac-node, polygon.fornac-node {
   stroke: #ccc;
   stroke-width: 1px;
   opacity: 1;
   fill: white;
 }
 
-polygon.node {
-  stroke: #ccc;
-  stroke-width: 1px;
-  opacity: 1;
-  fill: white;
+g.fornac-plot {
+    /* outline: 1px solid red; */
 }
 
-circle.node.label {
+circle.fornac-node[base_type="a"] {
+  fill: #dbdb8d;
+}
+
+circle.fornac-node[base_type="c"] {
+  fill: #98df8a;
+}
+
+circle.fornac-node[base_type="g"] {
+  fill: #ff9896;
+}
+
+circle.fornac-node[base_type="u"], circle.fornac-node[base_type="t"] {
+  fill: #aec7e8;
+}
+
+.fornac-node > text {
+     pointer-events: none;
+ }
+
+circle.fornac-node[node_type="label"] {
     stroke: transparent;
     stroke-width: 0;
     fill: white;
     display: inline;
 }
 
-circle.outline_node {
-    stroke-width: 1px;
-    fill: red;
-}
-
-circle.protein {
+circle.fornac-node[node_type="protein"] {
     fill: gray;
     fill-opacity: 0.5;
     stroke-width: 4;
 }
 
-circle.hidden_outline {
-    stroke-width: 0px;
-}
-
-
-line.link {
-  stroke: #999;
-  stroke-opacity: 0.8;
-  stroke-width: 2;
-}
-
-line.pseudoknot {
+.fornac-selectedNode > circle.fornac-node {
     stroke: red;
 }
 
-line.basepair {
-  stroke: red;
-}
-
-line.intermolecule {
-  stroke: blue;
-}
-
-line.chain_chain {
-  stroke-dasharray: 3,3;
-}
-
-line.fake {
-  stroke: green;
-}
-
-.transparent {
-    fill: transparent;
-    stroke-width: 0;
-    stroke-opacity: 0;
-    opacity: 0;
-    visibility: hidden;
-}
-
-.drag_line {
-  stroke: #999;
-  stroke-width: 2;
-  pointer-events: none;
-}
-
-.drag_line_hidden {
-  stroke: #999;
-  stroke-width: 0;
-  pointer-events: none;
-}
-
-.d3-tip {
-    line-height: 1;
-    font-weight: bold;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    border-radius: 4px;
-    pointer-events: none;
-          }
-
-text.node-label {
+text.fornac-nodeLabel {
     font-weight: bold;
     font-family: Tahoma, Geneva, sans-serif;
+    font-size: 0.4em;
     color: rgb(100,100,100);
+    text-anchor: middle;
+    alignment-baseline: middle;
+    dominant-baseline: central;
     pointer-events: none;
-}
-
-text {
-    pointer-events: none;
-}
-
-g.gnode {
-
-}
-
-circle.outline_node.selected {
-    visibility: visible;
-}
-
-circle.outline_node {
-    visibility: hidden;
-}
-
-.brush .extent {
-  fill-opacity: .1;
-  stroke: #fff;
-  shape-rendering: crispEdges;
-}
-
-.noselect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+line.fornac-link {
+  stroke: #999;
+  stroke-opacity: 0.8;
+  stroke-width: 2;
+}
+
+line.fornac-link[link_type="pseudoknot"] {
+    stroke: red;
+}
+
+line.fornac-link[link_type="basepair"] {
+  stroke: red;
+}
+
+line.fornac-link[link_type="intermolecule"] {
+  stroke: blue;
+}
+
+line.fornac-link[link_type="chain_chain"] {
+  stroke-dasharray: 3,3;
+}
+line.fornac-link[link_type="fake"] {
+  stroke: green;
+}
+
+text.fornac-plotLabel {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bolder;
+    font-size: 1.2em;
+    fill: rgba(200, 200, 200, 0.5);
+    text-anchor: middle;
+    alignment-baseline: central;
+}
+
+.fornac-transparent {
+    fill: transparent;
+    stroke-width: 0;
+    stroke-opacity: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.fornac-dragLine {
+  stroke: #999;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.fornac-brush {
+  fill-opacity: .1;
+  stroke: #fff;
+  shape-rendering: crispEdges;
 }
 
 .d3-context-menu {
@@ -182,7 +164,7 @@ circle.outline_node {
 	Header
 */
 
-.d3-context-menu ul li.is-header,
+.d3-context-menu ul li.is-header
 .d3-context-menu ul li.is-header:hover {
 	background-color: #f2f2f2;
 	color: #444;
@@ -194,7 +176,7 @@ circle.outline_node {
 	Disabled
 */
 
-.d3-context-menu ul li.is-disabled,
+.d3-context-menu ul li.is-disabled
 .d3-context-menu ul li.is-disabled:hover {
 	background-color: #f2f2f2;
 	color: #888;
@@ -220,95 +202,4 @@ circle.outline_node {
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-circle.rna-base {
-  stroke: #ccc;
-  stroke-width: 1px;
-  opacity: 1;
-  fill: white;
-}
-
-circle.rna-base.label {
-    stroke: transparent;
-    stroke-width: 0;
-    fill: white;
-}
-
-circle.rna-base[data-base="a"] {
-  fill: #dbdb8d;
-}
-
-circle.rna-base[data-base="c"] {
-  fill: #98df8a;
-}
-
-circle.rna-base[data-base="g"] {
-  fill: #ff9896;
-}
-
-circle.rna-base[data-base="u"], circle.rna-base[data-base="t"] {
-  fill: #aec7e8;
-}
-
-line.rna-link {
-  stroke: #999;
-  stroke-opacity: 0.8;
-  stroke-width: 2;
-}
-
-.overlay {
-    fill: transparent;
-}
-
-.rna-name {
-    font-family: Tahoma, Geneva, sans-serif;
-    font-weight: bolder;
-    font-size: 1.2em;
-    fill: rgba(200, 200, 200, 0.5);
-}
-
-path {
-    stroke: grey;
-    stroke-width: 2;
-}
-
-line.basepair {
-  stroke: red;
-}
-
-line.intermolecule {
-  stroke: blue;
-}
-
-line.chain_chain {
-  stroke-dasharray: 3,3;
-}
-
-line.fake {
-  stroke: green;
-}
-
-.transparent {
-    fill: transparent;
-    stroke-width: 0;
-    stroke-opacity: 0;
-    opacity: 0;
-}
-
-.d3-tip {
-    line-height: 1;
-    font-weight: bold;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    border-radius: 4px;
-    pointer-events: none;
-          }
-
-text.nucleotide-label, text.number-label {
-    font-size: 5.5pt;
-    font-weight: bold;
-    font-family: Tahoma, Geneva, sans-serif;
-    color: rgb(100,100,100);
-    pointer-events: none;
-    fill: #333;
-}
+/*# sourceMappingURL=fornac.css.map*/
