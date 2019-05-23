@@ -2,7 +2,7 @@ var path = require("path");
 var webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-var config = {
+module.exports = {
   entry: {
       fornac: './src/index.js',
   },
@@ -12,6 +12,7 @@ var config = {
     libraryTarget: 'umd',
     library: '[name]'
   },
+  devtool: 'source-map',
   devServer: {
     contentBase: path.join(__dirname, 'examples'),
     watchContentBase: true,
@@ -45,7 +46,9 @@ var config = {
           {
             loader: 'css-loader',
             options: {
-              modules: true
+              modules: true,
+              localIdentName: '[name]-[local]',
+              sourceMap: true,
             }
           }
         ],
@@ -64,14 +67,4 @@ var config = {
   externals: {
     d3: "d3"
   }
-};
-
-module.exports = (env, argv) => {
-  console.log('Running mode: ', argv.mode)
-
-  if (argv.mode === 'development') {
-    config.devtool = 'source-map';
-  }
-
-  return config;
 };
