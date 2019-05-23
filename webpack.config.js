@@ -39,13 +39,13 @@ var config = {
           {
             loader: MiniCssExtractPlugin.loader,
             options: {
-              hmr: process.env.NODE_ENV === 'development',
+              hmr: true,
             },
           },
           {
             loader: 'css-loader',
             options: {
-              modules: true,
+              modules: true
             }
           }
         ],

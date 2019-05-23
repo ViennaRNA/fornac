@@ -1131,7 +1131,7 @@ export function FornaContainer(element, passedOptions) {
     .append('svg:svg')
     .attr('width', self.options.svgW)
     .attr('height', self.options.svgH)
-    .attr('id', 'plotting-area');
+    .attr('class', 'fornacPlot');
 
     self.options.svg = svg;
 
@@ -1174,10 +1174,9 @@ export function FornaContainer(element, passedOptions) {
                })
                .on('brush', function() {
                    var gnodes = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
-                   var extent = d3.event.target.extent()
-                   .classed(fstyle.brush, true);
+                   var extent = d3.event.target.extent();
 
-                   gnodes.classed('selected', function(d) {
+                   gnodes.classed(fstyle.selected, function(d) {
                        return d.selected = self.options.applyForce && d.previouslySelected ^
                        (extent[0][0] <= d.x && d.x < extent[1][0]
                         && extent[0][1] <= d.y && d.y < extent[1][1]);
@@ -1201,7 +1200,7 @@ export function FornaContainer(element, passedOptions) {
                 d.selected = false;
                 d.previouslySelected = false;
                 });
-        node.classed('selected', false);
+        node.classed(fstyle.selected, false);
     }
 
     function redraw() {
@@ -1324,10 +1323,10 @@ export function FornaContainer(element, passedOptions) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
             var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
-            node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
+            node.classed(fstyle.selected, function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
           }
 
-        d3.select(this).select('.outlineNode').classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
+        d3.select(this).select('.outlineNode').classed(fstyle.selected, function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         var toDrag = selectedNodes(d);
         toDrag.each(function(d1) {
@@ -1868,12 +1867,11 @@ export function FornaContainer(element, passedOptions) {
         if (!ctrlKeydown) {
             //if the shift key isn't down, unselect everything
             var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
-            console.log(node)
-            node.classed('selected', function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
+            node.classed(fstyle.selected, function(p) { return p.selected =  self.options.applyForce && (p.previouslySelected = false); });
         }
 
         // always select this node
-        d3.select(this).select('circle').classed('selected', d.selected = self.options.applyForce && !d.previouslySelected);
+        d3.select(this).select('circle').classed(fstyle.selected, d.selected = self.options.applyForce && !d.previouslySelected);
         d3.event.stopPropagation();
     };
 
@@ -1975,11 +1973,11 @@ export function FornaContainer(element, passedOptions) {
       if (!d.selected && !ctrlKeydown) {
           // if this node isn't selected, then we have to unselect every other node
             var node = visNodes.selectAll('g.gnode').selectAll('.outlineNode');
-            node.classed('selected', function(p) { return p.selected = p.previouslySelected = false; })
+            node.classed(fstyle.selected, function(p) { return p.selected = p.previouslySelected = false; })
           }
 
 
-          d3.select(this).classed('selected', function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
+          d3.select(this).classed(fstyle.selected, function(p) { d.previouslySelected = d.selected; return d.selected = self.options.applyForce && true; });
 
         if (!shiftKeydown) {
             return;
@@ -2227,11 +2225,7 @@ export function FornaContainer(element, passedOptions) {
 
         var labelsEnter = gnodesEnter.append('text')
         .text(function(d) { return d.name; })
-        .attr('text-anchor', 'middle')
-        .attr('font-size', 8.0)
-        .attr('font-weight', 'bold')
-        .attr('y', 2.5)
-        .attr('class', 'node-label')
+        .attr('class', fstyle.nodeLabel)
         .attr('label_type', function(d) { return d.nodeType; })
 
         /*

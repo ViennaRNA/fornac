@@ -1,21 +1,4 @@
-svg {
-  display: block;
-  //min-width: 100%;
-  //width: 100%;
-  min-height: 100%;
-}
-
-:global(.d3-tip) {
-    line-height: 1;
-    font-weight: bold;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    border-radius: 4px;
-    pointer-events: none;
-}
-
-text {
+.fornacPlot > text {
     pointer-events: none;
 }
 
@@ -101,14 +84,17 @@ line.link[link_type="fake"] {
   pointer-events: none;
 }
 
-text.nodeLabel {
+.nodeLabel {
     font-weight: bold;
     font-family: Tahoma, Geneva, sans-serif;
+    font-size: 0.4em;
     color: rgb(100,100,100);
+    text-anchor: middle;
+    alignment-baseline: middle;
     pointer-events: none;
 }
 
-:global(.selected) {
+.selected {
     visibility: visible !important;
 }
 
