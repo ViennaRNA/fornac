@@ -1033,7 +1033,7 @@ export function FornaContainer(element, passedOptions) {
             var scale = d3.scale.category10()
             .domain(['s','m','i','e','t','h','x'])
             .range(['lightgreen', '#ff9896', '#dbdb8d', 'lightsalmon',
-                   'lightcyan', 'lightblue', fstyle.transparent]);
+                   'lightcyan', 'lightblue', 'transparent']);
 
                    nodes.style('fill', function(d) {
                        return scale(d.elemType);

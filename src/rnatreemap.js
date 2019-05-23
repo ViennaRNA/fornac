@@ -1,7 +1,5 @@
 import {rnaPlot} from './rnaplot.js';
 
-import './rnaplot.css';
-
 export function rnaTreemap(passedOptions) {
     var options = {
         'width': 300,

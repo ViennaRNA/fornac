@@ -3,7 +3,7 @@ import {RNAGraph} from './rnagraph.js';
 import {simpleXyCoordinates} from './simplernaplot.js';
 import {NAView} from './naview/naview.js'
 
-import './rnaplot.css';
+import fstyle from './fornac.css';
 
 export function rnaPlot(passedOptions = {}) {
     var options = {
@@ -90,7 +90,7 @@ export function rnaPlot(passedOptions = {}) {
     function createNucleotides(selection, nucleotideNodes) {
         // create groupings for each nucleotide and label
         var gs = selection
-        .selectAll('.rna-base')
+        .selectAll('.node')
         .data(nucleotideNodes)
         .enter()
         .append('svg:g')
@@ -99,17 +99,16 @@ export function rnaPlot(passedOptions = {}) {
         });
 
         var circles = gs.append('svg:circle')
-        .attr('data-base', (d) => { if (d.name) { return d.name.toLowerCase(); }})
+        .attr('nucleotide', (d) => { if (d.name) { return d.name.toLowerCase(); }})
         .attr('r', options.nucleotideRadius)
-        .classed('rna-base', true)
+        .classed('node', true)
+        .classed(fstyle.node, true)
         
 
         if (options.showNucleotideLabels) {
             var nucleotideLabels = gs.append('svg:text')
             .text(function(d) { return d.name; })
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central')
-            .classed('nucleotide-label', true)
+            .classed(fstyle.nodeLabel, true)
             .append('svg:title')
             .text(function(d) { return d.struct_name + ':' + d.num; });
         }
@@ -129,23 +128,22 @@ export function rnaPlot(passedOptions = {}) {
         
         var circles = gs.append('svg:circle')
         .attr('r', options.nucleotideRadius)
-        .classed('rna-base', true)
-        .classed('label', true)
+        .classed('node', true)
+        .classed(fstyle.node, true)
+        .classed(fstyle.nodeLabel, true)
 
         var numberLabels = gs.append('svg:text')
         .text(function(d) { return d.name; })
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
         .attr('dominant-baseline', 'central')
-        .classed('number-label', true);
+        .classed(fstyle.nodeLabel, true);
     }
 
     function createName(selection, name) {
         let nameLabel = selection.append('svg:text')
         //.attr('dy', -10)
-        .classed('rna-name', true)
-        .attr('text-anchor', 'middle')
-        .attr('alignment-baseline', 'central')
+        .classed(fstyle.rnaName, true)
         .text(name);
     
         let xyPos = options.namePosition.split(" ", 2) // 0 0.5 1
@@ -214,7 +212,7 @@ export function rnaPlot(passedOptions = {}) {
 
     function createLinks(selection, links) {
         links = links.filter(function(d) { return d.source !== null && d.target !== null; });
-        var gs = selection.selectAll('.rna-link')
+        var gs = selection.selectAll('.link')
         .data(links)
         .enter()
         .append('svg:line')
@@ -224,7 +222,8 @@ export function rnaPlot(passedOptions = {}) {
         .attr('y2', function(d) { return d.target.y; })
         .attr('link-type', function(d) { return d.linkType; })
         .attr('extra-link-type', function(d) { return d.extraLinkType; })
-        .classed('rna-link', true);
+        .classed('link', true)
+        .classed(fstyle.link, true)
     }
 
     function chart(selection) {

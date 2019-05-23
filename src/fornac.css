@@ -9,6 +9,22 @@ circle.node {
   fill: white;
 }
 
+circle.node[nucleotide="a"] {
+  fill: #dbdb8d;
+}
+
+circle.node[nucleotide="c"] {
+  fill: #98df8a;
+}
+
+circle.node[nucleotide="g"] {
+  fill: #ff9896;
+}
+
+circle.node[nucleotide="u"], circle.node[nucleotide="t"] {
+  fill: #aec7e8;
+}
+
 polygon.node {
   stroke: #ccc;
   stroke-width: 1px;
@@ -38,7 +54,6 @@ circle.hiddenOutline {
     stroke-width: 0px;
 }
 
-
 line.link {
   stroke: #999;
   stroke-opacity: 0.8;
@@ -62,6 +77,15 @@ line.link[link_type="chain_chain"] {
 }
 line.link[link_type="fake"] {
   stroke: green;
+}
+
+.rnaName {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bolder;
+    font-size: 1.2em;
+    fill: rgba(200, 200, 200, 0.5);
+    text-anchor: middle;
+    alignment-baseline: central;
 }
 
 .transparent {
@@ -91,6 +115,7 @@ line.link[link_type="fake"] {
     color: rgb(100,100,100);
     text-anchor: middle;
     alignment-baseline: middle;
+    dominant-baseline: central;
     pointer-events: none;
 }
 
