@@ -1092,9 +1092,7 @@ export function FornaContainer(element, passedOptions = {}) {
         resetMouseVars();
         //update()
     }
-    //adapt size to window changes:
-    //window.addEventListener('resize', self.setSize, false);
-
+    
     self.zoomer = d3.behavior.zoom()
         .scaleExtent([0.1,10])
         .x(xScale)
