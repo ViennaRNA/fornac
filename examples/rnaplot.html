@@ -92,7 +92,7 @@
     .append('div')
     .classed('svg-container', true)
     .append('svg')
-    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
     .call(chart);
 
@@ -138,7 +138,7 @@
     // and then a g for each grid cell
     var svg = d3.select('#rna_rgl')
     .append('svg')
-    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .attr('viewBox', "0 0 " + (svgWidth + margin.left + margin.right) + " " + (svgHeight + margin.top + margin.bottom))
     .append('g')
     .attr('transform', 'translate(' + margin.left + "," + margin.top + ")")
@@ -200,7 +200,7 @@
     .classed('transparent', true)
     .attr('id', (d) => {return d.name})
     .append('svg')
-    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
     .call(timeChart);
 

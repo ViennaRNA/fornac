@@ -31,10 +31,7 @@ export function FornaContainer(element, passedOptions = {}) {
         'layout': 'standard-polygonal',
         'allowPanningAndZooming': true,
         'transitionDuration': 500,
-        'maxNodeRadius': 80,    // the maximum radius of a node when the view is centered
-        'resizeSvgOnResize': true   //change the size of the svg when resizing the container
-                                    //sometimes its beneficial to turn this off, especially when
-                                    //performance is an issue
+        'maxNodeRadius': 80    // the maximum radius of a node when the view is centered
     };
 
     self.options = Object.assign(options, passedOptions);
@@ -43,8 +40,8 @@ export function FornaContainer(element, passedOptions = {}) {
         self.options.svgW = self.options.initialSize[0];
         self.options.svgH = self.options.initialSize[1];
     } else {
-        self.options.svgW = 800;
-        self.options.svgH = 800;
+        self.options.svgW = 300;
+        self.options.svgH = 300;
     }
 
     if (self.options.editable == true) {
@@ -936,15 +933,16 @@ export function FornaContainer(element, passedOptions = {}) {
         self.update();
     };
 
-    self.setSize = function() {
-        if (self.options.initialSize != null)
-            return;
-
-        var svgH = d3.select(element).node().offsetHeight;
-        var svgW = d3.select(element).node().offsetWidth;
-
+    self.setSize = (
+            svgW = d3.select(element).node().offsetWidth, 
+            svgH = d3.select(element).node().offsetHeight
+        ) => {
+        // save width and height
         self.options.svgW = svgW;
         self.options.svgH = svgH;
+        
+        // set the viewBox
+        svg.attr('viewBox', "0 0 " + svgW + " " + svgH)
 
         //Set the output range of the scales
         xScale.range([0, svgW]).domain([0, svgW]);
@@ -953,24 +951,16 @@ export function FornaContainer(element, passedOptions = {}) {
         //re-attach the scales to the zoom behaviour
         self.zoomer.x(xScale)
         .y(yScale);
-
         self.brusher.x(xScale)
         .y(yScale);
 
-        self.centerView();
-
-        if (!self.options.resizeSvgOnResize) {
-            return;
-        }
-
         //resize the background
-        /*
-        rect.attr('width', svgW)
+        svg.select('.background')
+        .attr('width', svgW)
         .attr('height', svgH);
-        */
-
-        svg.attr('width', svgW)
-        .attr('height', svgH);
+        
+        // center the view
+        self.centerView();
     }
 
     function changeColors(moleculeColors, d, scale) {
@@ -1102,9 +1092,7 @@ export function FornaContainer(element, passedOptions = {}) {
         resetMouseVars();
         //update()
     }
-    //adapt size to window changes:
-    window.addEventListener('resize', self.setSize, false);
-
+    
     self.zoomer = d3.behavior.zoom()
         .scaleExtent([0.1,10])
         .x(xScale)
@@ -1120,8 +1108,8 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('keyup.brush', keyup)
     .each(function() { this.focus(); })
     .append('svg:svg')
-    .attr('width', self.options.svgW)
-    .attr('height', self.options.svgH)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr('viewBox', "0 0 " + self.options.svgW + " " + self.options.svgH)
 
     self.options.svg = svg;
 
@@ -1241,10 +1229,7 @@ export function FornaContainer(element, passedOptions = {}) {
         return {'translate': [xTrans, yTrans], 'scale': minRatio};
     };
 
-    self.centerView = function(duration) {
-        if (arguments.length === 0)
-            duration = 0;
-
+    self.centerView = function(duration = 0) {
         var bbTransform = self.getBoundingBoxTransform();
 
         if (bbTransform === null)
@@ -2333,8 +2318,4 @@ export function FornaContainer(element, passedOptions = {}) {
 
         self.updateStyle();
     };
-
-    self.setSize();
 }
-
-/************************* END FORNAF **********************************/
