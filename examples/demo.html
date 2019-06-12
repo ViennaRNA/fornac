@@ -4,22 +4,51 @@
     <meta charset="utf-8">
     <title>Fornac Examples</title>
     <link rel="stylesheet" href="fornac.css" />
+    <style>
+      .options {
+        float: left;
+        margin-left: 20px;
+      }
+      .optionsform {
+        display: table;
+        margin: 5px;
+        padding: 5px;
+        clear: both;
+      }
+      textarea {
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
     <div style="max-width: 800px; margin: auto;">
     <h3>Fornac Examples</h3>
 
-    This is an RNA container:
+    <h4>This is an RNA container</h4>
     <div id='rna_ss'> </div>
-
-    This is an RNA container using the NAView layout:
+    <form class="optionsform">
+      <label class="options"><input type="checkbox" onclick="nc.displayNumbering(this.checked)" checked>Numbering</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayNodeOutline(this.checked)" checked>Node Outline</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayNodeLabel(this.checked)" checked>Node Label</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayLinks(this.checked)" checked>Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayPseudoknotLinks(this.checked)" checked>Pseudoknot Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayProteinLinks(this.checked)" checked>Protein Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayDirectionArrows(this.checked)" checked>Direction Arrows</label>
+    </form>
+    
+    <h4>This is an RNA container using the NAView layout</h4>
     <div id="naview_ss"></div>
 
-    This is an output of an RNA folded using RNAcofold:
+    <h4>This is an output of an RNA folded using RNAcofold</h4>
     <div id='cofold_ss'></div>
 
-    This is a custom-colored RNA:
+    <h4>This is a custom-colored RNA</h4>
     <div id="custom_colors"></div>
+    <form onsubmit="return handleCustomColorApply()" class="optionsform">
+      <label for="CustomColorText">Custom Color Text:</label>
+      <textarea rows="4" cols="80" id="CustomColorText" name="CustomColorText">1:red 2:blue 9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8</textarea></br>
+      <button type="submit" name="Submit">Apply</button>
+    </form>
 
     <script src="https://unpkg.com/d3@3.5"></script>
     <script src='fornac.js'></script>
@@ -35,8 +64,7 @@
             'sequence':             'AACGCUUCAUAUAAUCAAA'
         };
         container.addRNA(options.structure, options);
-
-        container.addCustomColorsText('1:red         9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8');
+        return container;
     }
 
     function normalContainer() {
@@ -47,6 +75,7 @@
             'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
         };
         container.addRNA(options.structure, options);
+        return container;
     }
 
     function naviewContainer() {
@@ -71,11 +100,16 @@
         container.addRNA(options.structure, options);
     }
 
-    normalContainer();
+    let nc = normalContainer();
     naviewContainer();
     cofoldContainer();
-    customColorsContainer();
-
+    let cc = customColorsContainer();
+    
+    function handleCustomColorApply() {
+      cc.addCustomColorsText(document.getElementById("CustomColorText").value);
+      return false;
+    }
+    handleCustomColorApply();
 
     /*
     var options1 = {'structure': '.((((....)))).',

@@ -1,8 +1,17 @@
 circle.node, polygon.node {
   stroke: #ccc;
-  stroke-width: 1px;
+  @value nodeStrokeWidth: 0.8;
+  stroke-width: nodeStrokeWidth;
   opacity: 1;
   fill: white;
+}
+
+path.directionArrow {
+  fill: #777;
+  @value directionArrowSize: 6;
+  @value directionArrowWidth: 0.7;
+  stroke: none;
+  stroke-width: 0.8px;
 }
 
 g.plot {
