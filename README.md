@@ -15,7 +15,7 @@ a simple RNA molecule:
 
 The code for creating this web page is rather straightforward. After importing
 some necessary javascript files, we create a container using `new
-FornaContainer("#rna_ss", {'applyForce': false})`, passing in `#rna_ss` as the
+FornaContainer("#rna_ss", {'animation': false})`, passing in `#rna_ss` as the
 id of the `div` which will hold the container and then populate it with a
 structure and sequence using `container.addRNA`:
 
@@ -30,7 +30,7 @@ This after the RNA container.
     <link rel='stylesheet' type='text/css' href='fornac.css' />
     <script type='text/javascript' src='fornac.js'></script>
     <script type='text/javascript'>
-        var container = new FornaContainer("#rna_ss", {'applyForce': false});
+        var container = new FornaContainer("#rna_ss", {'animation': false});
 
         var options = {'structure': '((..((....)).(((....))).))',
                         'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
@@ -48,7 +48,7 @@ Display two cofolded sequences using the format of [RNAcofold](http://rna.tbi.un
 
 ```javascript
     var container = new fornac.FornaContainer("#cofold_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+            {'animation': false, 'zoomable': true, 'initialSize':[500,300]});
                                                      
     var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
         'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
@@ -74,20 +74,20 @@ array of length 2 (e.g. `['CCCCAAAAGGGG', '((((....))))']`).
 
 The `FornaContainer` supports a number of options to allow users to customize how the RNA will be presented.
 
-### applyForce
+### animation
 
 Indicate whether the force-directed layout will be applied to the displayed
 molecule. Enabling this option allows users to change the layout of the
 molecule by selecting and dragging the individual nucleotide nodes
 
-### allowPanningAndZooming [default=true]
+### zoomable [default=true]
 
 Allow users to zoom in and pan the display. If this is enabled then pressing
 the 'c' key on the keyboard will center the view.
 
 ### circularizeExternal [default=true]
 
-This only makes sense in connection with the `applyForce` argument. If it's
+This only makes sense in connection with the `animation` argument. If it's
 true, the external loops will be arranged in a nice circle. If false, they will
 be allowed to flop around as the force layout dictates:
 

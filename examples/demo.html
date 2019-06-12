@@ -35,12 +35,15 @@
       <label class="options"><input type="checkbox" onclick="nc.displayProteinLinks(this.checked)" checked>Protein Links</label>
       <label class="options"><input type="checkbox" onclick="nc.displayDirectionArrows(this.checked)" checked>Direction Arrows</label>
     </form>
-    
+
     <h4>This is an RNA container using the NAView layout</h4>
     <div id="naview_ss"></div>
 
     <h4>This is an output of an RNA folded using RNAcofold</h4>
     <div id='cofold_ss'></div>
+
+    <h4>This is a container with multiple RNA molecules</h4>
+    <div id='multi_ss'></div>
 
     <h4>This is a custom-colored RNA</h4>
     <div id="custom_colors"></div>
@@ -58,7 +61,7 @@
 
     function customColorsContainer() {
         let container = new fornac.FornaContainer("#custom_colors",
-                {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
+                {'animation': false, 'zoomable': true, 'initialSize':[300,200]});
 
         let options = {'structure': '..((((....)))).....',
             'sequence':             'AACGCUUCAUAUAAUCAAA'
@@ -69,7 +72,7 @@
 
     function normalContainer() {
         let container = new fornac.FornaContainer("#rna_ss",
-                {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+                {'animation': false, 'zoomable': true, 'initialSize':[500,300]});
 
         let options = {'structure': '..((..((...[)).(((..].))).))..',
             'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
@@ -80,7 +83,7 @@
 
     function naviewContainer() {
         let container = new fornac.FornaContainer("#naview_ss",
-                {'applyForce': false, 'allowPanningAndZooming': false, 'initialSize':[500,300],
+                {'animation': false, 'zoomable': false, 'initialSize':[500,300],
                 'layout': 'naview'});
 
         let options = {'structure': '..((..((...[)).(((..].))).))..',
@@ -92,7 +95,7 @@
 
     function cofoldContainer() {
         var container = new fornac.FornaContainer("#cofold_ss",
-                {'applyForce': true, 'allowPanningAndZooming': false, 'initialSize':[500,300]});
+                {'animation': true, 'zoomable': false, 'initialSize':[500,300]});
 
         var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
             'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
@@ -100,11 +103,20 @@
         container.addRNA(options.structure, options);
     }
 
+    function multiContainer() {
+        var container = new fornac.FornaContainer("#multi_ss",
+                {'animation': false, 'zoomable': true, 'initialSize':[500,300]});
+
+        container.addRNA('..((((....))))', {'sequence': 'ACGAUCAGAGAUCA'});
+        container.addRNA('.........', {'avoidOthers': true, 'sequence': 'AGUACGUAU'});
+    }
+
     let nc = normalContainer();
     naviewContainer();
     cofoldContainer();
+    multiContainer();
     let cc = customColorsContainer();
-    
+
     function handleCustomColorApply() {
       cc.addCustomColorsText(document.getElementById("CustomColorText").value);
       return false;

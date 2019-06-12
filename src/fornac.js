@@ -19,9 +19,10 @@ export function FornaContainer(element, passedOptions = {}) {
 
     let options = {
         'editable': false,
+        'zoomable': true,
+        'animation': true,
         'displayAllLinks': false,
         'labelInterval': 10,
-        'applyForce': true,
         'chargeDistance': 110,
         'friction': 0.35,
         'middleCharge': -30,
@@ -29,7 +30,6 @@ export function FornaContainer(element, passedOptions = {}) {
         'linkDistanceMultiplier': 15,
         'initialSize': null,
         'layout': 'standard-polygonal',
-        'allowPanningAndZooming': true,
         'transitionDuration': 500,
         'maxNodeRadius': 80    // the maximum radius of a node when the view is centered
     };
@@ -224,8 +224,6 @@ export function FornaContainer(element, passedOptions = {}) {
         self.nodeContextMenu = function() {};
     }
 
-    var fill = d3.scale.category20();
-
     // mouse event vars
     var mousedownLink = null,
         mousedownNode = null,
@@ -252,18 +250,17 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     self.displayParameters = {
-        'displayNumbering': 'true',
-        'displayNodeOutline': 'true',
-        'displayNodeLabel': 'true',
-        'displayLinks': 'true',
-        'displayPseudoknotLinks': 'true',
-        'displayProteinLinks': 'true',
-        'displayDirectionArrows': 'true'
+        'displayNumbering': true,
+        'displayNodeOutline': true,
+        'displayNodeLabel': true,
+        'displayLinks': true,
+        'displayPseudoknotLinks': true,
+        'displayProteinLinks': true,
+        'displayDirectionArrows': true
     };
 
     self.colorScheme = 'structure';
     self.customColors = {};
-    self.animation = self.options.applyForce;
     // don't listen to events because a model window is open somewhere
     self.deaf = false;
     self.rnas = {};
@@ -624,17 +621,17 @@ export function FornaContainer(element, passedOptions = {}) {
 
         if (u[0] == 0 && u[1] == 0)
             return;     // will lead to a NaN error
-        
+
         // scale u to unit length
         u = [u[0] / magnitude(u), u[1] / magnitude(u)];
         // normal vector of u
         let v = [-u[1], u[0]];
-        
+
         // calculate the tip position
         let arrowTip = [(d.radius + nodeStroke) * u[0], (d.radius + nodeStroke) * u[1]];
 
-        let path = 'M' + (arrowTip[0] + lengthMult * (u[0]/2 + v[0]*arrowWidth/2)) + ',' + (arrowTip[1] + lengthMult * (u[1]/2 + v[1]*arrowWidth/2)) + 
-                   'L' + (arrowTip[0]) + ',' + (arrowTip[1]) + 
+        let path = 'M' + (arrowTip[0] + lengthMult * (u[0]/2 + v[0]*arrowWidth/2)) + ',' + (arrowTip[1] + lengthMult * (u[1]/2 + v[1]*arrowWidth/2)) +
+                   'L' + (arrowTip[0]) + ',' + (arrowTip[1]) +
                    'L' + (arrowTip[0] + lengthMult * (u[0]/2 - v[0]*arrowWidth/2)) + ',' + (arrowTip[1] + lengthMult * (u[1]/2 - v[1]*arrowWidth/2));
 
         d3.select(this).attr('d', path);
@@ -939,13 +936,13 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     self.setSize = (
-            svgW = d3.select(element).node().offsetWidth, 
+            svgW = d3.select(element).node().offsetWidth,
             svgH = d3.select(element).node().offsetHeight
         ) => {
         // save width and height
         self.options.svgW = svgW;
         self.options.svgH = svgH;
-        
+
         // set the viewBox
         svg.attr('viewBox', "0 0 " + svgW + " " + svgH)
 
@@ -963,7 +960,7 @@ export function FornaContainer(element, passedOptions = {}) {
         svg.select('.background')
         .attr('width', svgW)
         .attr('height', svgH);
-        
+
         // center the view
         self.centerView();
     }
@@ -1099,7 +1096,7 @@ export function FornaContainer(element, passedOptions = {}) {
       resetMouseVars();
       //update()
     }
-    
+
     self.zoomer = d3.behavior.zoom()
         .scaleExtent([0.1,10])
         .x(xScale)
@@ -1126,7 +1123,7 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('mouseup', mouseup)
     .classed('mouseEventHelper', true)
 
-    if (self.options.allowPanningAndZooming)
+    if (self.options.zoomable)
         svgGraph.call(self.zoomer);
 
     if (self.options.editable)
@@ -1247,7 +1244,7 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     self.force = d3.layout.force()
-    .charge(function(d) { 
+    .charge(function(d) {
       if (d.nodeType == 'middle')
         return self.options.middleCharge;
       else
@@ -1334,7 +1331,7 @@ export function FornaContainer(element, passedOptions = {}) {
     }
 
     self.resumeForce = function() {
-        if (self.animation)
+        if (self.options.animation)
             self.force.resume();
     };
 
@@ -1400,7 +1397,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
 
         if (shiftKeydown || ctrlKeydown) {
-            if (self.options.allowPanningAndZooming) {
+            if (self.options.zoomable) {
               svgGraph.call(self.zoomer)
               .on('mousedown.zoom', null)
               .on('touchstart.zoom', null)
@@ -1430,8 +1427,8 @@ export function FornaContainer(element, passedOptions = {}) {
         .on('touchend.brush', null);
 
         brush.select('.background').style('cursor', 'auto');
-        
-        if (self.options.allowPanningAndZooming)
+
+        if (self.options.zoomable)
           svgGraph.call(self.zoomer);
 
         vis.selectAll('g.gnode')
@@ -1793,7 +1790,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         let newRna = null;
         // create a new RNA
-        if (self.options.applyForce)
+        if (self.options.animation)
             newRna = self.addRNA(newDotbracket, { 'sequence': newSeq,
                                 'positions': newPositions,
                                 'centerView': false});
@@ -1938,7 +1935,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
     };
 
-    var nodeMousedown = function(d) {      
+    var nodeMousedown = function(d) {
       if (!d.selected && !ctrlKeydown) {
         // if this node isn't selected, then we have to unselect every other node
         var node = visNodes.selectAll('g.gnode');
@@ -1946,7 +1943,7 @@ export function FornaContainer(element, passedOptions = {}) {
       }
       // always select this node
       d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
-      
+
       // without shift key stop here, otherwise continue to draw dragline
       if (!shiftKeydown) {
           return;
@@ -1960,19 +1957,19 @@ export function FornaContainer(element, passedOptions = {}) {
       .attr('y1', mousedownNode.y)
       .attr('x2', mousedownNode.x)
       .attr('y2', mousedownNode.y);
-      
+
       d3.event.stopPropagation();
     };
 
     self.startAnimation = function() {
-      self.animation = true;
+      self.options.animation = true;
       vis.selectAll('g.gnode')
         .call(drag);
       self.force.start();
     };
 
     self.stopAnimation = function() {
-      self.animation = false;
+      self.options.animation = false;
       vis.selectAll('g.gnode')
            .on('mousedown.drag', null);
       self.force.stop();
@@ -2027,12 +2024,12 @@ export function FornaContainer(element, passedOptions = {}) {
       self.displayParameters.displayProteinLinks = value;
       self.updateStyle();
     };
-    
+
     self.displayDirectionArrows = function(value) {
       self.displayParameters.displayDirectionArrows = value;
       self.updateStyle();
     };
-    
+
     self.updateStyle = function() {
         // Numbering
         visNodes.selectAll('[node_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
@@ -2149,12 +2146,12 @@ export function FornaContainer(element, passedOptions = {}) {
         })
         .attr('node_type', function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; });
-        
+
         // direction arrows
         nucleotideNodes.append('svg:path')
         .attr('class', fstyle.directionArrow)
         .attr('node_num', function(d) { return d.num; })
-        
+
         // nucleotide outlines
         nucleotideNodes.append('svg:circle')
         .attr('class', fstyle.node)
@@ -2169,13 +2166,13 @@ export function FornaContainer(element, passedOptions = {}) {
                 return '';
             }
         });
-        
+
         // nucleotide labels
         var labelsEnter = gnodesEnter.append('text')
         .text(function(d) { return d.name; })
         .attr('class', fstyle.nodeLabel)
         .attr('label_type', function(d) { return d.nodeType; })
-        
+
         // nucleotide label title
         labelsEnter.append('svg:title')
         .text(function(d) {
@@ -2185,7 +2182,7 @@ export function FornaContainer(element, passedOptions = {}) {
                 return '';
             }
         });
-        
+
         return gnodesEnter;
     };
 
@@ -2205,7 +2202,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.force.nodes(self.graph.nodes)
         .links(self.graph.links);
 
-        if (self.animation) {
+        if (self.options.animation) {
           self.force.start();
         }
 
@@ -2292,7 +2289,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         self.changeColorScheme(self.colorScheme);
 
-        if (self.animation) {
+        if (self.options.animation) {
           self.force.start();
         }
 
