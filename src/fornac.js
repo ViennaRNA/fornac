@@ -220,7 +220,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.backgroundContextMenu = contextMenu(backgroundMenu);
 
     }  else {
-        console.log('empty context menu');
+        //console.log('empty context menu');
         self.nodeContextMenu = function() {};
     }
 
@@ -252,13 +252,13 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     self.displayParameters = {
-        'displayBackground': 'true',
         'displayNumbering': 'true',
         'displayNodeOutline': 'true',
         'displayNodeLabel': 'true',
         'displayLinks': 'true',
         'displayPseudoknotLinks': 'true',
-        'displayProteinLinks': 'true'
+        'displayProteinLinks': 'true',
+        'displayDirectionArrows': 'true'
     };
 
     self.colorScheme = 'structure';
@@ -308,7 +308,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         options = Object.assign(options, passedOptions);
 
-        console.log('options.uids:', options.uids);
+        //console.log('options.uids:', options.uids);
         var rg = new RNAGraph(options.sequence, structure, options.name);
         rg.circularizeExternal = options.circularizeExternal;
 
@@ -544,7 +544,7 @@ export function FornaContainer(element, passedOptions = {}) {
         // when it is modified, it is replaced in the global list of RNAs
         //
         var maxX, minX;
-        console.log('centerView:', centerView);
+        //console.log('centerView:', centerView);
 
         if (centerPos != null) {
             // center the newly created RNA at a given position
@@ -605,9 +605,12 @@ export function FornaContainer(element, passedOptions = {}) {
     }
 
     function positionAnyNode(d) {
-        var endPoint = d;
-        var startPoint = d.prevNode;
-        var lengthMult = 6;
+        let endPoint = d;
+        let startPoint = d.prevNode;
+        // get stroke width and arrow size values from css
+        let nodeStroke = parseFloat(fstyle.nodeStrokeWidth) / 2;
+        let lengthMult = parseFloat(fstyle.directionArrowSize);
+        let arrowWidth = parseFloat(fstyle.directionArrowWidth);
 
         if (startPoint === null)
             return;
@@ -617,20 +620,22 @@ export function FornaContainer(element, passedOptions = {}) {
             return;
 
         // point back toward the previous node
-        var u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
+        let u = [-(endPoint.x - startPoint.x), -(endPoint.y - startPoint.y)];
 
         if (u[0] == 0 && u[1] == 0)
             return;     // will lead to a NaN error
-
+        
+        // scale u to unit length
         u = [u[0] / magnitude(u), u[1] / magnitude(u)];
-        var v = [-u[1], u[0]];
+        // normal vector of u
+        let v = [-u[1], u[0]];
+        
+        // calculate the tip position
+        let arrowTip = [(d.radius + nodeStroke) * u[0], (d.radius + nodeStroke) * u[1]];
 
-        var arrowTip = [d.radius * u[0], d.radius * u[1]];
-
-        var path = 'M' +
-                    (arrowTip[0] + lengthMult * (u[0] + v[0]) / 2) + ',' + (arrowTip[1] + lengthMult * (u[1] + v[1]) / 2) + 'L' +
-                    (arrowTip[0]) + ',' + (arrowTip[1]) + 'L' +
-                    (arrowTip[0] + lengthMult * (u[0] - v[0]) / 2) + ',' + (arrowTip[1] + lengthMult * (u[1] - v[1]) / 2);
+        let path = 'M' + (arrowTip[0] + lengthMult * (u[0]/2 + v[0]*arrowWidth/2)) + ',' + (arrowTip[1] + lengthMult * (u[1]/2 + v[1]*arrowWidth/2)) + 
+                   'L' + (arrowTip[0]) + ',' + (arrowTip[1]) + 
+                   'L' + (arrowTip[0] + lengthMult * (u[0]/2 - v[0]*arrowWidth/2)) + ',' + (arrowTip[1] + lengthMult * (u[1]/2 - v[1]*arrowWidth/2));
 
         d3.select(this).attr('d', path);
     }
@@ -1124,17 +1129,6 @@ export function FornaContainer(element, passedOptions = {}) {
 
     if (self.options.editable)
         svgGraph.on('contextmenu', self.backgroundContextMenu);
-
-    /*
-    var rect = svgGraph.append('svg:rect')
-    .attr('width', self.options.svgW)
-    .attr('height', self.options.svgH)
-    .attr('fill', 'white')
-    //.attr('stroke', 'grey')
-    //.attr('stroke-width', 1)
-    //.attr('pointer-events', 'all')
-    .attr('id', 'zrect');
-    */
 
     var brush = svgGraph.append('g')
     .datum(function() { return {selected: false, previouslySelected: false}; })
@@ -2004,11 +1998,6 @@ export function FornaContainer(element, passedOptions = {}) {
       self.update();
     };
 
-    self.displayBackground = function(value) {
-      self.displayParameters.displayBackground = value;
-      self.updateStyle();
-    };
-
     self.displayNumbering = function(value) {
       self.displayParameters.displayNumbering = value;
       self.updateStyle();
@@ -2038,16 +2027,19 @@ export function FornaContainer(element, passedOptions = {}) {
       self.displayParameters.displayProteinLinks = value;
       self.updateStyle();
     };
-
+    
+    self.displayDirectionArrows = function(value) {
+      self.displayParameters.displayDirectionArrows = value;
+      self.updateStyle();
+    };
+    
     self.updateStyle = function() {
-        // Background
-        //rect.classed('transparent', !self.displayParameters.displayBackground);
         // Numbering
         visNodes.selectAll('[node_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
         visNodes.selectAll('[label_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
-        visLinks.selectAll('[linkType=label_link]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
+        visLinks.selectAll('[link_type=label_link]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
         // Node Outline
-        svg.selectAll('circle').classed(fstyle.transparent, !self.displayParameters.displayNodeOutline);
+        svg.selectAll('[node_type=nucleotide]').classed(fstyle.transparent, !self.displayParameters.displayNodeOutline);
         // Node Labels
         visNodes.selectAll('[label_type=nucleotide]').classed(fstyle.transparent, !self.displayParameters.displayNodeLabel);
         // Links
@@ -2059,6 +2051,8 @@ export function FornaContainer(element, passedOptions = {}) {
         // Fake Links
         visLinks.selectAll('[link_type=fake]').classed(fstyle.transparent, !self.options.displayAllLinks);
         visLinks.selectAll('[link_type=fake_fake]').classed(fstyle.transparent, !self.options.displayAllLinks);
+        // direction Arrows
+        svg.selectAll('.' + fstyle.directionArrow).classed(fstyle.transparent, !self.displayParameters.displayDirectionArrows);
     };
 
     function nudge(dx, dy) {
@@ -2156,7 +2150,13 @@ export function FornaContainer(element, passedOptions = {}) {
         })
         .attr('node_type', function(d) { return d.nodeType; })
         .attr('node_num', function(d) { return d.num; });
-
+        
+        // direction arrows
+        nucleotideNodes.append('svg:path')
+        .attr('class', fstyle.directionArrow)
+        .attr('node_num', function(d) { return d.num; })
+        
+        // nucleotide outlines
         nucleotideNodes.append('svg:circle')
         .attr('class', fstyle.node)
         .attr('node_type', function(d) { return d.nodeType; })
@@ -2170,32 +2170,14 @@ export function FornaContainer(element, passedOptions = {}) {
                 return '';
             }
         });
-
-        nucleotideNodes.append('svg:path')
-        .attr('class', fstyle.node)
-        .attr('node_type', function(d) { return d.nodeType; })
-        .attr('node_num', function(d) { return d.num; })
-        .append('svg:title')
-        .text(function(d) {
-            if (d.nodeType == 'nucleotide') {
-                return d.structName + ':' + d.num;
-            } else {
-                return '';
-            }
-        });
-
-
+        
+        // nucleotide labels
         var labelsEnter = gnodesEnter.append('text')
         .text(function(d) { return d.name; })
         .attr('class', fstyle.nodeLabel)
         .attr('label_type', function(d) { return d.nodeType; })
-
-        /*
-        labelsEnter.text(function(d) {
-            return d.num;
-        });
-        */
-
+        
+        // nucleotide label title
         labelsEnter.append('svg:title')
         .text(function(d) {
             if (d.nodeType == 'nucleotide') {
@@ -2204,8 +2186,7 @@ export function FornaContainer(element, passedOptions = {}) {
                 return '';
             }
         });
-
-
+        
         return gnodesEnter;
     };
 
