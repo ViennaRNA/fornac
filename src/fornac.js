@@ -597,11 +597,11 @@ export function FornaContainer(element, passedOptions = {}) {
         return rnaGraph;
     };
 
-    function magnitude(x) {
-        return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
-    }
-
     function positionAnyNode(d) {
+        let magnitude = (x) => {
+            return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
+        }
+
         let endPoint = d;
         let startPoint = d.prevNode;
         // get stroke width and arrow size values from css
@@ -637,7 +637,7 @@ export function FornaContainer(element, passedOptions = {}) {
         d3.select(this).attr('d', path);
     }
 
-    function realLinkFilter(d) {
+    let realLinkFilter = (d) => {
         return d.linkType == 'basepair' ||
                d.linkType == 'backbone' ||
                d.linkType == 'intermolecule' ||
@@ -965,24 +965,6 @@ export function FornaContainer(element, passedOptions = {}) {
         self.centerView();
     }
 
-    function changeColors(moleculeColors, d, scale) {
-        if (moleculeColors.hasOwnProperty(d.num)) {
-            let val = parseFloat(moleculeColors[d.num]);
-
-            if (isNaN(val)) {
-                // passed in color is not a scalar, so
-                // treat it as a color
-                return moleculeColors[d.num];
-            } else {
-                // the user passed in a float, let's use a colormap
-                // to convert it to a color
-                return scale(val);
-            }
-        } else {
-            return 'white';
-        }
-    }
-
     self.setOutlineColor = function(color) {
         var nodes = visNodes.selectAll('g.gnode').select('[node_type=nucleotide]');
         nodes.style('fill', color);
@@ -1039,6 +1021,24 @@ export function FornaContainer(element, passedOptions = {}) {
                 .range(self.customColors.range);
             }
 
+            let changeColors = (moleculeColors, d, scale) => {
+                if (moleculeColors.hasOwnProperty(d.num)) {
+                    let val = parseFloat(moleculeColors[d.num]);
+
+                    if (isNaN(val)) {
+                        // passed in color is not a scalar, so
+                        // treat it as a color
+                        return moleculeColors[d.num];
+                    } else {
+                        // the user passed in a float, let's use a colormap
+                        // to convert it to a color
+                        return scale(val);
+                    }
+                } else {
+                    return 'white';
+                }
+            }
+
             nodes.style('fill', function(d) {
                 if (typeof self.customColors == 'undefined' ||
                    !self.customColors.hasOwnProperty('colorValues')) {
@@ -1061,48 +1061,22 @@ export function FornaContainer(element, passedOptions = {}) {
         }
     };
 
-    function mousedown() {
-      console.log("mouse down")
-    }
-
-    function mousemove() {
-      // only if we are dragging
-      if (!mousedownNode) return;
-      console.log("mouse move")
-
-      // if mouse starts to move, deselect all
-      let node = visNodes.selectAll('g.gnode');
-      node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
-
-      // update drag line
-      let mpos = d3.mouse(vis.node());
-      dragLine
-      .attr('x1', mousedownNode.x)
-      .attr('y1', mousedownNode.y)
-      .attr('x2', mpos[0])
-      .attr('y2', mpos[1]);
-    }
-
-    function mouseup() {
-      console.log("mouse up")
-      if (mousedownNode) {
-
-          if (!linkContextMenuShown)
-              dragLine
-              .attr('class', fstyle.transparent);
-      }
-
-      // clear mouse event vars
-      resetMouseVars();
-      //update()
-    }
-
     self.zoomer = d3.behavior.zoom()
         .scaleExtent([0.1,10])
         .x(xScale)
         .y(yScale)
-        .on('zoomstart', zoomstart)
-        .on('zoom', redraw);
+        .on('zoomstart', () => {
+            let node = visNodes.selectAll('g.gnode');
+            node.each(function(d) {
+                    d.selected = false;
+                    d.previouslySelected = false;
+                    });
+            node.classed(fstyle.selectedNode, false);
+        })
+        .on('zoom', () => {
+            vis.attr('transform',
+                     'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
+        });
 
     d3.select(element).select('svg').remove();
 
@@ -1118,9 +1092,35 @@ export function FornaContainer(element, passedOptions = {}) {
     self.options.svg = svg;
 
     var svgGraph = svg.append('svg:g')
-    .on('mousemove', mousemove)
-    .on('mousedown', mousedown)
-    .on('mouseup', mouseup)
+    .on('mousemove', () => {
+          // only if we are dragging
+          if (!mousedownNode) return;
+          console.log("mouse move")
+
+          // if mouse starts to move, deselect all
+          let node = visNodes.selectAll('g.gnode');
+          node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
+
+          // update drag line
+          let mpos = d3.mouse(vis.node());
+          dragLine
+          .attr('x1', mousedownNode.x)
+          .attr('y1', mousedownNode.y)
+          .attr('x2', mpos[0])
+          .attr('y2', mpos[1]);
+        })
+    .on('mousedown', () => {
+          console.log("mouse down")
+        })
+    .on('mouseup', () => {
+          console.log("mouse up")
+          if (mousedownNode && !linkContextMenuShown) {
+              dragLine.classed(fstyle.transparent, true);
+          }
+          // clear mouse event vars
+          resetMouseVars();
+          //update()
+        })
     .classed('mouseEventHelper', true)
 
     if (self.options.zoomable)
@@ -1171,20 +1171,6 @@ export function FornaContainer(element, passedOptions = {}) {
         let node = visNodes.selectAll('g.gnode');
         node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
       })
-
-    function zoomstart() {
-        var node = visNodes.selectAll('g.gnode');
-        node.each(function(d) {
-                d.selected = false;
-                d.previouslySelected = false;
-                });
-        node.classed(fstyle.selectedNode, false);
-    }
-
-    function redraw() {
-        vis.attr('transform',
-                 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
-    }
 
     self.getBoundingBoxTransform = function() {
         // Center the view on the molecule(s) and scale it so that everything
@@ -1276,9 +1262,6 @@ export function FornaContainer(element, passedOptions = {}) {
         mouseupNode = null;
         mousedownLink = null;
     }
-
-    var shiftKeydown = false;
-    var ctrlKeydown = false;
 
     function selectedNodes(mouseDownNode) {
         var gnodes = visNodes.selectAll('g.gnode');
@@ -1374,7 +1357,10 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('drag', dragged)
     .on('dragend', dragended);
 
-    function keydown() {
+    var shiftKeydown = false;
+    var ctrlKeydown = false;
+
+    let keydown = () => {
         if (self.deaf)
             // lalalalal, not listening
             return;
@@ -1416,7 +1402,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
     }
 
-    function keyup() {
+    let keyup = () => {
         shiftKeydown = false;
         ctrlKeydown = false;
 
@@ -1439,7 +1425,7 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('keydown', keydown)
     .on('keyup', keyup)
     .on('contextmenu', function() {
-            d3.event.preventDefault();
+        d3.event.preventDefault();
     });
 
     var linkKey = function(d) {
@@ -2072,7 +2058,7 @@ export function FornaContainer(element, passedOptions = {}) {
         var linkLines = linksEnter.append('svg:line');
 
         linkLines.append('svg:title')
-        .text(linkKey);
+        .text((d) => { return d.linkType + ':' + d.source.num + '-' + d.target.num });
 
         linkLines
         .classed('link', true)
@@ -2127,7 +2113,6 @@ export function FornaContainer(element, passedOptions = {}) {
         .duration(750)
         .ease('elastic');
 
-        // create nodes behind the circles which will serve to highlight them
         var labelAndProteinNodes = gnodesEnter.filter(function(d) {
             return d.nodeType == 'label' || d.nodeType == 'protein';
         });
@@ -2137,7 +2122,7 @@ export function FornaContainer(element, passedOptions = {}) {
         });
 
         labelAndProteinNodes.append('svg:circle')
-        .classed(fstyle.node, function(d) { return d.nodeType == 'label'; })
+        .classed(fstyle.node, true)
         .attr('r', function(d) {
             if (d.nodeType == 'middle') return 0;
             else {
@@ -2186,18 +2171,6 @@ export function FornaContainer(element, passedOptions = {}) {
         return gnodesEnter;
     };
 
-    var nodeTooltip = function(d) {
-        nodeTooltips = {};
-
-        nodeTooltips.nucleotide = d.num;
-        nodeTooltips.label = '';
-        nodeTooltips.pseudo = '';
-        nodeTooltips.middle = '';
-        nodeTooltips.protein = d.structName;
-
-        return nodeTooltips[d.nodeType];
-    };
-
     self.update = function () {
         self.force.nodes(self.graph.nodes)
         .links(self.graph.links);
@@ -2206,7 +2179,7 @@ export function FornaContainer(element, passedOptions = {}) {
           self.force.start();
         }
 
-        var allLinks = visLinks.selectAll('line.link')
+        let allLinks = visLinks.selectAll('line.link')
         .data(self.graph.links.filter(realLinkFilter), linkKey);
 
         allLinks.attr('class', '')
@@ -2214,78 +2187,65 @@ export function FornaContainer(element, passedOptions = {}) {
         .classed(fstyle.link, true)
         .attr('link_type', function(d) { return d.linkType; } )
 
-        var linksEnter = allLinks.enter();
+        let linksEnter = allLinks.enter();
         self.createNewLinks(linksEnter);
 
         allLinks.exit().remove();
 
+        let gnodes = visNodes.selectAll('g.gnode')
+        .data(self.graph.nodes, nodeKey);
+        //.attr('pointer-events', 'all');
 
-        var domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        var colors = d3.scale.category10().domain(domain);
-
-            var gnodes = visNodes.selectAll('g.gnode')
-            .data(self.graph.nodes, nodeKey);
-            //.attr('pointer-events', 'all');
-
-            var gnodesEnter = gnodes.enter();
-
-            self.createNewNodes(gnodesEnter);
-            gnodes.exit().remove();
+        let gnodesEnter = gnodes.enter();
+        self.createNewNodes(gnodesEnter);
+        gnodes.exit().remove();
 
 
-            //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
-            //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
-            var realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
+        //fake_nodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'middle'; });
+        //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
+        let realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
-            var xlink;
-            if (self.displayFakeLinks)
-                xlink = allLinks;
-            else
-                xlink = visLinks.selectAll('[link_type=real],[link_type=pseudoknot],[link_type=protein_chain],[link_type=chain_chain],[link_type=label_link],[link_type=backbone],[link_type=basepair],[link_type=intermolecule],[link_type=external]');
+        gnodes.selectAll('path')
+        .each(positionAnyNode);
 
-            var position;
+        allLinks.on('click', linkClick);
 
-            gnodes.selectAll('path')
+        self.force.on('tick', function() {
+            let q = d3.geom.quadtree(realNodes);
+            let i = 0;
+            let n = realNodes.length;
+
+            while (++i < n) q.visit(collide(realNodes[i]));
+
+            allLinks.attr('x1', function(d) { return d.source.x; })
+            .attr('y1', function(d) {  return d.source.y; })
+            .attr('x2', function(d) { return d.target.x; })
+            .attr('y2', function(d) { return d.target.y; });
+
+            // Translate the groups
+            gnodes.attr('transform', function(d) {
+                return 'translate(' + [d.x, d.y] + ')';
+            });
+
+            gnodes.select('path')
             .each(positionAnyNode);
 
-            xlink.on('click', linkClick);
+        });
 
-            self.force.on('tick', function() {
-                var q = d3.geom.quadtree(realNodes);
-                var i = 0;
-                var n = realNodes.length;
-
-                while (++i < n) q.visit(collide(realNodes[i]));
-
-                xlink.attr('x1', function(d) { return d.source.x; })
-                .attr('y1', function(d) {  return d.source.y; })
-                .attr('x2', function(d) { return d.target.x; })
-                .attr('y2', function(d) { return d.target.y; });
-
-                // Translate the groups
-                gnodes.attr('transform', function(d) {
-                    return 'translate(' + [d.x, d.y] + ')';
-                });
-
-                gnodes.select('path')
-                .each(positionAnyNode);
-
+        self.force.on('end', () => {
+            gnodes.selectAll('[node_type=nucleotide]')
+            .filter((d,i) => { if (i == 0) return true; else return false; })
+            .each((d,i) => {
+                //console.log("pos", d.num, d.x, d.y);
             });
 
-            self.force.on('end', () => {
-                gnodes.selectAll('[node_type=nucleotide]')
-                .filter((d,i) => { if (i == 0) return true; else return false; })
-                .each((d,i) => {
-                    //console.log("pos", d.num, d.x, d.y);
-                });
-
-                for (let uid in self.rnas) {
-                    for (let i = 1; i < self.rnas[uid].pairtable[0]; i++) {
-                        //console.log('pt', i, self.rnas[uid].pairtable[i]);
-                    }
+            for (let uid in self.rnas) {
+                for (let i = 1; i < self.rnas[uid].pairtable[0]; i++) {
+                    //console.log('pt', i, self.rnas[uid].pairtable[i]);
                 }
+            }
 
-            });
+        });
 
         self.changeColorScheme(self.colorScheme);
 
