@@ -80,7 +80,7 @@
 
     function naviewContainer() {
         let container = new fornac.FornaContainer("#naview_ss",
-                {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300],
+                {'applyForce': false, 'allowPanningAndZooming': false, 'initialSize':[500,300],
                 'layout': 'naview'});
 
         let options = {'structure': '..((..((...[)).(((..].))).))..',
@@ -92,7 +92,7 @@
 
     function cofoldContainer() {
         var container = new fornac.FornaContainer("#cofold_ss",
-                {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
+                {'applyForce': true, 'allowPanningAndZooming': false, 'initialSize':[500,300]});
 
         var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
             'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
