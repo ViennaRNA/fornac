@@ -261,8 +261,6 @@ export function FornaContainer(element, passedOptions = {}) {
 
     self.colorScheme = 'structure';
     self.customColors = {};
-    // don't listen to events because a model window is open somewhere
-    self.deaf = false;
     self.rnas = {};
     self.extraLinks = []; //store links between different RNAs
 
@@ -1061,29 +1059,10 @@ export function FornaContainer(element, passedOptions = {}) {
         }
     };
 
-    self.zoomer = d3.behavior.zoom()
-        .scaleExtent([0.1,10])
-        .x(xScale)
-        .y(yScale)
-        .on('zoomstart', () => {
-            let node = visNodes.selectAll('g.gnode');
-            node.each(function(d) {
-                    d.selected = false;
-                    d.previouslySelected = false;
-                    });
-            node.classed(fstyle.selectedNode, false);
-        })
-        .on('zoom', () => {
-            vis.attr('transform',
-                     'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
-        });
-
     d3.select(element).select('svg').remove();
 
     var svg = d3.select(element)
     .attr('tabindex', 1)
-    .on('keydown.brush', keydown)
-    .on('keyup.brush', keyup)
     .each(function() { this.focus(); })
     .append('svg:svg')
     .attr("preserveAspectRatio", "xMidYMid meet")
@@ -1091,14 +1070,10 @@ export function FornaContainer(element, passedOptions = {}) {
 
     self.options.svg = svg;
 
-    var svgGraph = svg.append('svg:g')
+    var mouseEventHelper = svg.append('svg:g')
     .on('mousemove', () => {
           // only if we are dragging
           if (!mousedownNode) return;
-
-          // if mouse starts to move, deselect all
-          visNodes.selectAll('g.gnode')
-          .classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
 
           // update drag line
           let mpos = d3.mouse(vis.node());
@@ -1108,7 +1083,8 @@ export function FornaContainer(element, passedOptions = {}) {
           .attr('x2', mpos[0])
           .attr('y2', mpos[1]);
         })
-    .on('mousedown', () => {})
+    .on('mousedown', () => {
+    })
     .on('mouseup', () => {
           if (mousedownNode && !linkContextMenuShown) {
               dragLine.classed(fstyle.transparent, true);
@@ -1117,56 +1093,119 @@ export function FornaContainer(element, passedOptions = {}) {
           resetMouseVars();
           //update()
         })
-    .classed('mouseEventHelper', true)
+    .classed(fstyle.mouseEventHelper, true)
+    
+    mouseEventHelper.append('svg:rect')
+    .classed('background', true)
+    .style('visibility', 'hidden')
+    .attr('width', self.options.svgW)
+    .attr('height', self.options.svgH);
 
-    if (self.options.zoomable)
-        svgGraph.call(self.zoomer);
-
-    if (self.options.editable)
-        svgGraph.on('contextmenu', self.backgroundContextMenu);
-
-    var brush = svgGraph.append('g')
-    .datum(function() { return {selected: false, previouslySelected: false}; })
-    .attr('class', fstyle.brush);
-
-    var vis = svgGraph.append('svg:g')
+    var vis = svg.append('svg:g')
     .classed(fstyle.plot, true)
-    var visLinks = vis.append('svg:g');
-    var visNodes = vis.append('svg:g');
+    var visLinks = vis.append('svg:g')
+    .classed('fornac-links', true);
+    var visNodes = vis.append('svg:g')
+    .classed('fornac-nodes', true);
+    
+    if (self.options.editable)
+        svg.on('contextmenu', self.backgroundContextMenu);
+    
+    self.zoomer = d3.behavior.zoom()
+      .scaleExtent([0.1,10])
+      .x(xScale)
+      .y(yScale)
+      .on('zoom', () => {
+          vis.attr('transform',
+                   'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
+      });
+    
+    let enableZooming = () => {
+      if (self.options.zoomable)
+        svg.call(self.zoomer);
+    }
+    
+    let disableZooming = () => {
+      if (self.options.zoomable) {
+        svg.call(self.zoomer)
+        .on('mousedown.zoom', null)
+        .on('touchstart.zoom', null)
+        .on('touchmove.zoom', null)
+        .on('touchend.zoom', null);
+      }
+    }
+    
+    enableZooming()
+    
+    let toggleSelectNode = (node) => {
+      node.selected = !node.selected;
+      visNodes.selectAll('g.gnode').filter((d) => { return node.uid == d.uid; })
+      .classed(fstyle.selectedNode, function(p) { return p.selected; });
+    }
+    
+    let selectNode = (node) => {
+      node.selected = true;
+      visNodes.selectAll('g.gnode').filter((d) => { return node.uid == d.uid; })
+      .classed(fstyle.selectedNode, function(p) { return p.selected; });
+    }
+    
+    let deselectAllNodes = () => {
+      visNodes.selectAll('g.gnode')
+      .classed(fstyle.selectedNode, function(p) { return p.selected = false; });
+    }
+    
+    let selectedNodes = () => {
+      // return all selected nodes
+      return visNodes.selectAll('g.gnode').filter(function(d) { return d.selected; });
+    }
 
     self.brusher = d3.svg.brush()
-                .x(xScale)
-                .y(yScale)
-               .on('brushstart', function(d) {
-                   var gnodes = visNodes.selectAll('g.gnode');
-                   gnodes.each(function(d) { d.previouslySelected = ctrlKeydown && d.selected; });
-               })
-               .on('brush', function() {
-                   var gnodes = visNodes.selectAll('g.gnode');
-                   var extent = d3.event.target.extent();
+        .x(xScale)
+        .y(yScale)
+       .on('brushstart', function(d) {
+       })
+       .on('brush', function() {
+         // during brushing invert styling of selection as preview
+         let extent = d3.event.target.extent();
 
-                   gnodes.classed(fstyle.selectedNode, function(d) {
-                       return d.selected = d.previouslySelected ^
-                       (extent[0][0] <= d.x && d.x < extent[1][0]
-                        && extent[0][1] <= d.y && d.y < extent[1][1]);
-                   });
-               })
-               .on('brushend', function() {
-                   d3.event.target.clear();
-                   d3.select(this).call(d3.event.target);
-               });
-
-      brush.call(self.brusher)
-          .on('mousedown.brush', null)
-          .on('touchstart.brush', null)
-          .on('touchmove.brush', null)
-          .on('touchend.brush', null);
-      brush.select('.background').style('cursor', 'auto')
-      .on('click.background', function() {
-        // click on background should deselect everything
-        let node = visNodes.selectAll('g.gnode');
-        node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
-      })
+         visNodes.selectAll('g.gnode')
+         .classed(fstyle.selectedNode, function (d) { 
+           return d.selected ^ (extent[0][0] <= d.x && d.x < extent[1][0]
+                  && extent[0][1] <= d.y && d.y < extent[1][1])
+         })
+       })
+       .on('brushend', function() {
+         // after brushing finally toggle the selection
+         let extent = d3.event.target.extent();
+         
+         visNodes.selectAll('g.gnode')
+         .filter(function (d) {
+           return extent[0][0] <= d.x && d.x < extent[1][0]
+                  && extent[0][1] <= d.y && d.y < extent[1][1]
+         })
+         .each(toggleSelectNode)
+           
+         d3.event.target.clear();
+         d3.select(this).call(d3.event.target);
+       });
+    
+     let enableBrushing = () => {
+       // crosshair curson
+       mouseEventHelper.select('.background').style('cursor', 'crosshair');
+       // bind brusher
+       mouseEventHelper.call(self.brusher);
+     }
+     
+     let disableBrushing = () => {
+       // normal cursor
+       mouseEventHelper.select('.background').style('cursor', 'auto');
+       // disable brushing events
+       mouseEventHelper.call(self.brusher)
+       .on('mousedown.brush', null)
+       .on('touchstart.brush', null)
+       .on('touchmove.brush', null)
+       .on('touchend.brush', null);
+     }
 
     self.getBoundingBoxTransform = function() {
         // Center the view on the molecule(s) and scale it so that everything
@@ -1259,61 +1298,40 @@ export function FornaContainer(element, passedOptions = {}) {
         mousedownLink = null;
     }
 
-    let selectedNodes = () => {
-      // return all selected nodes
-      return visNodes.selectAll('g.gnode').filter(function(d) { return d.selected; });
-    }
-
     var drag = d3.behavior.drag()
     //.origin(function(d) { return d; })
     .on('dragstart', function(d) {
+      console.log('dragstart')
       d3.event.sourceEvent.stopPropagation();
-      if (!d.selected && !ctrlKeydown) {
-      // if this node isn't selected, then we have to unselect every other node
-        visNodes.selectAll('g.gnode')
-        .classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
-      }
-      // select the clicked node
-      d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
-      
-      let toDrag = selectedNodes();
-      toDrag.each(function(d1) {
-          d1.fixed |= 2;
+                  
+      selectedNodes().each(function(d1) {
+        d1.fixed |= 2;
       });
     })
     .on('drag', (d) => {
-        let toDrag = selectedNodes();
+      if (shiftKeydown) return
+      selectedNodes().each(function(d1) {
+        d1.x += d3.event.dx;
+        d1.y += d3.event.dy;
 
-        toDrag.each(function(d1) {
-            d1.x += d3.event.dx;
-            d1.y += d3.event.dy;
+        d1.px += d3.event.dx;
+        d1.py += d3.event.dy;
+      });
 
-            d1.px += d3.event.dx;
-            d1.py += d3.event.dy;
-        });
-
-        self.resumeForce();
-        d3.event.sourceEvent.preventDefault();
+      self.resumeForce();
+      d3.event.sourceEvent.preventDefault();
     })
     .on('dragend', (d) => {
-        let toDrag = selectedNodes();
-
-        toDrag.each(function(d1) {
-            d1.fixed &= ~6;
-        });
+      console.log('dragend')
+      selectedNodes().each(function(d1) {
+        d1.fixed &= ~6;
+      });
     });
 
     var shiftKeydown = false;
     var ctrlKeydown = false;
 
     let keydown = () => {
-        if (self.deaf) {
-            console.log("lalalalal, not listening...")
-            return;
-        }
-        
-        if (shiftKeydown) return;
-
         switch (d3.event.keyCode) {
             case 68:    //'d' key
                 console.log('dotbracket:', self.getStructuresDotBracket());
@@ -1329,43 +1347,24 @@ export function FornaContainer(element, passedOptions = {}) {
                 break;
         }
 
-        if (shiftKeydown || ctrlKeydown) {
-            if (self.options.zoomable) {
-              svgGraph.call(self.zoomer)
-              .on('mousedown.zoom', null)
-              .on('touchstart.zoom', null)
-              .on('touchmove.zoom', null)
-              .on('touchend.zoom', null);
-            }
-
-            //svgGraph.on('zoom', null);
-            vis.selectAll('g.gnode')
-            .on('mousedown.drag', null);
-        }
-
         if (ctrlKeydown) {
-          brush.select('.background').style('cursor', 'crosshair');
-          brush.call(self.brusher);
+          // Ctrl key must disable panning and zooming
+          disableZooming()
+          // Ctrl Button must enable crosshair and start brusher
+          if (self.options.editable || self.options.animation) {
+            enableBrushing()
+          }
         }
     }
 
     let keyup = () => {
         shiftKeydown = false;
         ctrlKeydown = false;
-
-        brush.call(self.brusher)
-        .on('mousedown.brush', null)
-        .on('touchstart.brush', null)
-        .on('touchmove.brush', null)
-        .on('touchend.brush', null);
-
-        brush.select('.background').style('cursor', 'auto');
-
-        if (self.options.zoomable)
-          svgGraph.call(self.zoomer);
-
-        vis.selectAll('g.gnode')
-        .call(drag);
+        
+        // disable brushing events
+        disableBrushing()
+        // enable zoomer
+        enableZooming()
     }
 
     d3.select(element)
@@ -1769,6 +1768,7 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     let nodeMouseup = function(d,i) {
+        console.log("nodeMouseup")
         let backbonePossible = true, basepairPossible = true;
 
         if (mousedownNode) {
@@ -1863,10 +1863,19 @@ export function FornaContainer(element, passedOptions = {}) {
     };
 
     let nodeMousedown = function(d) {
+      console.log("nodeMousedown")
       if (!d.selected && !ctrlKeydown) {
         // if this node isn't selected, then we have to unselect every other node
-        let node = visNodes.selectAll('g.gnode');
-        node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; })
+        deselectAllNodes()
+      }
+      
+      if (!shiftKeydown) {
+        // only without shift, toggle select or select
+        if (ctrlKeydown) {
+          toggleSelectNode(d)
+        } else {
+          selectNode(d)
+        }
       }
       
       if (shiftKeydown && self.options.editable) {
@@ -1881,9 +1890,6 @@ export function FornaContainer(element, passedOptions = {}) {
         .attr('y2', mousedownNode.y);
 
         d3.event.stopPropagation();
-      } else {
-        // select this node
-        d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
       }
     };
 
@@ -2057,11 +2063,11 @@ export function FornaContainer(element, passedOptions = {}) {
         .ease('elastic');
         
         if (self.options.editable || self.options.animation) {
-          gnodesEnter.call(drag)
-          .on('mousedown', nodeMousedown)
+          gnodesEnter.on('mousedown', nodeMousedown)
           //.on('mousedrag', function(d) {})
           .on('mouseup', nodeMouseup)
           .on('contextmenu', self.nodeContextMenu)
+          .call(drag)
         }
 
         var labelAndProteinNodes = gnodesEnter.filter(function(d) {
