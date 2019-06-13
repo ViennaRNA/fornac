@@ -360,7 +360,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         if ('extraLinks' in passedOptions) {
             // presumably the passed in links are within the passed molecule
-            var newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
+            let newLinks = self.addExternalLinks(rnaJson, passedOptions.extraLinks);
 
             self.extraLinks = self.extraLinks.concat(newLinks);
         }
@@ -480,14 +480,14 @@ export function FornaContainer(element, passedOptions = {}) {
     }
 
     self.addExternalLinks = function(rnaJson, externalLinks) {
-        var newLinks = [];
+        let newLinks = [];
 
-        for (var i = 0; i < externalLinks.length; i++) {
-            var newLink = {linkType: 'external', value: 1, uid: slugid.nice(),
+        for (let i = 0; i < externalLinks.length; i++) {
+            let newLink = {linkType: 'external', value: 1, uid: slugid.nice(),
                 source: null, target: null};
             // check if the source node is an array
             if (Object.prototype.toString.call(externalLinks[i][0]) === '[object Array]') {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][0])) {
                             newLink.source = rnaJson.nodes[j];
@@ -496,7 +496,7 @@ export function FornaContainer(element, passedOptions = {}) {
                     }
                 }
             } else {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][0]) {
                         newLink.source = rnaJson.nodes[j];
                     }
@@ -505,7 +505,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
             // check if the target node is an array
             if (Object.prototype.toString.call(externalLinks[i][1]) === '[object Array]') {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if ('nucs' in rnaJson.nodes[j]) {
                         if (rnaJson.nodes[j].nucs.equals(externalLinks[i][1])) {
                             newLink.target = rnaJson.nodes[j];
@@ -513,7 +513,7 @@ export function FornaContainer(element, passedOptions = {}) {
                     }
                 }
             } else {
-                for (var j = 0; j < rnaJson.nodes.length; j++) {
+                for (let j = 0; j < rnaJson.nodes.length; j++) {
                     if (rnaJson.nodes[j].num == externalLinks[i][1]) {
                         newLink.target = rnaJson.nodes[j];
                     }
@@ -658,7 +658,7 @@ export function FornaContainer(element, passedOptions = {}) {
         var options = {'uids': uids};
         var newRNAJson = self.createInitialLayout(newStructure, options);
 
-        var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, nodeKey);
+        var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, elementKey);
 
         if (duration === 0)
             gnodes.attr('transform', function(d) {
@@ -670,7 +670,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
 
         var links = visLinks.selectAll('line.link')
-        .data(newRNAJson.links.filter(realLinkFilter), linkKey);
+        .data(newRNAJson.links.filter(realLinkFilter), elementKey);
         var newNodes = self.createNewNodes(gnodes.enter())
         .attr('transform', function(d) {
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
@@ -1095,11 +1095,10 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('mousemove', () => {
           // only if we are dragging
           if (!mousedownNode) return;
-          console.log("mouse move")
 
           // if mouse starts to move, deselect all
-          let node = visNodes.selectAll('g.gnode');
-          node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
+          visNodes.selectAll('g.gnode')
+          .classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
 
           // update drag line
           let mpos = d3.mouse(vis.node());
@@ -1109,11 +1108,8 @@ export function FornaContainer(element, passedOptions = {}) {
           .attr('x2', mpos[0])
           .attr('y2', mpos[1]);
         })
-    .on('mousedown', () => {
-          console.log("mouse down")
-        })
+    .on('mousedown', () => {})
     .on('mouseup', () => {
-          console.log("mouse up")
           if (mousedownNode && !linkContextMenuShown) {
               dragLine.classed(fstyle.transparent, true);
           }
@@ -1263,43 +1259,30 @@ export function FornaContainer(element, passedOptions = {}) {
         mousedownLink = null;
     }
 
-    function selectedNodes(mouseDownNode) {
-        var gnodes = visNodes.selectAll('g.gnode');
-
-        if (ctrlKeydown) {
-            return gnodes.filter(function(d) { return d.selected; });
-
-            //return d3.selectAll('[struct_name=' + mouseDownNode.struct_name + ']');
-        } else {
-            return gnodes.filter(function(d) { return d.selected ; });
-            //return d3.select(this);
-        }
+    let selectedNodes = () => {
+      // return all selected nodes
+      return visNodes.selectAll('g.gnode').filter(function(d) { return d.selected; });
     }
 
-    function dragstarted(d) {
+    var drag = d3.behavior.drag()
+    //.origin(function(d) { return d; })
+    .on('dragstart', function(d) {
       d3.event.sourceEvent.stopPropagation();
-
       if (!d.selected && !ctrlKeydown) {
-          // if this node isn't selected, then we have to unselect every other node
-            var node = visNodes.selectAll('g.gnode');
-            node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
-          }
-
-        d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
-
-        var toDrag = selectedNodes(d);
-        toDrag.each(function(d1) {
-            d1.fixed |= 2;
-        });
-
-        //d3.event.sourceEvent.stopPropagation();
-        //d3.select(self).classed('dragging', true);
-        //
-    }
-
-    function dragged(d) {
-
-        var toDrag = selectedNodes(d);
+      // if this node isn't selected, then we have to unselect every other node
+        visNodes.selectAll('g.gnode')
+        .classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; });
+      }
+      // select the clicked node
+      d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
+      
+      let toDrag = selectedNodes();
+      toDrag.each(function(d1) {
+          d1.fixed |= 2;
+      });
+    })
+    .on('drag', (d) => {
+        let toDrag = selectedNodes();
 
         toDrag.each(function(d1) {
             d1.x += d3.event.dx;
@@ -1311,60 +1294,24 @@ export function FornaContainer(element, passedOptions = {}) {
 
         self.resumeForce();
         d3.event.sourceEvent.preventDefault();
-    }
-
-    self.resumeForce = function() {
-        if (self.options.animation)
-            self.force.resume();
-    };
-
-    function dragended(d) {
-        var toDrag = selectedNodes(d);
+    })
+    .on('dragend', (d) => {
+        let toDrag = selectedNodes();
 
         toDrag.each(function(d1) {
             d1.fixed &= ~6;
         });
-    }
-
-    function collide(node) {
-        var r = node.radius + 16,
-        nx1 = node.x - r,
-        nx2 = node.x + r,
-        ny1 = node.y - r,
-        ny2 = node.y + r;
-        return function(quad, x1, y1, x2, y2) {
-            if (quad.point && (quad.point !== node)) {
-                var x = node.x - quad.point.x,
-                y = node.y - quad.point.y,
-                l = Math.sqrt(x * x + y * y),
-                r = node.radius + quad.point.radius;
-                if (l < r) {
-                    l = (l - r) / l * 0.1;
-                    node.x -= x *= l;
-                    node.y -= y *= l;
-                    quad.point.x += x;
-                    quad.point.y += y;
-                }
-            }
-            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-        };
-    }
-
-
-    var drag = d3.behavior.drag()
-    //.origin(function(d) { return d; })
-    .on('dragstart', dragstarted)
-    .on('drag', dragged)
-    .on('dragend', dragended);
+    });
 
     var shiftKeydown = false;
     var ctrlKeydown = false;
 
     let keydown = () => {
-        if (self.deaf)
-            // lalalalal, not listening
+        if (self.deaf) {
+            console.log("lalalalal, not listening...")
             return;
-
+        }
+        
         if (shiftKeydown) return;
 
         switch (d3.event.keyCode) {
@@ -1428,16 +1375,10 @@ export function FornaContainer(element, passedOptions = {}) {
         d3.event.preventDefault();
     });
 
-    var linkKey = function(d) {
+    let elementKey = (d) => {
         return d.uid;
     };
-
-    var nodeKey = function(d) {
-        var key = d.uid;
-        return key;
-    };
-
-
+    
     var updateRnaGraph = function(r) {
         var nucleotidePositions = r.getPositions('nucleotide');
         var labelPositions = r.getPositions('label');
@@ -1827,7 +1768,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.update();
     };
 
-    var nodeMouseup = function(d,i) {
+    let nodeMouseup = function(d,i) {
         let backbonePossible = true, basepairPossible = true;
 
         if (mousedownNode) {
@@ -1838,7 +1779,7 @@ export function FornaContainer(element, passedOptions = {}) {
                 return;
 
             if (mouseupNode == mousedownNode) { resetMouseVars(); return; }
-            var newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: slugid.nice()};
+            let newLink = {source: mousedownNode, target: mouseupNode, linkType: 'basepair', value: 1, uid: slugid.nice()};
 
             for (let i = 0; i < self.graph.links.length; i++) {
                 if ((self.graph.links[i].source == mousedownNode)  ||
@@ -1921,30 +1862,29 @@ export function FornaContainer(element, passedOptions = {}) {
         }
     };
 
-    var nodeMousedown = function(d) {
+    let nodeMousedown = function(d) {
       if (!d.selected && !ctrlKeydown) {
         // if this node isn't selected, then we have to unselect every other node
-        var node = visNodes.selectAll('g.gnode');
+        let node = visNodes.selectAll('g.gnode');
         node.classed(fstyle.selectedNode, function(p) { return p.selected = p.previouslySelected = false; })
       }
-      // always select this node
-      d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
+      
+      if (shiftKeydown && self.options.editable) {
+        // with shift key and editable continue to draw dragline
+        mousedownNode = d;
 
-      // without shift key stop here, otherwise continue to draw dragline
-      if (!shiftKeydown) {
-          return;
+        dragLine
+        .attr('class', fstyle.dragLine)
+        .attr('x1', mousedownNode.x)
+        .attr('y1', mousedownNode.y)
+        .attr('x2', mousedownNode.x)
+        .attr('y2', mousedownNode.y);
+
+        d3.event.stopPropagation();
+      } else {
+        // select this node
+        d3.select(this).classed(fstyle.selectedNode, function(p) { d.previouslySelected = d.selected; return d.selected = true; });
       }
-
-      mousedownNode = d;
-
-      dragLine
-      .attr('class', fstyle.dragLine)
-      .attr('x1', mousedownNode.x)
-      .attr('y1', mousedownNode.y)
-      .attr('x2', mousedownNode.x)
-      .attr('y2', mousedownNode.y);
-
-      d3.event.stopPropagation();
     };
 
     self.startAnimation = function() {
@@ -1959,6 +1899,11 @@ export function FornaContainer(element, passedOptions = {}) {
       vis.selectAll('g.gnode')
            .on('mousedown.drag', null);
       self.force.stop();
+    };
+    
+    self.resumeForce = function() {
+        if (self.options.animation)
+            self.force.resume();
     };
 
     self.setFriction = function(value) {
@@ -2069,6 +2014,9 @@ export function FornaContainer(element, passedOptions = {}) {
         .attr('y2', function(d) { return d.target.y; })
         .attr('link_type', function(d) { return d.linkType; } )
         .attr('pointer-events', function(d) { if (d.linkType == 'fake') return 'none'; else return 'all';});
+        
+        if (self.options.editable)
+          linkLines.on('click', linkClick);
 
         /* We don't need to update the positions of the stabilizing links */
         /*
@@ -2101,17 +2049,20 @@ export function FornaContainer(element, passedOptions = {}) {
         .each( function(d) { d.selected = d.previouslySelected = false; });
 
         gnodesEnter
-        .call(drag)
-        .on('mousedown', nodeMousedown)
-        .on('mousedrag', function(d) {})
-        .on('mouseup', nodeMouseup)
         .attr('num', function(d) { return 'n' + d.num; })
         .attr('rnum', function(d) {
             return 'n' + (d.rna.rnaLength - d.num + 1); })
-        .on('contextmenu', self.nodeContextMenu)
         .transition()
         .duration(750)
         .ease('elastic');
+        
+        if (self.options.editable || self.options.animation) {
+          gnodesEnter.call(drag)
+          .on('mousedown', nodeMousedown)
+          //.on('mousedrag', function(d) {})
+          .on('mouseup', nodeMouseup)
+          .on('contextmenu', self.nodeContextMenu)
+        }
 
         var labelAndProteinNodes = gnodesEnter.filter(function(d) {
             return d.nodeType == 'label' || d.nodeType == 'protein';
@@ -2180,7 +2131,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
 
         let allLinks = visLinks.selectAll('line.link')
-        .data(self.graph.links.filter(realLinkFilter), linkKey);
+        .data(self.graph.links.filter(realLinkFilter), elementKey);
 
         allLinks.attr('class', '')
         .classed('link', true)
@@ -2193,7 +2144,7 @@ export function FornaContainer(element, passedOptions = {}) {
         allLinks.exit().remove();
 
         let gnodes = visNodes.selectAll('g.gnode')
-        .data(self.graph.nodes, nodeKey);
+        .data(self.graph.nodes, elementKey);
         //.attr('pointer-events', 'all');
 
         let gnodesEnter = gnodes.enter();
@@ -2208,12 +2159,34 @@ export function FornaContainer(element, passedOptions = {}) {
         gnodes.selectAll('path')
         .each(positionAnyNode);
 
-        allLinks.on('click', linkClick);
-
         self.force.on('tick', function() {
             let q = d3.geom.quadtree(realNodes);
             let i = 0;
             let n = realNodes.length;
+            
+            let collide = (node) => {
+                let r = node.radius + 16,
+                nx1 = node.x - r,
+                nx2 = node.x + r,
+                ny1 = node.y - r,
+                ny2 = node.y + r;
+                return function(quad, x1, y1, x2, y2) {
+                    if (quad.point && (quad.point !== node)) {
+                        var x = node.x - quad.point.x,
+                        y = node.y - quad.point.y,
+                        l = Math.sqrt(x * x + y * y),
+                        r = node.radius + quad.point.radius;
+                        if (l < r) {
+                            l = (l - r) / l * 0.1;
+                            node.x -= x *= l;
+                            node.y -= y *= l;
+                            quad.point.x += x;
+                            quad.point.y += y;
+                        }
+                    }
+                    return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+                };
+            }
 
             while (++i < n) q.visit(collide(realNodes[i]));
 
