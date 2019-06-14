@@ -122,7 +122,7 @@ text.plotLabel {
   pointer-events: none;
 }
 
-.mouseEventHelper {
+.mouseEventHelper > :global(.extent) {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;

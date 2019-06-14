@@ -110,56 +110,58 @@ export function FornaContainer(element, passedOptions = {}) {
     };
     
     /* Register mouse events on the whole plot */
-    var shiftKeydown = false;
-    var ctrlKeydown = false;
+    if (self.options.editable || self.options.animation) {
+      var shiftKeydown = false;
+      var ctrlKeydown = false;
 
-    let keydown = () => {
-        switch (d3.event.keyCode) {
-            case 68:    //'d' key
-                console.log('dotbracket:', self.getStructuresDotBracket());
-                break;
-            case 16:
-                shiftKeydown = true;
-                break;
-            case 17:
-                ctrlKeydown = true;
-                break;
-            case 67: //c
-                self.centerView();
-                break;
-        }
-
-        if (ctrlKeydown) {
-          // Ctrl key must disable panning and zooming
-          if (self.options.zoomable)
-            disableZooming()
-          // Ctrl Button must enable crosshair and start brusher
-          if (self.options.editable || self.options.animation) {
-            enableBrushing()
+      let keydown = () => {
+          switch (d3.event.keyCode) {
+              case 68:    //'d' key
+                  console.log('dotbracket:', self.getStructuresDotBracket());
+                  break;
+              case 16:
+                  shiftKeydown = true;
+                  break;
+              case 17:
+                  ctrlKeydown = true;
+                  break;
+              case 67: //c
+                  self.centerView();
+                  break;
           }
-        }
-    }
 
-    let keyup = () => {
-        shiftKeydown = false;
-        ctrlKeydown = false;
-        
-        // disable brushing events
-        disableBrushing()
-        // enable zoomer
-        if (self.options.zoomable)
-          enableZooming()
-    }
+          if (ctrlKeydown) {
+            // Ctrl key must disable panning and zooming
+            if (self.options.zoomable)
+              disableZooming()
+            // Ctrl Button must enable crosshair and start brusher
+            if (self.options.editable || self.options.animation) {
+              enableBrushing()
+            }
+          }
+      }
 
-    d3.select(element)
-    .on('keydown', keydown)
-    .on('keyup', keyup)
-    .on('contextmenu', function() {
-        d3.event.preventDefault();
-    });
+      let keyup = () => {
+          shiftKeydown = false;
+          ctrlKeydown = false;
+          
+          // disable brushing events
+          disableBrushing()
+          // enable zoomer
+          if (self.options.zoomable)
+            enableZooming()
+      }
+
+      d3.select(element)
+      .on('keydown', keydown)
+      .on('keyup', keyup)
+      .on('contextmenu', function() {
+          d3.event.preventDefault();
+      });
+    }
     
     /* Register global context menu */
-    if (self.options.editable == true) {
+    if (self.options.editable) {
         let backgroundMenu = [
             {
                 title: 'Add Node',
@@ -350,40 +352,45 @@ export function FornaContainer(element, passedOptions = {}) {
     .attr('viewBox', '0 0 ' + self.options.svgW + ' ' + self.options.svgH)
 
     self.options.svg = svg;
-
-    var mouseEventHelper = svg.append('svg:g')
-    .on('mousemove', () => {
-          // only if we are dragging
-          if (!mousedownNode) return;
-
-          // update drag line
-          let mpos = d3.mouse(vis.node());
-          dragLine
-          .attr('x1', mousedownNode.x)
-          .attr('y1', mousedownNode.y)
-          .attr('x2', mpos[0])
-          .attr('y2', mpos[1]);
-        })
-    .on('mousedown', () => {
-    })
-    .on('mouseup', () => {
-          if (mousedownNode && !linkContextMenuShown) {
-              dragLine.classed(fstyle.transparent, true);
-          }
-          // clear mouse event vars
-          resetMouseVars();
-          //update()
-        })
-    .classed(fstyle.mouseEventHelper, true)
     
-    // draw a background layer for mouse events
-    mouseEventHelper.append('svg:rect')
-    .classed('background', true)
-    .style('visibility', 'hidden')
-    .attr('width', self.options.svgW)
-    .attr('height', self.options.svgH);
+    if (self.options.editable || self.options.animation) {
+      var mouseEventHelper = svg.append('svg:g')
+      .on('mousemove', () => {
+            // only if we are dragging
+            if (!mousedownNode) return;
 
-    var vis = svg.append('svg:g')
+            // update drag line
+            let mpos = d3.mouse(vis.node());
+            dragLine
+            .attr('x1', mousedownNode.x)
+            .attr('y1', mousedownNode.y)
+            .attr('x2', mpos[0])
+            .attr('y2', mpos[1]);
+          })
+      .on('mousedown', () => {
+      })
+      .on('mouseup', () => {
+            if (mousedownNode && !linkContextMenuShown) {
+                dragLine.classed(fstyle.transparent, true);
+            }
+            // clear mouse event vars
+            resetMouseVars();
+            //update()
+          })
+      .classed(fstyle.mouseEventHelper, true)
+      
+      // draw a background layer for mouse events
+      mouseEventHelper.append('svg:rect')
+      .classed('background', true)
+      .style('visibility', 'hidden')
+      .attr('width', self.options.svgW)
+      .attr('height', self.options.svgH)
+      .on('click', () => { deselectAllNodes() });
+    } else {
+      var mouseEventHelper = svg;
+    }
+
+    var vis = mouseEventHelper.append('svg:g')
     .classed(fstyle.plot, true)
     var visLinks = vis.append('svg:g')
     .classed('fornac-links', true);
@@ -391,15 +398,16 @@ export function FornaContainer(element, passedOptions = {}) {
     .classed('fornac-nodes', true);
     
     // line displayed when dragging new nodes
-    var dragLine = vis.append('line')
-    .attr('class', fstyle.dragLine)
-    .attr('x1', 0)
-    .attr('y1', 0)
-    .attr('x2', 0)
-    .attr('y2', 0);
-    
-    if (self.options.editable)
-        svg.on('contextmenu', self.backgroundContextMenu);
+    if (self.options.editable) {
+      var dragLine = vis.append('line')
+      .attr('class', fstyle.dragLine)
+      .attr('x1', 0)
+      .attr('y1', 0)
+      .attr('x2', 0)
+      .attr('y2', 0);
+      
+      svg.on('contextmenu', self.backgroundContextMenu);
+    }
     
     /* Zooming related objects and functions */
     var xScale = d3.scale.linear()
