@@ -93,6 +93,7 @@ line.link[link_type="intermolecule"] {
 line.link[link_type="chain_chain"] {
   stroke-dasharray: 3,3;
 }
+
 line.link[link_type="fake"] {
   stroke: green;
 }
@@ -121,7 +122,7 @@ text.plotLabel {
   pointer-events: none;
 }
 
-.brush {
+.mouseEventHelper > :global(.extent) {
   fill-opacity: .1;
   stroke: #fff;
   shape-rendering: crispEdges;
