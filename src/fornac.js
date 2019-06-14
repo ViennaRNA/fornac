@@ -109,7 +109,7 @@ export function FornaContainer(element, passedOptions = {}) {
         return true;
     };
     
-    /* Register mouse events on the whole plot */
+    /* Register global mouse and key events */
     if (self.options.editable || self.options.animation) {
       var shiftKeydown = false;
       var ctrlKeydown = false;
@@ -145,14 +145,14 @@ export function FornaContainer(element, passedOptions = {}) {
           shiftKeydown = false;
           ctrlKeydown = false;
           
-          // disable brushing events
-          disableBrushing()
           // enable zoomer
           if (self.options.zoomable)
             enableZooming()
+          // disable brushing events
+          disableBrushing()
       }
 
-      d3.select(element)
+      d3.select('body')
       .on('keydown', keydown)
       .on('keyup', keyup)
       .on('contextmenu', function() {
@@ -378,6 +378,7 @@ export function FornaContainer(element, passedOptions = {}) {
             //update()
           })
       .classed(fstyle.mouseEventHelper, true)
+      .style('pointer-events', 'all')
       
       // draw a background layer for mouse events
       mouseEventHelper.append('svg:rect')
@@ -385,7 +386,10 @@ export function FornaContainer(element, passedOptions = {}) {
       .style('visibility', 'hidden')
       .attr('width', self.options.svgW)
       .attr('height', self.options.svgH)
-      .on('click', () => { deselectAllNodes() });
+      .on('mousedown', function() { 
+        //console.log('background click');
+        deselectAllNodes() 
+      })
     } else {
       var mouseEventHelper = svg;
     }
@@ -425,11 +429,13 @@ export function FornaContainer(element, passedOptions = {}) {
       });
     
     let enableZooming = () => {
-      svg.call(self.zoomer);
+      svg.call(self.zoomer)
+      .on("dblclick.zoom", null);
     }
     
     let disableZooming = () => {
       svg.call(self.zoomer)
+      .on("dblclick.zoom", null)
       .on('mousedown.zoom', null)
       .on('touchstart.zoom', null)
       .on('touchmove.zoom', null)
