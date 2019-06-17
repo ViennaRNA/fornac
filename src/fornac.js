@@ -1527,14 +1527,18 @@ export function FornaContainer(element, passedOptions = {}) {
     let addBackBoneLink = function(newLink) {
         // opposite of deleting a link
         // get the two dotbracket strings
-        let rna1 = newLink.source.rna;
-        let rna2 = newLink.target.rna;
+        let rna1 = newLink.target.rna;
+        let rna2 = newLink.source.rna;
+        if (newLink.target.num == 1) {
+          rna1 = newLink.source.rna;
+          rna2 = newLink.target.rna;
+        }
 
         let dotbracket1 = rnaUtilities.pairtableToDotbracket(rna1.pairtable);
         let dotbracket2 = rnaUtilities.pairtableToDotbracket(rna2.pairtable);
 
-        let seq1 = newLink.source.rna.seq;
-        let seq2 = newLink.target.rna.seq;
+        let seq1 = rna1.seq;
+        let seq2 = rna2.seq;
 
         let positions1 = rna1.getPositions('nucleotide');
         let positions2 = rna2.getPositions('nucleotide');
