@@ -873,8 +873,7 @@ export function FornaContainer(element, passedOptions = {}) {
         //fakeNodes = self.graph.nodes.filter(function(d) { return true; });
         let realNodes = self.graph.nodes.filter(function(d) { return d.nodeType == 'nucleotide' || d.nodeType == 'label';});
 
-        gnodes.selectAll('path')
-        .each(drawDirectionArrow);
+        gnodes.select('.' + fstyle.directionArrow).each(drawDirectionArrow);
 
         self.force.on('tick', function() {
             let q = d3.geom.quadtree(realNodes);
@@ -917,8 +916,7 @@ export function FornaContainer(element, passedOptions = {}) {
                 return 'translate(' + [d.x, d.y] + ')';
             });
 
-            gnodes.select('path')
-            .each(drawDirectionArrow);
+            gnodes.select('.' + fstyle.directionArrow).each(drawDirectionArrow);
 
         });
 
@@ -954,22 +952,23 @@ export function FornaContainer(element, passedOptions = {}) {
         .filter(function(d) { return d.nodeType == 'nucleotide'; })
         .map(function(d) { return d.uid; });
 
-        var options = {'uids': uids};
+        let options = {'uids': uids};
         var newRNAJson = createInitialLayout(newStructure, options);
 
-        var gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, elementKey);
-
+        let gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, elementKey);
+        var links = visLinks.selectAll('line.link').data(newRNAJson.links.filter(realLinkFilter), elementKey);
+        
         if (duration === 0)
             gnodes.attr('transform', function(d) {
                 return 'translate(' + [d.x, d.y] + ')';
             });
         else {
-            gnodes.transition().attr('transform', function(d) {
+            gnodes.transition()
+            .attr('transform', function(d) {
                 return 'translate(' + [d.x, d.y] + ')'; }).duration(duration);
         }
-
-        var links = visLinks.selectAll('line.link')
-        .data(newRNAJson.links.filter(realLinkFilter), elementKey);
+        
+        
         var newNodes = createNewNodes(gnodes.enter())
         .attr('transform', function(d) {
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
@@ -977,7 +976,6 @@ export function FornaContainer(element, passedOptions = {}) {
             else
                 return '';
         });
-
 
         if (duration === 0)
             gnodes.exit().remove();
@@ -989,11 +987,10 @@ export function FornaContainer(element, passedOptions = {}) {
                 else
                     return '';
             });
-
-        gnodes.select('path')
-        .each(drawDirectionArrow);
-
+        
         self.graph.nodes = gnodes.data();
+        gnodes.select('.' + fstyle.directionArrow).each(drawDirectionArrow);
+        self.changeColorScheme(self.colorScheme);
         updateStyle();
         self.centerView(duration);
 
@@ -1005,10 +1002,10 @@ export function FornaContainer(element, passedOptions = {}) {
             .each('end', function() { if (!--n) callback.apply(this, arguments); });
         }
 
-        function addNewLinks() {
+        function afterAnimation() {
             var newLinks = createNewLinks(links.enter());
             self.graph.links = links.data();
-
+            self.changeColorScheme(self.colorScheme);
             updateStyle();
 
             if (typeof nextFunction != 'undefined')
@@ -1036,7 +1033,7 @@ export function FornaContainer(element, passedOptions = {}) {
             .attr('x2', function(d) { return d.target.x; })
             .attr('y2', function(d) { return d.target.y; })
             .duration(duration)
-            .call(endall, addNewLinks);
+            .call(endall, afterAnimation);
         }
 
         if (duration === 0) {

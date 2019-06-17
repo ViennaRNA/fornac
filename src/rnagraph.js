@@ -276,7 +276,7 @@ export function RNAGraph(seq = '', dotbracket = '', structName = '', startNumber
 
         var fakeNodeUid = '';
 
-        for (var i = 0; i < nucs.length; i++)
+        for (let i = 0; i < nucs.length; i++)
             fakeNodeUid += self.nodes[nucs[i]-1].uid;
 
         var newNode = {'name': '',
@@ -297,7 +297,7 @@ export function RNAGraph(seq = '', dotbracket = '', structName = '', startNumber
         angle = (nucs.length - 2) * 3.14159 / (2 * nucs.length);
         radius = 0.5 / Math.cos(angle);
 
-        for (var j = 0; j < nucs.length; j++) {
+        for (let j = 0; j < nucs.length; j++) {
             if (nucs[j] === 0 || nucs[j] > self.dotbracket.length)
                 continue;
 

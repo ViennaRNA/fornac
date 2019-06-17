@@ -91,19 +91,19 @@
     },
     {'name': 'graph',
                  'children': [{'structure': '...........(((((.....)))))..',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
                 'size': 50},
                  {'structure': '(((((((......)))).))).......',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
                 'size': 50}
                  ]
     },
     {'name': 'graph',
                  'children': [{'structure': '(((.....)))(((((.....)))))..',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
                 'size': 30},
                  {'structure': '(((((((......)))).)))((...))',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
                 'size': 70}
                  ]
     }]
@@ -123,62 +123,6 @@
     var svg = d3.select('#rna_tmg')
     .selectAll('.div')
     .data(multiData)
-    .enter()
-    .append('div')
-    .classed('svg-container', true)
-    .append('svg')
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
-    .call(chart);
-
-
-    var timeData = [
-    {'name': 'graph',
-                 'children': [{'structure': '((((....))))..',
-                'sequence': 'AGCUUUGAAGCUUA',
-                'size': 50},
-                 {'structure': '..............',
-                'sequence': 'AGCUUUGAAGCUUA',
-                'size': 40},
-                 {'structure': '..((....))....',
-                'sequence': 'AGCUUUGAAGCUUA',
-                'size': 10}
-                 ]
-    },
-    {'name': 'graph',
-                 'children': [{'structure': '...........(((((.....)))))..',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
-                'size': 50},
-                 {'structure': '(((((((......)))).))).......',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
-                'size': 50}
-                 ]
-    },
-    {'name': 'graph',
-                 'children': [{'structure': '(((.....)))(((((.....)))))..',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
-                'size': 30},
-                 {'structure': '(((((((......)))).)))((...))',
-                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
-                'size': 70}
-                 ]
-    }]
-
-    var svgWidth = 200
-    var svgHeight = 200
-
-    var chart = fornac.rnaTreemap()
-    .rnaLayout('simple')
-    .rnaEdgePadding(5)
-    .namePosition('0 0')
-    .startNucleotideNumber(10)
-    .labelInterval(5)
-    .width(svgWidth)
-    .height(svgHeight)
-
-    var svg = d3.select('#rna_tmg')
-    .selectAll('.div')
-    .data(timeData)
     .enter()
     .append('div')
     .classed('svg-container', true)
