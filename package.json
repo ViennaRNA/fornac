@@ -10,7 +10,7 @@
   "main": "dist/fornac.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pkerpedjiev/fornac"
+    "url": "https://github.com/ViennaRNA/fornac"
   },
   "engines": {
     "node": ">=10.0.0"
