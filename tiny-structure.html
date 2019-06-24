@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="utf-8">
+  <title>Tiny Example</title>
+  <link rel="stylesheet" href="fornac.css" />
+</head>
+<body>
+    <div style="max-width: 800px; margin: auto;">
+    <h3>Tiny Example</h3>
+
+    This is an RNA container.
+    <div id='rna_ss'> </div>
+    This after the RNA container.
+
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script type='text/javascript' src='fornac.js'></script>
+
+    <script type='text/javascript'>
+        var container = new fornac.FornaContainer("#rna_ss",
+            {'animation': true, 'zoomable': true });
+
+        var options = {'structure': '(())',
+                        'sequence': 'AACG'
+        };
+
+        container.addRNA(options.structure, options);
+        container.setSize(300, 300)
+    </script>
+</div>
+</body>
+</html>

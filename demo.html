@@ -1,100 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Fornac Example</title>
+    <meta charset="utf-8">
+    <title>Fornac Examples</title>
+    <link rel="stylesheet" href="fornac.css" />
+    <style>
+      .options {
+        float: left;
+        margin-left: 20px;
+      }
+      .optionsform {
+        display: table;
+        margin: 5px;
+        padding: 5px;
+        clear: both;
+      }
+      textarea {
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
+    <div style="max-width: 800px; margin: auto;">
+    <h3>Fornac Examples</h3>
 
-This is an RNA container:
-<div id='rna_ss'> </div>
+    <h4>This is an RNA container</h4>
+    <div id='rna_ss'> </div>
+    <form class="optionsform">
+      <label class="options"><input type="checkbox" onclick="nc.displayNumbering(this.checked)" checked>Numbering</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayNodeOutline(this.checked)" checked>Node Outline</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayNodeLabel(this.checked)" checked>Node Label</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayLinks(this.checked)" checked>Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayPseudoknotLinks(this.checked)" checked>Pseudoknot Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayProteinLinks(this.checked)" checked>Protein Links</label>
+      <label class="options"><input type="checkbox" onclick="nc.displayDirectionArrows(this.checked)" checked>Direction Arrows</label>
+    </form>
 
-This is an RNA container using the NAView layout:
-<div id="naview_ss"></div>
+    <h4>This is an RNA container using the NAView layout</h4>
+    <div id="naview_ss"></div>
 
-This is an output of an RNA folded using RNAcofold:
-<div id='cofold_ss'></div>
+    <h4>This is an output of an RNA folded using RNAcofold</h4>
+    <div id='cofold_ss'></div>
 
-This is a custom-colored RNA:
-<div id="custom_colors"></div>
+    <h4>This is a container with multiple RNA molecules</h4>
+    <div id='multi_ss'></div>
 
-<script src="scripts/fornac.js"></script>
+    <h4>This is a custom-colored RNA</h4>
+    <div id="custom_colors"></div>
+    <form onsubmit="return handleCustomColorApply()" class="optionsform">
+      <label for="CustomColorText">Custom Color Text:</label>
+      <textarea rows="4" cols="80" id="CustomColorText" name="CustomColorText">1:red 2:blue 9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8</textarea></br>
+      <button type="submit" name="Submit">Apply</button>
+    </form>
 
-<script type='text/javascript'>
-"use strict"
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script src='fornac.js'></script>
 
-function customColorsContainer() {
-    let container = new fornac.FornaContainer("#custom_colors",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[300,200]});
+    <script type='text/javascript'>
+    "use strict"
 
-    let options = {'structure': '..((((....)))).....',
-        'sequence':             'AACGCUUCAUAUAAUCAAA'
+    function customColorsContainer() {
+        let container = new fornac.FornaContainer("#custom_colors",
+                {'animation': false, 'zoomable': true, 'initialSize':[300,200]});
+
+        let options = {'structure': '..((((....)))).....',
+            'sequence':             'AACGCUUCAUAUAAUCAAA'
+        };
+        container.addRNA(options.structure, options);
+        return container;
+    }
+
+    function normalContainer() {
+        let container = new fornac.FornaContainer("#rna_ss",
+                {'animation': false, 'zoomable': true, 'initialSize':[500,300]});
+
+        let options = {'structure': '..((..((...[)).(((..].))).))..',
+            'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+        };
+        container.addRNA(options.structure, options);
+        return container;
+    }
+
+    function naviewContainer() {
+        let container = new fornac.FornaContainer("#naview_ss",
+                {'animation': false, 'zoomable': false, 'initialSize':[500,300],
+                'layout': 'naview'});
+
+        let options = {'structure': '..((..((...[)).(((..].))).))..',
+            'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+        };
+        container.addRNA(options.structure, options);
+    }
+
+
+    function cofoldContainer() {
+        var container = new fornac.FornaContainer("#cofold_ss",
+                {'animation': true, 'zoomable': false, 'initialSize':[500,300]});
+
+        var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
+                        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
+        };
+        container.addRNA(options.structure, options);
+    }
+
+    function multiContainer() {
+        var container = new fornac.FornaContainer("#multi_ss",
+                {'animation': false, 'zoomable': true, 'initialSize':[500,300]});
+
+        container.addRNA('..((((....))))', {'sequence': 'ACGAUCAGAGAUCA'});
+        container.addRNA('.........', {'avoidOthers': true, 'sequence': 'AGUACGUAU'});
+    }
+
+    let nc = normalContainer();
+    naviewContainer();
+    cofoldContainer();
+    multiContainer();
+    let cc = customColorsContainer();
+
+    function handleCustomColorApply() {
+      cc.addCustomColorsText(document.getElementById("CustomColorText").value);
+      return false;
+    }
+    handleCustomColorApply();
+
+    /*
+    var options1 = {'structure': '.((((....)))).',
+        'sequence': 'GCGACGAUUGUCGG'
     };
-    container.addRNA(options.structure, options);
-    container.setSize();
 
-    container.addCustomColorsText('1:red         9:#ff7f0e 10:#ff7f0e 11:#ff7f0e 12:#aec7e8');
-}
+    var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+        'structure': '..((((((....((((((....))))))....))))))..'}
 
-function normalContainer() {
-    let container = new fornac.FornaContainer("#rna_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
-
-    let options = {'structure': '..((..((...[)).(((..].))).))..',
-        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
+    var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
+        'structure': '..((((((....))))))....((((((....))))))..'}
+    var options1 = {'structure': '..............',
+        'sequence': 'GCGGCGAUUGCCGG'
     };
-    container.addRNA(options.structure, options);
-    container.setSize();
-}
+    */
 
-function naviewContainer() {
-    let container = new fornac.FornaContainer("#naview_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300],
-            'layout': 'naview'});
-
-    let options = {'structure': '..((..((...[)).(((..].))).))..',
-        'sequence': 'AACGCUUCAUAUAAUCCUAAUGACCUAUAA'
-    };
-    container.addRNA(options.structure, options);
-    container.setSize();
-}
-
-
-function cofoldContainer() {
-    var container = new fornac.FornaContainer("#cofold_ss",
-            {'applyForce': false, 'allowPanningAndZooming': true, 'initialSize':[500,300]});
-
-    var options = {'structure': '..((((...))))...((...((...((..&............))...))...))..',
-        'sequence': 'ACGAUCAGAGAUCAGAGCAUACGACAGCAG&ACGAAAAAAAGAGCAUACGACAGCAG'
-    };
-    container.addRNA(options.structure, options);
-    container.setSize();
-}
-
-normalContainer();
-naviewContainer();
-cofoldContainer();
-customColorsContainer();
-
-
-/*
-var options1 = {'structure': '.((((....)))).',
-    'sequence': 'GCGACGAUUGUCGG'
-};
-
-var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
-    'structure': '..((((((....((((((....))))))....))))))..'}
-
-var options1 = {'sequence': 'UACACUGCCCAGGUAGUGCUUACACUGCAACUGUAGUGGG',
-    'structure': '..((((((....))))))....((((((....))))))..'}
-var options1 = {'structure': '..............',
-    'sequence': 'GCGGCGAUUGCCGG'
-};
-*/
-
-//container.changeColorScheme('custom')
-//container.transitionRNA(options1.structure);
-
-</script>
+    //container.changeColorScheme('custom')
+    //container.transitionRNA(options1.structure);
+    </script>
+</div>
 </body>
 </html>

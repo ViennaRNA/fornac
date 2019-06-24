@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <title>RNAtreemap Examples</title>
+    <link rel="stylesheet" href="fornac.css" />
+    <style>
+    svg {
+        width: 100%;
+        height: 100%;
+        border: 1px solid gray;
+    }
+
+    .svg-container {
+        max-width: 200px;
+        margin-right: 10px;
+        margin-top: 5px;
+        float: left;
+    }
+
+    .svg-container-grid:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    </style>
+</head>
+<body>
+    <div style="max-width: 800px; margin: auto;">
+    <h3>RNAtreemap Examples</h3>
+
+    RNA Treemap:
+    <div id='rna_tm' class="svg-container-grid"></div>
+
+    RNA Treemap Grid:
+    <div id='rna_tmg' class="svg-container-grid"> </div>
+
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script src='fornac.js'></script>
+
+    <script type='text/javascript'>
+    let testData = [{'name': 'graph',
+                'children': [{'structure': '((..((....)).(((....))).))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'name': '1)',
+                'size': 50},
+                 {'structure': '((...........(((....))).))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'name': '2)',
+                'size': 40},
+                 {'structure': '..........................',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'name': '3)',
+                'size': 10}
+                 ]
+    }];
+
+    var svgWidth = 400
+    var svgHeight = 100
+
+    var chart = fornac.rnaTreemap()
+    .rnaLayout('simple')
+    .rnaEdgePadding(5)
+    .namePosition('0 0')
+    .startNucleotideNumber(10)
+    .labelInterval(5)
+    .width(svgWidth)
+    .height(svgHeight)
+
+    var svg = d3.select('#rna_tm')
+    .selectAll('svg')
+    .data(testData)
+    .enter()
+    .append('svg')
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+    .call(chart);
+
+    var multiData = [
+    {'name': 'graph',
+                 'children': [{'structure': '((..((....)).(((....))).))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 50},
+                 {'structure': '((...........(((....))).))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 40},
+                 {'structure': '..........................',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU',
+                'size': 10}
+                 ]
+    },
+    {'name': 'graph',
+                 'children': [{'structure': '...........(((((.....)))))..',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
+                'size': 50},
+                 {'structure': '(((((((......)))).))).......',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
+                'size': 50}
+                 ]
+    },
+    {'name': 'graph',
+                 'children': [{'structure': '(((.....)))(((((.....)))))..',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
+                'size': 30},
+                 {'structure': '(((((((......)))).)))((...))',
+                'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAUGG',
+                'size': 70}
+                 ]
+    }]
+
+    var svgWidth = 200
+    var svgHeight = 200
+
+    var chart = fornac.rnaTreemap()
+    .rnaLayout('simple')
+    .rnaEdgePadding(5)
+    .namePosition('0 0')
+    .startNucleotideNumber(10)
+    .labelInterval(5)
+    .width(svgWidth)
+    .height(svgHeight)
+
+    var svg = d3.select('#rna_tmg')
+    .selectAll('.div')
+    .data(multiData)
+    .enter()
+    .append('div')
+    .classed('svg-container', true)
+    .append('svg')
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr('viewBox', "0 0 " + svgWidth + " " + svgHeight)
+    .call(chart);
+    </script>
+    </div>
+</body>
+</html>

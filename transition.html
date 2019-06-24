@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="utf-8">
+  <title>Transition Example</title>
+  <link rel="stylesheet" href="fornac.css" />
+</head>
+<body>
+    <div style="max-width: 800px; margin: auto;">
+    <h3>Transition Example</h3>
+
+    This is an RNA container.
+    <div id='rna_ss'> </div>
+    This after the RNA container.
+
+    <script src="https://unpkg.com/d3@3.5"></script>
+    <script type='text/javascript' src='fornac.js'></script></br>
+    <button onclick="reset()">Reset</button></br>
+    <button onclick="step1()">Start</button>
+
+    <script type='text/javascript'>    
+    rnaSteps = [
+      '............',
+      '...(....)...',
+      '..((....))...',
+      '.(((....)))...',
+      '((((....))))...'
+    ]
+    
+    funcs = []
+    
+    let container = new fornac.FornaContainer("#rna_ss",
+        {'animation': false, 'zoomable': true});
+    container.displayNumbering(false);
+    container.displayDirectionArrows(false);
+    
+    container.addRNA(rnaSteps[0]);
+    let reset = () => { container.transitionRNA(rnaSteps[0]) }
+    let step1 = () => { container.transitionRNA(rnaSteps[1], step2) }
+    let step2 = () => { container.transitionRNA(rnaSteps[2], step3) }
+    let step3 = () => { container.transitionRNA(rnaSteps[3], step4) }
+    let step4 = () => { container.transitionRNA(rnaSteps[4]) }
+    step1()
+    </script>
+</div>
+</body>
+</html>
