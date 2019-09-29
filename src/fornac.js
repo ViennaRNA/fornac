@@ -43,7 +43,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.options.svgW = 300;
         self.options.svgH = 300;
     }
-    
+
     self.linkStrengths = {
         'pseudoknot': 0.00,
         'proteinChain': 0.00,
@@ -108,7 +108,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
         return true;
     };
-    
+
     /* Register global mouse and key events */
     if (self.options.editable || self.options.animation) {
       var shiftKeydown = false;
@@ -144,7 +144,7 @@ export function FornaContainer(element, passedOptions = {}) {
       let keyup = () => {
           shiftKeydown = false;
           ctrlKeydown = false;
-          
+
           // enable zoomer
           if (self.options.zoomable)
             enableZooming()
@@ -159,7 +159,7 @@ export function FornaContainer(element, passedOptions = {}) {
           d3.event.preventDefault();
       });
     }
-    
+
     /* Register global context menu */
     if (self.options.editable) {
         let backgroundMenu = [
@@ -340,7 +340,7 @@ export function FornaContainer(element, passedOptions = {}) {
         //console.log('empty context menu');
         self.nodeContextMenu = function() {};
     }
-    
+
     /* Draw the plot here */
     d3.select(element).select('svg').remove();
 
@@ -352,7 +352,7 @@ export function FornaContainer(element, passedOptions = {}) {
     .attr('viewBox', '0 0 ' + self.options.svgW + ' ' + self.options.svgH)
 
     self.options.svg = svg;
-    
+
     if (self.options.editable || self.options.animation) {
       var mouseEventHelper = svg.append('svg:g')
       .on('mousemove', () => {
@@ -379,16 +379,16 @@ export function FornaContainer(element, passedOptions = {}) {
           })
       .classed(fstyle.mouseEventHelper, true)
       .style('pointer-events', 'all')
-      
+
       // draw a background layer for mouse events
       mouseEventHelper.append('svg:rect')
       .classed('background', true)
       .style('visibility', 'hidden')
       .attr('width', self.options.svgW)
       .attr('height', self.options.svgH)
-      .on('mousedown', function() { 
+      .on('mousedown', function() {
         //console.log('background click');
-        deselectAllNodes() 
+        deselectAllNodes()
       })
     } else {
       var mouseEventHelper = svg;
@@ -400,7 +400,7 @@ export function FornaContainer(element, passedOptions = {}) {
     .classed('fornac-links', true);
     var visNodes = vis.append('svg:g')
     .classed('fornac-nodes', true);
-    
+
     // line displayed when dragging new nodes
     if (self.options.editable) {
       var dragLine = vis.append('line')
@@ -409,16 +409,16 @@ export function FornaContainer(element, passedOptions = {}) {
       .attr('y1', 0)
       .attr('x2', 0)
       .attr('y2', 0);
-      
+
       svg.on('contextmenu', self.backgroundContextMenu);
     }
-    
+
     /* Zooming related objects and functions */
     var xScale = d3.scale.linear()
     .domain([0,self.options.svgW]).range([0,self.options.svgW]);
     var yScale = d3.scale.linear()
     .domain([0,self.options.svgH]).range([0, self.options.svgH]);
-    
+
     self.zoomer = d3.behavior.zoom()
       .scaleExtent([0.1,10])
       .x(xScale)
@@ -427,12 +427,12 @@ export function FornaContainer(element, passedOptions = {}) {
           vis.attr('transform',
                    'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
       });
-    
+
     let enableZooming = () => {
       svg.call(self.zoomer)
       .on("dblclick.zoom", null);
     }
-    
+
     let disableZooming = () => {
       svg.call(self.zoomer)
       .on("dblclick.zoom", null)
@@ -441,28 +441,28 @@ export function FornaContainer(element, passedOptions = {}) {
       .on('touchmove.zoom', null)
       .on('touchend.zoom', null);
     }
-    
+
     if (self.options.zoomable)
       enableZooming()
-    
+
     /* Node selection related objects and functions */
     let toggleSelectNode = (node) => {
       node.selected = !node.selected;
       visNodes.selectAll('g.gnode').filter((d) => { return node.uid == d.uid; })
       .classed(fstyle.selectedNode, function(p) { return p.selected; });
     }
-    
+
     let selectNode = (node) => {
       node.selected = true;
       visNodes.selectAll('g.gnode').filter((d) => { return node.uid == d.uid; })
       .classed(fstyle.selectedNode, function(p) { return p.selected; });
     }
-    
+
     let deselectAllNodes = () => {
       visNodes.selectAll('g.gnode')
       .classed(fstyle.selectedNode, function(p) { return p.selected = false; });
     }
-    
+
     let selectedNodes = () => {
       // return all selected nodes
       return visNodes.selectAll('g.gnode').filter(function(d) { return d.selected; });
@@ -477,7 +477,7 @@ export function FornaContainer(element, passedOptions = {}) {
         let extent = d3.event.target.extent();
 
         visNodes.selectAll('g.gnode')
-        .classed(fstyle.selectedNode, function (d) { 
+        .classed(fstyle.selectedNode, function (d) {
          return d.selected ^ (extent[0][0] <= d.x && d.x < extent[1][0]
                 && extent[0][1] <= d.y && d.y < extent[1][1])
         })
@@ -492,11 +492,11 @@ export function FornaContainer(element, passedOptions = {}) {
                 && extent[0][1] <= d.y && d.y < extent[1][1]
       })
       .each(toggleSelectNode)
-       
+
       d3.event.target.clear();
       d3.select(this).call(d3.event.target);
     });
-    
+
     let enableBrushing = () => {
      // crosshair curson
      mouseEventHelper.select('.background').style('cursor', 'crosshair');
@@ -540,7 +540,7 @@ export function FornaContainer(element, passedOptions = {}) {
     .on('dragstart', function(d) {
       console.log('dragstart')
       d3.event.sourceEvent.stopPropagation();
-                  
+
       selectedNodes().each(function(d1) {
         d1.fixed |= 2;
       });
@@ -564,8 +564,8 @@ export function FornaContainer(element, passedOptions = {}) {
         d1.fixed &= ~6;
       });
     });
-    
-    /* Main plot drawing functions */  
+
+    /* Main plot drawing functions */
     let createInitialLayout = function(structure, passedOptions = {}) {
         // the default options
         let options = {
@@ -613,7 +613,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         return rnaJson;
     };
-      
+
     let createNewNodes = function(gnodesEnter) {
         gnodesEnter = gnodesEnter.append('g')
         .classed('gnode', true)
@@ -633,7 +633,7 @@ export function FornaContainer(element, passedOptions = {}) {
         .transition()
         .duration(750)
         .ease('elastic');
-        
+
         if (self.options.editable || self.options.animation) {
           gnodesEnter.on('mousedown', nodeMousedown)
           //.on('mousedrag', function(d) {})
@@ -699,7 +699,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         return gnodesEnter;
     };
-    
+
     let createNewLinks = function(linksEnter) {
         var linkLines = linksEnter.append('svg:line');
 
@@ -715,7 +715,7 @@ export function FornaContainer(element, passedOptions = {}) {
         .attr('y2', function(d) { return d.target.y; })
         .attr('link_type', function(d) { return d.linkType; } )
         .attr('pointer-events', function(d) { if (d.linkType == 'fake') return 'none'; else return 'all';});
-        
+
         if (self.options.editable)
           linkLines.on('click', linkClick);
 
@@ -736,7 +736,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
        return linkLines;
     };
-    
+
     function drawDirectionArrow(d) {
         let magnitude = (x) => {
             return Math.sqrt(x[0] * x[0] + x[1] * x[1]);
@@ -838,7 +838,7 @@ export function FornaContainer(element, passedOptions = {}) {
             graph.links.push(self.extraLinks[i]);
         }
     };
-    
+
     self.update = function () {
         self.force.nodes(self.graph.nodes)
         .links(self.graph.links);
@@ -879,7 +879,7 @@ export function FornaContainer(element, passedOptions = {}) {
             let q = d3.geom.quadtree(realNodes);
             let i = 0;
             let n = realNodes.length;
-            
+
             let collide = (node) => {
                 let r = node.radius + 16,
                 nx1 = node.x - r,
@@ -943,8 +943,13 @@ export function FornaContainer(element, passedOptions = {}) {
 
         updateStyle();
     };
-    
+
     self.transitionRNA = function(newStructure, nextFunction) {
+        if (self.dotbracket == newStructure) {
+            return;
+        } else {
+            self.dotbracket = newStructure;
+        }
         //transition from an RNA which is already displayed to a new structure
         var duration = self.options.transitionDuration;
 
@@ -957,7 +962,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         let gnodes = visNodes.selectAll('g.gnode').data(newRNAJson.nodes, elementKey);
         var links = visLinks.selectAll('line.link').data(newRNAJson.links.filter(realLinkFilter), elementKey);
-        
+
         if (duration === 0)
             gnodes.attr('transform', function(d) {
                 return 'translate(' + [d.x, d.y] + ')';
@@ -967,8 +972,8 @@ export function FornaContainer(element, passedOptions = {}) {
             .attr('transform', function(d) {
                 return 'translate(' + [d.x, d.y] + ')'; }).duration(duration);
         }
-        
-        
+
+
         var newNodes = createNewNodes(gnodes.enter())
         .attr('transform', function(d) {
             if (typeof d.x != 'undefined' && typeof d.y != 'undefined')
@@ -987,7 +992,7 @@ export function FornaContainer(element, passedOptions = {}) {
                 else
                     return '';
             });
-        
+
         self.graph.nodes = gnodes.data();
         gnodes.select('.' + fstyle.directionArrow).each(drawDirectionArrow);
         self.changeColorScheme(self.colorScheme);
@@ -1055,7 +1060,7 @@ export function FornaContainer(element, passedOptions = {}) {
         }
 
     };
-    
+
     /* Plot presentation related functions */
     let getBoundingBoxTransform = () => {
         // Center the view on the molecule(s) and scale it so that everything
@@ -1113,7 +1118,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.zoomer.translate(bbTransform.translate);
         self.zoomer.scale(bbTransform.scale);
     };
-    
+
     self.setSize = (
       svgW = d3.select(element).node().offsetWidth,
       svgH = d3.select(element).node().offsetHeight
@@ -1143,7 +1148,7 @@ export function FornaContainer(element, passedOptions = {}) {
       // center the view
       self.centerView();
     }
-    
+
     /* Style and color related functions */
     self.setOutlineColor = function(color) {
         var nodes = visNodes.selectAll('g.gnode').select('[node_type=nucleotide]');
@@ -1252,7 +1257,7 @@ export function FornaContainer(element, passedOptions = {}) {
             });
         }
     };
-    
+
     let updateStyle = () => {
         // Numbering
         visNodes.selectAll('[node_type=label]').classed(fstyle.transparent, !self.displayParameters.displayNumbering);
@@ -1274,7 +1279,7 @@ export function FornaContainer(element, passedOptions = {}) {
         // direction Arrows
         svg.selectAll('.' + fstyle.directionArrow).classed(fstyle.transparent, !self.displayParameters.displayDirectionArrows);
     };
-    
+
     /* RNA edditing related functions */
     let changeNode = function(nodeName, referenceNode) {
         // change the label of a node
@@ -1374,11 +1379,11 @@ export function FornaContainer(element, passedOptions = {}) {
         //remove this node
 
     }
-    
+
     let elementKey = (d) => {
         return d.uid;
     };
-    
+
     let updateRnaGraph = function(r) {
         let nucleotidePositions = r.getPositions('nucleotide');
         let labelPositions = r.getPositions('label');
@@ -1767,7 +1772,7 @@ export function FornaContainer(element, passedOptions = {}) {
         // if this node isn't selected, then we have to unselect every other node
         deselectAllNodes()
       }
-      
+
       if (!shiftKeydown) {
         // only without shift, toggle select or select
         if (ctrlKeydown) {
@@ -1776,7 +1781,7 @@ export function FornaContainer(element, passedOptions = {}) {
           selectNode(d)
         }
       }
-      
+
       if (shiftKeydown && self.options.editable) {
         // with shift key and editable continue to draw dragline
         mousedownNode = d;
@@ -1791,7 +1796,7 @@ export function FornaContainer(element, passedOptions = {}) {
         d3.event.stopPropagation();
       }
     };
-    
+
     let linkClick = (d) => {
         if (!shiftKeydown) {
             return;
@@ -1808,7 +1813,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         removeLink(d);
     };
-    
+
     /* I/O functions */
     self.toJSON = function toJSON() {
        var data = {'rnas': self.rnas, 'extraLinks': self.extraLinks};
@@ -1867,7 +1872,7 @@ export function FornaContainer(element, passedOptions = {}) {
         recalculateGraph();
         self.update();
     };
-    
+
     self.addRNA = function(structure, passedOptions = {}) {
         let rnaJson = createInitialLayout(structure, passedOptions);
         let centerView = false;
@@ -1971,7 +1976,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         return rnaGraph;
     };
-    
+
     self.addNodes = function addNodes(json) {
         // add a new set of nodes from a json file
 
@@ -2015,7 +2020,7 @@ export function FornaContainer(element, passedOptions = {}) {
         self.update();
         self.centerView();
     };
-    
+
     self.clearNodes = () => {
         self.graph.nodes = [];
         self.graph.links = [];
@@ -2025,7 +2030,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         self.update();
     };
-    
+
     self.addLink =  function(newLink) {
         // this means we have a new json, which means we have
         // to recalculate the structure and change the colors
@@ -2050,7 +2055,7 @@ export function FornaContainer(element, passedOptions = {}) {
         recalculateGraph();
         self.update();
     };
-    
+
     self.addExternalLinks = function(rnaJson, externalLinks) {
         let newLinks = [];
 
@@ -2102,7 +2107,7 @@ export function FornaContainer(element, passedOptions = {}) {
 
         return newLinks;
     };
-    
+
     self.getStructuresDotBracket = function() {
         console.log('self.rnas:', self.rnas);
         let sequence = [];
@@ -2174,7 +2179,7 @@ export function FornaContainer(element, passedOptions = {}) {
         console.log('structure:', structure, structure.join(''));
         return [sequence.join(''), structure.join('')];
     };
-    
+
     /* APIs */
     self.startAnimation = function() {
       self.options.animation = true;
@@ -2189,7 +2194,7 @@ export function FornaContainer(element, passedOptions = {}) {
            .on('mousedown.drag', null);
       self.force.stop();
     };
-    
+
     self.resumeForce = function() {
         if (self.options.animation)
             self.force.resume();
