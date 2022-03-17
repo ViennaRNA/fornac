@@ -12,6 +12,9 @@ module.exports = {
     libraryTarget: 'umd',
     library: '[name]'
   },
+  optimization: {
+    minimize: true
+  },
   devtool: 'source-map',
   devServer: {
     static: path.join(__dirname, 'examples'),
