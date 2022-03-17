@@ -26,18 +26,19 @@
     "@babel/core": "^7.7.2",
     "@babel/preset-env": "^7.7.1",
     "babel-loader": "^8.0.6",
-    "css-loader": "^2.1.1",
-    "eslint": "^5.16.0",
+    "buffer": "^6.0.3",
+    "css-loader": "^6.7.1",
+    "eslint": "^8.11.0",
     "extract-css-chunks-webpack-plugin": "^4.6.0",
-    "file-loader": "^3.0.1",
+    "file-loader": "^6.2.0",
     "style-loader": "^0.23.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.9.0",
-    "webpack-stream": "^5.2.1"
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-stream": "^7.0.0"
   },
   "dependencies": {
     "d3": "~3.5.13",
-    "slugid": "^1.1.0"
+    "slugid": "^3.0.0"
   }
 }

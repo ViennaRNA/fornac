@@ -14,8 +14,7 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
-    contentBase: path.join(__dirname, 'examples'),
-    watchContentBase: true,
+    static: path.join(__dirname, 'examples'),
     compress: true,
     port: 9000,
     hot: true
@@ -28,6 +27,11 @@ module.exports = {
             orderWarning: true,
           }
       ),
+      // Work around for Buffer is undefined:
+      // https://github.com/webpack/changelog-v5/issues/10
+      new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+      }),
   ],
   module: {
     rules: [
@@ -49,8 +53,9 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              modules: true,
-              localIdentName: '[name]-[local]',
+              modules: {
+	      	localIdentName: '[name]-[local]',
+	      },
               sourceMap: true,
             }
           }
@@ -66,6 +71,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['*', '.js', '.jsx'],
+    fallback: { "buffer": require.resolve("buffer") },
   },
   externals: {
     d3: "d3"
